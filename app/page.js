@@ -187,6 +187,11 @@ export default function Home() {
 
   const comparisonMetrics = metricColumns;
 
+  function renderMetric(scopeName, label, key) {
+    const item = view.totals[scopeName];
+    return item?.recorded[key] ? formatNumber(item[key]) : "—";
+  }
+
   function comparisonScopeName() {
     return scope === "All" ? "Stellantis Total" : scope;
   }
@@ -385,7 +390,11 @@ export default function Home() {
                       const item = periodView.totals[scopeName];
                       const itemStatus = item?.recorded[key] ? periodView.status : "NO DATA";
                       return (
-                        <div key={metricLabel} className={valueClass(itemStatus, item?.[key])}>
+                        <div
+                          key={metricLabel}
+                          data-label={metricLabel}
+                          className={valueClass(itemStatus, item?.[key])}
+                        >
                           {item?.recorded[key] ? formatNumber(item[key]) : "—"}
                         </div>
                       );
