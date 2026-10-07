@@ -232,35 +232,45 @@ export default function ModelWiseClient({ brand }) {
 
   const summary = useMemo(() => {
     if (showBreakdown) return null;
+
+    let result;
     if (period !== "Custom Period") {
-      return buildModelSummary(rows, {
+      result = buildModelSummary(rows, {
         brand,
         salesType,
         year,
         period: period === "Annual" ? "FY" : periodValue,
       });
+    } else {
+      const totals = Object.fromEntries(allModels.map((model) => [model, 0]));
+      for (const model of allModels) {
+        totals[model] = sumPeriod(
+          rows,
+          brand,
+          salesType,
+          year,
+          periodMonths("Custom Period", "All", Number(year), customFrom, customTo),
+          model
+        );
+      }
+      const grandTotal = Object.values(totals).reduce((sum, value) => sum + value, 0);
+      result = {
+        models: allModels.map((model) => ({
+          model,
+          units: totals[model],
+          share: grandTotal ? (totals[model] / grandTotal) * 100 : 0,
+        })),
+        grandTotal,
+      };
     }
-    const totals = Object.fromEntries(models.map((model) => [model, 0]));
-    for (const model of models) {
-      totals[model] = sumPeriod(
-        rows,
-        brand,
-        salesType,
-        year,
-        periodMonths("Custom Period", "All", Number(year), customFrom, customTo),
-        model
-      );
-    }
-    const grandTotal = Object.values(totals).reduce((sum, value) => sum + value, 0);
+
+    if (selectedModel === "All") return result;
+    const selected = result.models.find((item) => item.model === selectedModel);
     return {
-      models: models.map((model) => ({
-        model,
-        units: totals[model],
-        share: grandTotal ? (totals[model] / grandTotal) * 100 : 0,
-      })),
-      grandTotal,
+      models: selected ? [{ ...selected, share: 100 }] : [],
+      grandTotal: selected?.units || 0,
     };
-  }, [rows, brand, salesType, year, period, periodValue, showBreakdown, models, customFrom, customTo]);
+  }, [rows, brand, salesType, year, period, periodValue, showBreakdown, allModels, selectedModel, customFrom, customTo]);
 
   const title = period === "Custom Period"
     ? customFrom + " → " + customTo
