@@ -194,8 +194,8 @@ export default function ModelWiseClient({ brand }) {
           months: period === "Monthly"
             ? [Number(option.value)]
             : period === "Quarterly"
-              ? periodMonths("Quarterly", option.value)
-              : periodMonths("Half-Yearly", option.value),
+              ? periodMonths("Quarterly", option.value, Number(y), customFrom, customTo)
+              : periodMonths("Half-Yearly", option.value, Number(y), customFrom, customTo),
           status: getStatus(period, option.value, y),
         }))
       );
@@ -232,13 +232,35 @@ export default function ModelWiseClient({ brand }) {
 
   const summary = useMemo(() => {
     if (showBreakdown) return null;
-    return buildModelSummary(rows, {
-      brand,
-      salesType,
-      year,
-      period: period === "Annual" ? "FY" : periodValue,
-    });
-  }, [rows, brand, salesType, year, period, periodValue, showBreakdown]);
+    if (period !== "Custom Period") {
+      return buildModelSummary(rows, {
+        brand,
+        salesType,
+        year,
+        period: period === "Annual" ? "FY" : periodValue,
+      });
+    }
+    const totals = Object.fromEntries(models.map((model) => [model, 0]));
+    for (const model of models) {
+      totals[model] = sumPeriod(
+        rows,
+        brand,
+        salesType,
+        year,
+        periodMonths("Custom Period", "All", Number(year), customFrom, customTo),
+        model
+      );
+    }
+    const grandTotal = Object.values(totals).reduce((sum, value) => sum + value, 0);
+    return {
+      models: models.map((model) => ({
+        model,
+        units: totals[model],
+        share: grandTotal ? (totals[model] / grandTotal) * 100 : 0,
+      })),
+      grandTotal,
+    };
+  }, [rows, brand, salesType, year, period, periodValue, showBreakdown, models, customFrom, customTo]);
 
   const title = period === "Custom Period"
     ? customFrom + " → " + customTo
