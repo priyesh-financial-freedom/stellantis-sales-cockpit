@@ -3,144 +3,101 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import {
-  MONTHS,
-  buildIndustryView,
-  formatIndustryNumber,
-  getIndustryMonths,
-  getIndustryTotal,
-  getIndustryYears,
-  loadIndustryData,
+  INDUSTRY_HALVES, INDUSTRY_PERIODS, INDUSTRY_QUARTERS, MONTHS,
+  filterHistoryRows, formatIndustryNumber, getIndustryYears, loadIndustryData
 } from "../../lib/industryData";
 
 export default function IndustryPage() {
   const [data, setData] = useState([]);
-  const [year, setYear] = useState("");
-  const [month, setMonth] = useState("All");
+  const [period, setPeriod] = useState("Monthly");
+  const [segment, setSegment] = useState("All");
+  const [periodValue, setPeriodValue] = useState("All");
+  const [year, setYear] = useState("2026");
+  const [customFrom, setCustomFrom] = useState("");
+  const [customTo, setCustomTo] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
   useEffect(() => {
     let active = true;
-    loadIndustryData()
-      .then((rows) => {
-        if (!active) return;
-        setData(rows);
-        const years = getIndustryYears(rows);
-        if (years.length) setYear(String(years[0]));
-      })
-      .catch((err) => { if (active) setError(err.message); })
-      .finally(() => { if (active) setLoading(false); });
-
+    loadIndustryData().then(rows => {
+      if (!active) return;
+      setData(rows);
+      const years = getIndustryYears(rows);
+      if (years.length) setYear(String(years[0]));
+    }).catch(err => active && setError(err.message)).finally(() => active && setLoading(false));
     return () => { active = false; };
   }, []);
 
-  const years = useMemo(() => getIndustryYears(data), [data]);
-  const availableMonths = useMemo(() => getIndustryMonths(data, Number(year)), [data, year]);
-  const rows = useMemo(() => buildIndustryView(data, Number(year), month), [data, year, month]);
-  const total = useMemo(() => getIndustryTotal(data, Number(year), month), [data, year, month]);
-  const selectedMonthLabel = month === "All" ? "YTD" : month === "Annual" ? "Annual" : MONTHS[Number(month) - 1];
+  const years = useMemo(() => ["All", ...getIndustryYears(data).map(String)], [data]);
+  const segments = useMemo(() => ["All", ...[...new Set(data.map(r => r.segment).filter(s => s && s !== "Industry Total"))].sort()], [data]);
+  const periodOptions = useMemo(() => {
+    if (period === "Monthly") return ["All", ...MONTHS];
+    if (period === "Quarterly") return INDUSTRY_QUARTERS;
+    if (period === "Half-Yearly") return INDUSTRY_HALVES;
+    if (period === "Annual") return ["All"];
+    return [];
+  }, [period]);
 
-  return (
-    <main className="cockpit">
-      <header className="header">
-        <div>
-          <div className="eyebrow">STELLANTIS INDIA · INDUSTRY INTELLIGENCE</div>
-          <h1>Industry</h1>
-          <p className="subtitle">Indian passenger vehicle industry TIV by segment</p>
-        </div>
-        <div className="headerStatus">
-          <span className={loading ? "statusDot loadingDot" : "statusDot"} />
-          {loading ? "Loading industry data" : error ? "Data error" : "Industry data connected"}
-        </div>
-      </header>
+  function changePeriod(next) {
+    setPeriod(next);
+    setPeriodValue("All");
+  }
 
-      <nav className="cockpitNav">
-        <Link href="/">Sales Cockpit</Link>
-        <Link href="/model-wise/jeep">Jeep Model Wise</Link>
-        <Link href="/model-wise/citroen">Citroën Model Wise</Link>
-        <Link className="active" href="/industry">Industry</Link>
-        <Link href="/industry/manufacturers">Manufacturer History</Link>
-        <Link href="/data-entry">Data Entry</Link>
-      </nav>
+  const filters = { period, periodValue, year, customFrom, customTo };
+  const selectedRows = useMemo(() => filterHistoryRows(
+    data.filter(r => r.segment !== "Industry Total"), filters, "segment", segment
+  ), [data, period, periodValue, year, customFrom, customTo, segment]);
 
-      <section className="filters modelFilters">
-        <div className="filter">
-          <label>Year</label>
-          <select value={year} onChange={(e) => { setYear(e.target.value); setMonth("All"); }} disabled={!years.length}>
-            {years.map((item) => <option key={item}>{item}</option>)}
-          </select>
-        </div>
+  const totalRows = useMemo(() => filterHistoryRows(
+    data.filter(r => r.segment === "Industry Total"), filters, "segment", "Industry Total"
+  ), [data, period, periodValue, year, customFrom, customTo]);
 
-        <div className="filter">
-          <label>Month</label>
-          <select value={month} onChange={(e) => setMonth(e.target.value)} disabled={!year}>
-            <option value="All">All / YTD</option>
-            {availableMonths.map((item) => (
-              <option key={item} value={String(item)}>{MONTHS[item - 1]}</option>
-            ))}
-          </select>
-        </div>
-      </section>
+  const total = totalRows.reduce((s, r) => s + Number(r.units || 0), 0);
+  const grouped = useMemo(() => {
+    const map = new Map();
+    for (const r of selectedRows) map.set(r.segment, (map.get(r.segment) || 0) + Number(r.units || 0));
+    return [...map.entries()].filter(([, units]) => units > 0).map(([name, units]) => ({name, units}))
+      .sort((a,b) => b.units-a.units);
+  }, [selectedRows]);
 
-      <section className="queryCard industryHistoryLinkCard">
-        <div>
-          <div className="eyebrow">HISTORICAL GOLD MINE</div>
-          <h2>Manufacturer History</h2>
-          <p>Long-term manufacturer movement from 1991 onward is preserved separately from the segment view.</p>
-        </div>
-        <Link className="secondaryButton" href="/industry/manufacturers">Open manufacturer history</Link>
-      </section>
+  const label = period === "Monthly" ? (periodValue === "All" ? "All / YTD" : periodValue)
+    : period === "Quarterly" ? (periodValue === "All" ? "All / YTD" : periodValue)
+    : period === "Half-Yearly" ? (periodValue === "All" ? "All / YTD" : periodValue)
+    : period === "Annual" ? "Annual" : "Custom Period";
 
-      <section className="industrySummaryGrid">
-        <div className="queryCard">
-          <div className="eyebrow">{month === "All" ? "YTD INDUSTRY TIV" : "INDUSTRY TIV"}</div>
-          <h2>{year || "Industry"}</h2>
-          <strong className="industryHeadline">{formatIndustryNumber(total)}</strong>
-          <p>{selectedMonthLabel} · Total passenger vehicle industry</p>
-        </div>
+  return <main className="cockpit">
+    <header className="header">
+      <div><div className="eyebrow">STELLANTIS INDIA · INDUSTRY INTELLIGENCE</div><h1>Industry</h1><p className="subtitle">Indian passenger vehicle industry TIV by segment</p></div>
+      <div className="headerStatus"><span className={loading ? "statusDot loadingDot" : "statusDot"} />{loading ? "Loading industry data" : error ? "Data error" : "Industry data connected"}</div>
+    </header>
+    <nav className="cockpitNav">
+      <Link href="/">Sales Cockpit</Link><Link href="/model-wise/jeep">Jeep Model Wise</Link><Link href="/model-wise/citroen">Citroën Model Wise</Link>
+      <Link className="active" href="/industry">Industry</Link><Link href="/industry/manufacturers">Manufacturer History</Link><Link href="/data-entry">Data Entry</Link>
+    </nav>
 
-        <div className="queryCard">
-          <div className="eyebrow">DATA SCOPE</div>
-          <h2>Segment only</h2>
-          <p>Industry Total history is maintained from 1991; current segment detail remains lightweight.</p>
-        </div>
-      </section>
+    <section className="filters">
+      <div className="filter"><label>Period</label><select value={period} onChange={e => changePeriod(e.target.value)}>{INDUSTRY_PERIODS.map(x => <option key={x}>{x}</option>)}</select></div>
+      <div className="filter"><label>Segment</label><select value={segment} onChange={e => setSegment(e.target.value)}>{segments.map(x => <option key={x}>{x}</option>)}</select></div>
+      <div className="filter"><label>{period === "Monthly" ? "Month" : period === "Quarterly" ? "Quarter" : period === "Half-Yearly" ? "Half-Year" : "Period"}</label>
+        {period === "Custom Period" ? <div className="customDates"><input type="date" value={customFrom} onChange={e => setCustomFrom(e.target.value)}/><input type="date" value={customTo} onChange={e => setCustomTo(e.target.value)}/></div>
+        : <select value={periodValue} onChange={e => setPeriodValue(e.target.value)}>{periodOptions.map(x => <option key={x}>{x}</option>)}</select>}
+      </div>
+      <div className="filter"><label>Year</label><select value={year} onChange={e => setYear(e.target.value)}>{years.map(x => <option key={x}>{x}</option>)}</select></div>
+    </section>
 
-      {error ? <div className="errorBanner">{error}</div> : null}
+    <section className="industrySummaryGrid">
+      <div className="queryCard"><div className="eyebrow">{segment === "All" ? "INDUSTRY TIV" : "SEGMENT TIV"}</div><h2>{segment === "All" ? "Industry" : segment}</h2><strong className="industryHeadline">{formatIndustryNumber(segment === "All" ? total : grouped.reduce((s,r)=>s+r.units,0))}</strong><p>{label} · {year}</p></div>
+      <div className="queryCard"><div className="eyebrow">DATA SCOPE</div><h2>Segment history</h2><p>1991–1996 annual · 1997 onward monthly · source IND.xlsx</p></div>
+    </section>
 
-      <section>
-        <div className="sectionHeading">
-          <div>
-            <h2>Industry by segment</h2>
-            <p className="subtitle">Source: IND.xlsx · segment-wise Industry TIV history</p>
-          </div>
-        </div>
-
-        <div className="tableCard">
-          <div className="industryTableHeader">
-            <div>Segment</div>
-            <div>Units</div>
-            <div>Share</div>
-          </div>
-
-          {rows.length ? rows.map((row) => (
-            <div className="industryTableRow" key={row.key}>
-              <div className="scopeName">{row.segment}</div>
-              <div>{formatIndustryNumber(row.units)}</div>
-              <div>{total ? ((row.units / total) * 100).toFixed(1) + "%" : "—"}</div>
-            </div>
-          )) : (
-            <div className="industryEmpty">
-              {loading ? "Loading..." : "No Industry segment data is available for the selected period."}
-            </div>
-          )}
-        </div>
-      </section>
-
-      <footer>
-        <span>Industry is intentionally lightweight and independent of Sales Cockpit.</span>
-        <span>Historical Industry Total: 1991 onward · Source Excel remains the detailed backup.</span>
-      </footer>
-    </main>
-  );
+    {error && <div className="errorBanner">{error}</div>}
+    <section><div className="sectionHeading"><div><h2>Industry by segment</h2><p className="subtitle">Select a segment above to isolate its movement.</p></div></div>
+      <div className="tableCard">
+        <div className="industryTableHeader"><div>Segment</div><div>Units</div><div>Share</div></div>
+        {grouped.length ? grouped.map(r => <div className="industryTableRow" key={r.name}><div className="scopeName">{r.name}</div><div>{formatIndustryNumber(r.units)}</div><div>{total ? ((r.units/total)*100).toFixed(1)+"%" : "—"}</div></div>) : <div className="industryEmpty">{loading ? "Loading..." : "No Industry data is available for the selected filters."}</div>}
+      </div>
+    </section>
+    <footer><span>Industry filters mirror the Sales Cockpit period structure.</span><span>Historical Industry: 1991 onward</span></footer>
+  </main>;
 }
