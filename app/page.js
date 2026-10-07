@@ -359,7 +359,7 @@ export default function Home() {
               {breakdownViews.flatMap(({ label, yearLabel, view: periodView }) =>
                 displayedScopes.map((scopeName) => (
                   <div
-                    className="tableRow"
+                    className="tableRow breakdownRow"
                     key={`${yearLabel}-${label}-${scopeName}`}
                     style={{ gridTemplateColumns: `0.8fr 1.1fr 1.4fr repeat(${metricColumns.length}, 1fr) 1.25fr` }}
                   >
@@ -383,7 +383,7 @@ export default function Home() {
               )}
 
               <div
-                className="tableRow totalRow"
+                className="tableRow totalRow breakdownRow"
                 style={{ gridTemplateColumns: `0.8fr 1.1fr 1.4fr repeat(${metricColumns.length}, 1fr) 1.25fr` }}
               >
                 <div className="scopeName">TOTAL</div>
@@ -414,7 +414,7 @@ export default function Home() {
 
               {displayedScopes.map((scopeName) => (
                 <div
-                  className="tableRow"
+                  className="tableRow standardRow"
                   key={scopeName}
                   style={{ gridTemplateColumns: `2fr repeat(${metricColumns.length}, 1fr) 1.25fr` }}
                 >
