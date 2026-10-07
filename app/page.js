@@ -296,6 +296,7 @@ export default function Home() {
         <a className="active" href="/">Sales Cockpit</a>
         <a href="/model-wise/jeep">Jeep Model Wise</a>
         <a href="/model-wise/citroen">Citroën Model Wise</a>
+        <a href="/industry">Industry</a>
         <a href="/data-entry">Data Entry</a>
       </nav>
 
