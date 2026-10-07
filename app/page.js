@@ -33,7 +33,15 @@ function valueClass(status, value) {
 }
 
 function statusClass(status) {
-  return status === "INCOMPLETE" || status === "FUTURE" ? "futureValue" : "";
+  return status === "INCOMPLETE" || status === "FUTURE"
+    ? "incompleteStatus"
+    : "completeStatus";
+}
+
+function statusLabel(status) {
+  return status === "INCOMPLETE" || status === "FUTURE"
+    ? "INCOMPLETE"
+    : "COMPLETE";
 }
 
 function periodDisplay(period, value, customFrom, customTo) {
@@ -291,7 +299,7 @@ export default function Home() {
                       );
                     })}
                     <div className={statusClass(periodView.status) + " statusText"}>
-                      {periodView.status}
+                      {statusLabel(periodView.status)}
                     </div>
                   </div>
                 ))
@@ -313,7 +321,7 @@ export default function Home() {
                     </div>
                   );
                 })}
-                <div className={statusClass(view.status) + " statusText"}>{view.status}</div>
+                <div className={statusClass(view.status) + " statusText"}>{statusLabel(view.status)}</div>
               </div>
             </>
           ) : (
