@@ -16,7 +16,7 @@ export default function ManufacturerHistoryPage() {
   const manufacturers=useMemo(()=>["All",...[...new Set(rows.map(r=>r.manufacturer).filter(Boolean))].sort((a,b)=>a.localeCompare(b))],[rows]);
   const options=useMemo(()=>period==="Monthly"?["All",...MONTHS]:period==="Quarterly"?INDUSTRY_QUARTERS:period==="Half-Yearly"?INDUSTRY_HALVES:period==="Annual"?["All"]:[],[period]);
   const filters={period,periodValue,year,customFrom,customTo};
-  const filtered=useMemo(()=>filterHistoryRows(rows,filters,"manufacturer",manufacturer),[rows,period,periodValue,year,customFrom,customTo,manufacturer]);
+  const filtered=useMemo(()=>filterHistoryRows(rows,{...filters,key:"manufacturer",value:manufacturer}),[rows,period,periodValue,year,customFrom,customTo,manufacturer]);
   const grouped=useMemo(()=>{const m=new Map();for(const r of filtered)m.set(r.manufacturer,(m.get(r.manufacturer)||0)+Number(r.units||0));const total=[...m.values()].reduce((a,b)=>a+b,0);return [...m.entries()].map(([manufacturer,units])=>({manufacturer,units,share:total?units/total*100:0})).filter(r=>r.units>0).sort((a,b)=>b.units-a.units)},[filtered]);
   const total=grouped.reduce((s,r)=>s+r.units,0);
   const label=period==="Custom Period"?"Custom Period":period==="Annual"?"Annual":periodValue==="All"?"All / YTD":periodValue;
