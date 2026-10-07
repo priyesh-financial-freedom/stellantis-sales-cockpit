@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { buildSalesView, loadSalesData } from "../lib/salesData";
+import { buildComparison, buildSalesView, loadSalesData } from "../lib/salesData";
 
 const PERIODS = ["Monthly", "Quarterly", "Half-Yearly", "Annual", "Custom Period"];
 const SCOPES = ["All", "Jeep", "Citroën", "SAARC"];
@@ -171,6 +171,133 @@ export default function Home() {
     : metric === "Retail + Wholesale"
       ? [metricMap.Retail, metricMap.Wholesale]
       : [metricMap[metric]];
+
+  const comparison = useMemo(
+    () => buildComparison(rows, selection),
+    [rows, selection]
+  );
+
+  const comparisonMetrics = metricColumns;
+
+  function comparisonScopeName() {
+    return scope === "All" ? "Stellantis Total" : scope;
+  }
+
+  function comparisonDelta(currentValue, compareValue) {
+    if (currentValue === null || compareValue === null || currentValue === undefined || compareValue === undefined) {
+      return null;
+    }
+    return Number(currentValue) - Number(compareValue);
+  }
+
+  function comparisonPercent(currentValue, compareValue) {
+    if (currentValue === null || compareValue === null || currentValue === undefined || compareValue === undefined || Number(compareValue) === 0) {
+      return null;
+    }
+    return ((Number(currentValue) - Number(compareValue)) / Number(compareValue)) * 100;
+  }
+
+  function comparisonPeriodLabel(relation) {
+    const target = relation === "previous" ? comparison.previousSelection : comparison.lySelection;
+    if (!target) return "Not available";
+    return `${target.period} · ${periodDisplay(target.period, target.periodValue, target.customFrom, target.customTo)} · ${target.year}`;
+  }
+
+  function renderComparisonBlock(title, relation, currentView, compareView, scopeName) {
+    if (!compareView) {
+      return (
+        <div className="comparisonBlock">
+          <div className="comparisonBlockHeader">
+            <div>
+              <strong>{title}</strong>
+              <span>Not available for this selection</span>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    const currentItem = currentView?.totals?.[scopeName];
+    const compareItem = compareView?.totals?.[scopeName];
+
+    return (
+      <div className="comparisonBlock">
+        <div className="comparisonBlockHeader">
+          <div>
+            <strong>{title}</strong>
+            <span>
+              Current: {periodDisplay(period, periodValue, customFrom, customTo)} · {comparison.currentSelection.year}
+              {" · "}
+              {relation === "previous" ? comparisonPeriodLabel("previous") : comparisonPeriodLabel("ly")}
+            </span>
+          </div>
+        </div>
+        {comparisonMetrics.map(([label, key]) => {
+          const currentValue = currentItem?.recorded[key] ? Number(currentItem[key]) : null;
+          const compareValue = compareItem?.recorded[key] ? Number(compareItem[key]) : null;
+          const delta = comparisonDelta(currentValue, compareValue);
+          const percent = comparisonPercent(currentValue, compareValue);
+          const currentStatus = currentItem?.recorded[key] ? currentView.status : "NO DATA";
+
+          return (
+            <div className="comparisonMetricRow" key={label}>
+              <span>{label}</span>
+              <strong className={valueClass(currentStatus, currentValue)}>{currentValue === null ? "—" : formatNumber(currentValue)}</strong>
+              <span className="comparisonVs">{compareValue === null ? "—" : formatNumber(compareValue)}</span>
+              <span className={delta !== null && delta < 0 ? "negativeChange" : "positiveChange"}>
+                {delta === null ? "—" : `${delta >= 0 ? "+" : ""}${formatNumber(delta)}`}
+              </span>
+              <span className={percent !== null && percent < 0 ? "negativeChange" : "positiveChange"}>
+                {percent === null ? "—" : `${percent >= 0 ? "+" : ""}${percent.toFixed(1)}%`}
+              </span>
+            </div>
+          );
+        })}
+        <div className="comparisonMetricLabels">
+          <span>Metric</span><span>Current</span><span>Compare</span><span>Change</span><span>%</span>
+        </div>
+      </div>
+    );
+  }
+
+  function renderBrandComparison() {
+    const jeep = comparison.brandView?.totals?.Jeep;
+    const citroen = comparison.brandView?.totals?.Citroën;
+
+    return (
+      <div className="comparisonBlock">
+        <div className="comparisonBlockHeader">
+          <div>
+            <strong>Jeep vs Citroën</strong>
+            <span>{period} · {periodDisplay(period, periodValue, customFrom, customTo)} · {comparison.currentSelection.year}</span>
+          </div>
+        </div>
+        {comparisonMetrics.map(([label, key]) => {
+          const jeepValue = jeep?.recorded[key] ? Number(jeep[key]) : null;
+          const citroenValue = citroen?.recorded[key] ? Number(citroen[key]) : null;
+          const delta = comparisonDelta(jeepValue, citroenValue);
+          const percent = comparisonPercent(jeepValue, citroenValue);
+
+          return (
+            <div className="comparisonMetricRow" key={label}>
+              <span>{label}</span>
+              <strong className={valueClass(comparison.brandView.status, jeepValue)}>{jeepValue === null ? "—" : formatNumber(jeepValue)}</strong>
+              <span className={valueClass(comparison.brandView.status, citroenValue)}>{citroenValue === null ? "—" : formatNumber(citroenValue)}</span>
+              <span className={delta !== null && delta < 0 ? "negativeChange" : "positiveChange"}>
+                {delta === null ? "—" : `${delta >= 0 ? "+" : ""}${formatNumber(delta)}`}
+              </span>
+              <span className={percent !== null && percent < 0 ? "negativeChange" : "positiveChange"}>
+                {percent === null ? "—" : `${percent >= 0 ? "+" : ""}${percent.toFixed(1)}%`}
+              </span>
+            </div>
+          );
+        })}
+        <div className="comparisonMetricLabels">
+          <span>Metric</span><span>Jeep</span><span>Citroën</span><span>J−C</span><span>%</span>
+        </div>
+      </div>
+    );
+  }
 
   function handlePeriodChange(value) {
     setPeriod(value);
@@ -387,12 +514,22 @@ export default function Home() {
         <div className="comparisonCard">
           <div className="eyebrow">COMPARISON</div>
           <h2>Management comparison</h2>
-          <p>Comparison engine will use the selected period and metric.</p>
-          <div className="comparisonItems">
-            <div><span>Current vs previous</span><strong>—</strong></div>
-            <div><span>Current vs LY</span><strong>—</strong></div>
-            <div><span>Jeep vs Citroën</span><strong>—</strong></div>
-          </div>
+          <p>Comparisons use the active period, year, scope and metric selection.</p>
+          {renderComparisonBlock(
+            "Current vs previous",
+            "previous",
+            comparison.current,
+            comparison.previous,
+            comparisonScopeName()
+          )}
+          {renderComparisonBlock(
+            "Current vs last year",
+            "ly",
+            comparison.current,
+            comparison.ly,
+            comparisonScopeName()
+          )}
+          {renderBrandComparison()}
         </div>
       </section>
 
