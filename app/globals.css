@@ -1879,3 +1879,151 @@ h2 {
     padding: 25px;
   }
 }
+
+
+/* Final mobile readability pass — designed for quick-glance use without reading glasses. */
+@media (max-width: 650px) {
+  .tableRow {
+    min-height: 128px;
+    padding: 25px 18px;
+    gap: 15px 20px;
+  }
+
+  .tableRow .scopeName {
+    font-size: 26px;
+    line-height: 1.12;
+  }
+
+  .tableRow > div {
+    font-size: 23px;
+    line-height: 1.3;
+  }
+
+  .tableRow > div[data-label]::before {
+    font-size: 17px;
+    letter-spacing: .1px;
+  }
+
+  .modelTableRow {
+    min-height: 128px;
+    padding: 25px 18px;
+  }
+
+  .modelTableRow .scopeName {
+    font-size: 27px;
+    line-height: 1.12;
+  }
+
+  .modelTableRow > div:nth-child(2) {
+    font-size: 30px;
+    font-weight: 800;
+  }
+
+  .modelTableRow > div:nth-child(3) {
+    font-size: 22px;
+  }
+
+  .modelBreakdownRow {
+    min-height: 116px;
+    padding: 24px 18px;
+    font-size: 21px;
+  }
+
+  .modelBreakdownRow .scopeName {
+    font-size: 24px;
+  }
+
+  .industryTableRow {
+    min-height: 116px;
+    padding: 24px 18px;
+    gap: 14px 20px;
+    font-size: 22px;
+  }
+
+  .industryTableRow > div:first-child,
+  .industryTableRow .scopeName {
+    font-size: 26px;
+    line-height: 1.12;
+  }
+
+  .industryTableRow > div:nth-child(2),
+  .industryTableRow > div:nth-child(3) {
+    font-size: 23px;
+  }
+
+  .industryTableRow > div:nth-child(2)::before,
+  .industryTableRow > div:nth-child(3)::before {
+    font-size: 17px;
+  }
+
+  .industryBreakdownRow {
+    min-height: 138px;
+    padding: 24px 18px;
+    gap: 14px 20px;
+    font-size: 22px;
+  }
+
+  .industryBreakdownRow > :first-child,
+  .industryBreakdownRow > :nth-child(2) {
+    font-size: 23px;
+  }
+
+  .industryBreakdownRow > :nth-child(3),
+  .industryBreakdownRow > :nth-child(4),
+  .industryBreakdownRow > :nth-child(5) {
+    min-height: 31px;
+  }
+
+  .industryBreakdownRow > :nth-child(3)::before,
+  .industryBreakdownRow > :nth-child(4)::before,
+  .industryBreakdownRow > :nth-child(5)::before {
+    font-size: 17px;
+  }
+
+  .industryBreakdownRow > :nth-child(4) {
+    font-size: 27px;
+    line-height: 1.1;
+  }
+
+  .industryBreakdownRow > :nth-child(5) {
+    font-size: 22px;
+  }
+
+  .statusText {
+    font-size: 18px;
+    letter-spacing: .2px;
+  }
+
+  .completeStatus,
+  .incompleteStatus {
+    font-weight: 900;
+  }
+
+  .sectionHeading h2 {
+    font-size: 31px;
+    line-height: 1.1;
+  }
+
+  .industryHeadline {
+    font-size: 41px;
+  }
+
+  .queryCard h2,
+  .comparisonCard h2,
+  .dataEntryActions h2,
+  .entryCard h2,
+  .recentDataCard h2 {
+    font-size: 28px;
+  }
+
+  /* Keep the filters easy to read and operate. */
+  .filter select,
+  .filter input {
+    height: 62px;
+    font-size: 21px;
+  }
+
+  .filter label {
+    font-size: 16px;
+  }
+}
