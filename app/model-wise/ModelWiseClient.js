@@ -220,7 +220,7 @@ export default function ModelWiseClient({ brand }) {
           brand,
           salesType,
           y,
-          period === "Custom Period" ? Array.from({ length: 12 }, (_, i) => i + 1) : periodMonths(period, periodValue),
+          periodMonths(period, periodValue, Number(y), customFrom, customTo),
           model
         );
       }
