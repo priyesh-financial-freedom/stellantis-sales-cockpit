@@ -112,7 +112,7 @@ export default function IndustryPage() {
         <div className="sectionHeading">
           <div>
             <h2>Industry by segment</h2>
-            <p className="subtitle">Source: India TIV Sep26.xlsx · Master-Sep26</p>
+            <p className="subtitle">Source: IND.xlsx · segment-wise Industry TIV history</p>
           </div>
         </div>
 
@@ -125,7 +125,7 @@ export default function IndustryPage() {
 
           {rows.length ? rows.map((row) => (
             <div className="industryTableRow" key={row.key}>
-              <div className="scopeName">{row.bodyshape} · {row.segment}</div>
+              <div className="scopeName">{row.segment}</div>
               <div>{formatIndustryNumber(row.units)}</div>
               <div>{total ? ((row.units / total) * 100).toFixed(1) + "%" : "—"}</div>
             </div>
