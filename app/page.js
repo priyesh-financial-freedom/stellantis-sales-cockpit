@@ -105,6 +105,14 @@ export default function Home() {
           ? "Half-Year"
           : "Period";
 
+  function handlePeriodChange(nextPeriod) {
+    setPeriod(nextPeriod);
+    if (nextPeriod === "Monthly") setPeriodValue("All");
+    else if (nextPeriod === "Quarterly") setPeriodValue("All");
+    else if (nextPeriod === "Half-Yearly") setPeriodValue("All");
+    else setPeriodValue("All");
+  }
+
   const selection = useMemo(
     () => ({ period, periodValue, year, customFrom, customTo }),
     [period, periodValue, year, customFrom, customTo]
@@ -277,6 +285,13 @@ export default function Home() {
           {loading ? "Loading data" : error ? "Data error" : "Data connected"}
         </div>
       </header>
+
+      <nav className="cockpitNav">
+        <a className="active" href="/">Sales Cockpit</a>
+        <a href="/model-wise/jeep">Jeep Model Wise</a>
+        <a href="/model-wise/citroen">Citroën Model Wise</a>
+        <a href="/month-wise">Month Wise</a>
+      </nav>
 
       <section className="filters">
         <div className="filter">
