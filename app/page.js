@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { buildComparison, buildSalesView, getScopeStatus, loadSalesData } from "../lib/salesData";
+import { buildComparison, buildSalesView, getScopeStatus, loadSalesData, SALES_CACHE_KEY } from "../lib/salesData";
+import { readClientCache } from "../lib/clientCache";
 
 const PERIODS = ["Monthly", "Quarterly", "Half-Yearly", "Annual", "Custom Period"];
 const SCOPES = ["All", "Jeep", "Citroën", "SAARC"];
@@ -63,21 +64,38 @@ export default function Home() {
   const [customTo, setCustomTo] = useState("");
   const [rows, setRows] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState("");
+  const [cachedAt, setCachedAt] = useState(null);
 
   useEffect(() => {
     let active = true;
 
+    const cached = readClientCache(SALES_CACHE_KEY);
+    if (cached?.data?.length) {
+      setRows(cached.data);
+      setCachedAt(cached.cachedAt);
+      setLoading(false);
+      setRefreshing(true);
+    }
+
     async function fetchData() {
       try {
-        setLoading(true);
         setError("");
+        if (!cached?.data?.length) setLoading(true);
         const data = await loadSalesData();
-        if (active) setRows(data);
+        if (active) {
+          setRows(data);
+          setCachedAt(Date.now());
+          setLoading(false);
+          setRefreshing(false);
+        }
       } catch (err) {
-        if (active) setError(err.message || "Unable to load sales data.");
-      } finally {
-        if (active) setLoading(false);
+        if (active) {
+          setLoading(false);
+          setRefreshing(false);
+          if (!cached?.data?.length) setError(err.message || "Unable to load sales data.");
+        }
       }
     }
 
@@ -284,10 +302,17 @@ export default function Home() {
           <p className="subtitle">
             Management view of Bookings, Retail and Wholesale
           </p>
+          {cachedAt && (
+            <div className="dataFreshness">
+              {refreshing
+                ? "Showing cached data · refreshing in background"
+                : "Updated " + new Date(cachedAt).toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" })}
+            </div>
+          )}
         </div>
         <div className="headerStatus">
-          <span className={loading ? "statusDot loadingDot" : "statusDot"} />
-          {loading ? "Loading data" : error ? "Data error" : "Data connected"}
+          <span className={(loading || refreshing) ? "statusDot loadingDot" : "statusDot"} />
+          {loading ? "Loading data" : refreshing ? "Refreshing data" : error ? "Data error" : "Data connected"}
         </div>
       </header>
 
