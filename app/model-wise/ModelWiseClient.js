@@ -33,7 +33,19 @@ function periodLabel(period, value, customFrom, customTo) {
   return value;
 }
 
-function periodMonths(period, value) {
+function customMonthsForYear(year, from, to) {
+  if (!from || !to) return [];
+  const months = [];
+  for (let month = 1; month <= 12; month += 1) {
+    const monthStart = String(year) + "-" + String(month).padStart(2, "0") + "-01";
+    const monthEnd = new Date(Date.UTC(Number(year), month, 0)).toISOString().slice(0, 10);
+    if (monthEnd >= from && monthStart <= to) months.push(month);
+  }
+  return months;
+}
+
+function periodMonths(period, value, year, customFrom, customTo) {
+  if (period === "Custom Period") return customMonthsForYear(year, customFrom, customTo);
   if (period === "Monthly") {
     return value === "All" ? Array.from({ length: 12 }, (_, i) => i + 1) : [Number(value)];
   }
@@ -69,15 +81,20 @@ function intervalFor(period, value, year) {
   return null;
 }
 
-function getStatus(period, value, year) {
+function getStatus(period, value, year, customFrom, customTo) {
   const today = new Date().toISOString().slice(0, 10);
   if (year === "All") {
-    const statuses = MODEL_YEARS.map((y) => getStatus(period, value, String(y)));
+    const statuses = MODEL_YEARS.map((y) => getStatus(period, value, String(y), customFrom, customTo));
     if (statuses.includes("FUTURE")) return "FUTURE";
     if (statuses.includes("INCOMPLETE")) return "INCOMPLETE";
     return "ACTUAL / COMPLETE";
   }
-  if (period === "Custom Period") return "ACTUAL / COMPLETE";
+  if (period === "Custom Period") {
+    if (!customFrom || !customTo) return "NO DATA";
+    if (customFrom > today) return "FUTURE";
+    if (customTo >= today) return "INCOMPLETE";
+    return "ACTUAL / COMPLETE";
+  }
   if (period === "Monthly" && value === "All") {
     const statuses = Array.from({ length: 12 }, (_, i) => getStatus("Monthly", String(i + 1), year));
     if (statuses.includes("FUTURE")) return "FUTURE";
@@ -209,7 +226,7 @@ export default function ModelWiseClient({ brand }) {
       }
     }
     return totals;
-  }, [rows, brand, salesType, detailYears, models, period, periodValue]);
+  }, [rows, brand, salesType, detailYears, models, period, periodValue, customFrom, customTo]);
 
   const totalGrand = Object.values(totalValue).reduce((sum, value) => sum + value, 0);
 
@@ -340,17 +357,25 @@ export default function ModelWiseClient({ brand }) {
                 <div>Units</div>
                 <div>Share</div>
               </div>
+              <div className="modelTableHeader">
+                <div>Model</div>
+                <div>Units</div>
+                <div>Share</div>
+                <div>Status</div>
+              </div>
               {summary?.models.map(({ model, units, share }) => (
                 <div className="modelTableRow" key={model}>
                   <div className="scopeName">{model}</div>
-                  <div className={valueClass(getStatus(period, periodValue, year), units)}>{formatNumber(units)}</div>
+                  <div className={valueClass(getStatus(period, periodValue, year, customFrom, customTo), units)}>{formatNumber(units)}</div>
                   <div>{share.toFixed(1)}%</div>
+                  <div className={statusClass(getStatus(period, periodValue, year, customFrom, customTo)) + " statusText"}>{statusLabel(getStatus(period, periodValue, year, customFrom, customTo))}</div>
                 </div>
               ))}
               <div className="modelTableRow modelTotalRow">
                 <div className="scopeName">TOTAL</div>
                 <div>{formatNumber(summary?.grandTotal)}</div>
                 <div>100.0%</div>
+                <div className={statusClass(getStatus(period, periodValue, year, customFrom, customTo)) + " statusText"}>{statusLabel(getStatus(period, periodValue, year, customFrom, customTo))}</div>
               </div>
             </>
           )}
