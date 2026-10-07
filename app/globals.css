@@ -1278,3 +1278,10 @@ footer {
     font-size: 28px;
   }
 }
+
+
+.industryTotalRow {
+  font-weight: 800;
+  background: #f7f7f8;
+  border-top: 2px solid #cfd3d8;
+}
