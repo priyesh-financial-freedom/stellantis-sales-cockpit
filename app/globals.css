@@ -1385,3 +1385,497 @@ footer {
     font-weight: 500;
   }
 }
+
+
+/* =========================================================
+   Executive Visual System — global final pass
+   Larger mobile typography, stronger hierarchy, restrained
+   colour accents and better use of available card space.
+   ========================================================= */
+
+:root {
+  --ink: #15171a;
+  --muted: #68717c;
+  --line: #dfe3e8;
+  --surface: #ffffff;
+  --surface-soft: #f5f7fa;
+  --blue: #1769aa;
+  --blue-soft: #eaf4ff;
+  --teal: #087f8c;
+  --teal-soft: #e8f8f8;
+  --green: #18794e;
+  --green-soft: #eaf8f0;
+  --orange: #c76a00;
+  --orange-soft: #fff3e5;
+  --purple: #7057a8;
+  --purple-soft: #f2edfb;
+  --red: #c23b4a;
+  --red-soft: #fff0f2;
+}
+
+body {
+  background: #f3f6f9;
+  color: var(--ink);
+}
+
+.cockpit {
+  padding-top: 40px;
+}
+
+.eyebrow {
+  color: var(--blue);
+  font-weight: 800;
+}
+
+h1 {
+  letter-spacing: -0.8px;
+}
+
+h2 {
+  letter-spacing: -0.3px;
+}
+
+.sectionHeading h2 {
+  color: var(--ink);
+}
+
+.subtitle {
+  color: var(--muted);
+}
+
+.cockpitNav a {
+  color: var(--blue);
+  border-color: #d6e1ec;
+  background: #fff;
+}
+
+.cockpitNav a:hover {
+  background: var(--blue-soft);
+}
+
+.cockpitNav a.active {
+  background: var(--blue);
+  border-color: var(--blue);
+}
+
+.filters,
+.queryCard,
+.comparisonCard,
+.tableCard,
+.dataEntryActions,
+.entryCard,
+.recentDataCard {
+  border-color: var(--line);
+  box-shadow: 0 2px 10px rgba(25, 45, 65, 0.035);
+}
+
+.filter label {
+  color: var(--teal);
+  font-weight: 800;
+}
+
+.filter select:focus,
+.filter input:focus,
+.queryInput input:focus {
+  outline: 2px solid rgba(23, 105, 170, .18);
+  border-color: var(--blue);
+}
+
+.industryHeadline {
+  color: var(--blue);
+  font-weight: 800;
+  letter-spacing: -1px;
+}
+
+.completeStatus,
+.successMessage {
+  color: var(--green);
+}
+
+.incompleteStatus,
+.errorMessage,
+.incompleteLegend {
+  color: var(--red);
+}
+
+.primaryButton {
+  background: var(--blue);
+  border-color: var(--blue);
+}
+
+.secondaryButton:hover {
+  border-color: var(--blue);
+  color: var(--blue);
+}
+
+.queryCard .eyebrow {
+  color: var(--teal);
+}
+
+.industryTotalRow,
+.modelTotalRow,
+.monthWiseTotal,
+.totalRow {
+  background: var(--blue-soft);
+  color: var(--ink);
+}
+
+.positiveChange {
+  color: var(--green);
+}
+
+.negativeChange,
+.futureValue {
+  color: var(--red);
+}
+
+/* Metric colours used consistently across the Sales Cockpit cards. */
+.tableRow > div[data-label="TD"],
+.tableRow > div[data-label="Test Drive"] {
+  color: var(--blue);
+}
+
+.tableRow > div[data-label="Bookings"] {
+  color: var(--purple);
+}
+
+.tableRow > div[data-label="Retail"] {
+  color: var(--green);
+}
+
+.tableRow > div[data-label="Wholesale"] {
+  color: var(--orange);
+}
+
+/* Make mobile metric labels colourful but keep the values highly legible. */
+@media (max-width: 650px) {
+  .cockpit {
+    padding: 18px 12px 30px;
+  }
+
+  .header {
+    margin-bottom: 26px;
+  }
+
+  h1 {
+    font-size: 40px;
+    line-height: 1.04;
+    letter-spacing: -1.1px;
+  }
+
+  .subtitle {
+    font-size: 18px;
+    line-height: 1.5;
+  }
+
+  .eyebrow {
+    font-size: 14px;
+    letter-spacing: 1.6px;
+  }
+
+  .headerStatus {
+    font-size: 15px;
+    padding: 11px 15px;
+  }
+
+  .cockpitNav {
+    gap: 9px;
+    margin-bottom: 20px;
+  }
+
+  .cockpitNav a {
+    padding: 12px 17px;
+    font-size: 16px;
+  }
+
+  .filters {
+    padding: 19px;
+    gap: 17px;
+    border-radius: 16px;
+    margin-bottom: 24px;
+  }
+
+  .filter label {
+    font-size: 15px;
+    margin-bottom: 9px;
+  }
+
+  .filter select,
+  .filter input {
+    height: 58px;
+    font-size: 20px;
+    border-radius: 11px;
+  }
+
+  .industrySummaryGrid {
+    gap: 15px;
+    margin-bottom: 26px;
+  }
+
+  .queryCard,
+  .comparisonCard {
+    padding: 21px;
+    border-radius: 16px;
+  }
+
+  .queryCard h2 {
+    font-size: 27px;
+    line-height: 1.1;
+  }
+
+  .queryCard p,
+  .comparisonCard p {
+    font-size: 16px;
+    line-height: 1.55;
+  }
+
+  .industryHeadline {
+    font-size: 38px;
+    line-height: 1;
+    margin: 13px 0 8px;
+  }
+
+  .sectionHeading h2 {
+    font-size: 29px;
+    font-weight: 800;
+  }
+
+  .tableCard {
+    border-radius: 16px;
+  }
+
+  /* Sales Cockpit rows */
+  .tableRow {
+    min-height: 112px;
+    padding: 22px 17px;
+    gap: 13px 18px;
+    font-size: 20px;
+  }
+
+  .tableRow .scopeName {
+    font-size: 23px;
+    font-weight: 800;
+  }
+
+  .tableRow > div {
+    font-size: 21px;
+    line-height: 1.35;
+  }
+
+  .tableRow > div[data-label]::before {
+    font-size: 16px;
+    font-weight: 800;
+  }
+
+  .tableRow > div[data-label="TD"]::before,
+  .tableRow > div[data-label="Test Drive"]::before {
+    color: var(--blue);
+  }
+
+  .tableRow > div[data-label="Bookings"]::before {
+    color: var(--purple);
+  }
+
+  .tableRow > div[data-label="Retail"]::before {
+    color: var(--green);
+  }
+
+  .tableRow > div[data-label="Wholesale"]::before {
+    color: var(--orange);
+  }
+
+  .statusText {
+    font-size: 17px;
+    font-weight: 800;
+  }
+
+  /* Model-wise rows */
+  .modelTableRow {
+    min-height: 112px;
+    padding: 22px 17px;
+    gap: 13px 18px;
+    font-size: 20px;
+  }
+
+  .modelTableRow .scopeName {
+    font-size: 24px;
+    font-weight: 800;
+  }
+
+  .modelTableRow > div:nth-child(2) {
+    font-size: 27px;
+  }
+
+  .modelTableRow > div:nth-child(3) {
+    font-size: 20px;
+  }
+
+  .modelBreakdownRow {
+    min-height: 100px;
+    padding: 21px 17px;
+    font-size: 19px;
+  }
+
+  .modelBreakdownRow .scopeName {
+    font-size: 21px;
+    font-weight: 800;
+  }
+
+  /* Industry/manufacturer standard rows */
+  .industryTableRow {
+    min-height: 104px;
+    padding: 21px 17px;
+    gap: 12px 18px;
+    font-size: 20px;
+  }
+
+  .industryTableRow > div:first-child,
+  .industryTableRow .scopeName {
+    font-size: 23px;
+    font-weight: 800;
+  }
+
+  .industryTableRow > div:nth-child(2),
+  .industryTableRow > div:nth-child(3) {
+    font-size: 21px;
+  }
+
+  .industryTableRow > div:nth-child(2)::before,
+  .industryTableRow > div:nth-child(3)::before {
+    font-size: 16px;
+    font-weight: 800;
+  }
+
+  .industryTableRow > div:nth-child(2)::before {
+    color: var(--blue);
+  }
+
+  .industryTableRow > div:nth-child(3)::before {
+    color: var(--teal);
+  }
+
+  /* Period breakdown rows — especially important on mobile. */
+  .industryBreakdownRow {
+    min-height: 124px;
+    padding: 21px 17px;
+    gap: 12px 18px;
+    font-size: 20px;
+    border-top-color: #e5e8ed;
+  }
+
+  .industryBreakdownRow > :first-child,
+  .industryBreakdownRow > :nth-child(2) {
+    font-size: 21px;
+    font-weight: 800;
+  }
+
+  .industryBreakdownRow > :first-child {
+    color: var(--blue);
+  }
+
+  .industryBreakdownRow > :nth-child(2) {
+    color: var(--purple);
+    text-align: right;
+  }
+
+  .industryBreakdownRow > :nth-child(3),
+  .industryBreakdownRow > :nth-child(4),
+  .industryBreakdownRow > :nth-child(5) {
+    min-height: 27px;
+  }
+
+  .industryBreakdownRow > :nth-child(3)::before {
+    color: var(--teal);
+    font-size: 16px;
+    font-weight: 800;
+  }
+
+  .industryBreakdownRow > :nth-child(4)::before {
+    color: var(--blue);
+    font-size: 16px;
+    font-weight: 800;
+  }
+
+  .industryBreakdownRow > :nth-child(5)::before {
+    color: var(--green);
+    font-size: 16px;
+    font-weight: 800;
+  }
+
+  .industryBreakdownRow > :nth-child(4) {
+    font-size: 24px;
+    font-weight: 800;
+    color: var(--ink);
+  }
+
+  .industryBreakdownRow > :nth-child(5) {
+    font-size: 20px;
+    font-weight: 800;
+  }
+
+  /* Data Entry */
+  .dataEntryActions,
+  .entryCard {
+    padding: 21px;
+    border-radius: 16px;
+  }
+
+  .dataEntryActions h2,
+  .entryCard h2,
+  .recentDataCard h2 {
+    font-size: 25px;
+  }
+
+  .actionButtons button,
+  .primaryButton,
+  .secondaryButton {
+    min-height: 52px;
+    padding: 12px 17px;
+    font-size: 16px;
+  }
+
+  .recentRow {
+    min-height: 92px;
+    padding: 19px 16px;
+    gap: 12px 18px;
+    font-size: 18px;
+  }
+
+  footer {
+    font-size: 15px;
+    line-height: 1.5;
+  }
+}
+
+/* Brand accents — subtle and consistent across the cockpit. */
+.scopeName {
+  color: var(--ink);
+}
+
+.completeStatus {
+  font-weight: 800;
+}
+
+.errorBanner {
+  border-color: #f0c3c9;
+  background: var(--red-soft);
+}
+
+/* Keep colour restrained on desktop while improving hierarchy. */
+@media (min-width: 651px) {
+  .tableRow,
+  .modelTableRow,
+  .industryTableRow,
+  .industryBreakdownRow {
+    font-size: 15px;
+  }
+
+  .industryHeadline {
+    font-size: 38px;
+  }
+
+  .queryCard,
+  .comparisonCard {
+    padding: 25px;
+  }
+}
