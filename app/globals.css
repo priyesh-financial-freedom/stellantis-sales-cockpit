@@ -2027,3 +2027,89 @@ h2 {
     font-size: 16px;
   }
 }
+
+
+/* Model-wise period breakdown: mobile rows retain model identity and Annual-card scale. */
+@media (max-width: 650px) {
+  .modelBreakdownRow {
+    min-height: 128px;
+    padding: 24px 18px;
+    gap: 13px 18px;
+    font-size: 22px;
+  }
+
+  .modelBreakdownRow > :first-child,
+  .modelBreakdownRow > :nth-child(2) {
+    grid-column: auto;
+    font-size: 23px;
+    font-weight: 800;
+  }
+
+  .modelBreakdownRow > :first-child {
+    color: var(--blue);
+  }
+
+  .modelBreakdownRow > :nth-child(2) {
+    color: var(--purple);
+    text-align: right;
+  }
+
+  .modelBreakdownRow .modelBreakdownValue {
+    grid-column: 1 / -1;
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 16px;
+    min-height: 31px;
+    font-size: 24px;
+    font-weight: 700;
+  }
+
+  .modelBreakdownRow .modelBreakdownValue::before {
+    content: attr(data-model);
+    color: var(--teal);
+    font-size: 20px;
+    font-weight: 800;
+    line-height: 1.2;
+  }
+
+  .modelBreakdownRow > :nth-last-child(2) {
+    grid-column: 1 / -1;
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    font-size: 27px;
+    font-weight: 900;
+    min-height: 32px;
+  }
+
+  .modelBreakdownRow > :nth-last-child(2)::before {
+    content: "TOTAL";
+    color: var(--blue);
+    font-size: 18px;
+    font-weight: 900;
+  }
+
+  .modelBreakdownRow > :last-child {
+    grid-column: 1 / -1;
+    font-size: 18px;
+    font-weight: 900;
+    text-align: left;
+  }
+
+  .modelBreakdownRow.modelTotalRow {
+    min-height: 138px;
+  }
+
+  .modelBreakdownRow.modelTotalRow > :first-child,
+  .modelBreakdownRow.modelTotalRow > :nth-child(2) {
+    grid-column: 1 / -1;
+  }
+
+  .modelBreakdownRow.modelTotalRow > :nth-child(2) {
+    text-align: left;
+    color: var(--muted);
+    font-size: 18px;
+    font-weight: 700;
+  }
+}
