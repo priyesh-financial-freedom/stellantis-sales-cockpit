@@ -64,66 +64,75 @@ export default function IndustryPage() {
   }, [selectedRows]);
 
   const breakdownRows = useMemo(() => {
-    if (segment === "All") return [];
-
     const map = new Map();
-    for (const row of selectedRows) {
+
+    for (const row of (segment === "All" ? totalRows : selectedRows)) {
       const date = String(row.sales_period);
+      const yearLabel = date.slice(0, 4);
       const month = Number(date.slice(5, 7));
-      let key = date;
-      let label = date;
+      let periodKey = date;
+      let periodLabel = date;
 
       if (period === "Monthly") {
-        label = MONTHS[month - 1] || date;
+        periodLabel = MONTHS[month - 1] || date;
       } else if (period === "Quarterly") {
-        key = `Q${Math.floor((month - 1) / 3) + 1}`;
-        label = key;
+        periodKey = `Q${Math.floor((month - 1) / 3) + 1}`;
+        periodLabel = periodKey;
       } else if (period === "Half-Yearly") {
-        key = month <= 6 ? "H1" : "H2";
-        label = key;
+        periodKey = month <= 6 ? "H1" : "H2";
+        periodLabel = periodKey;
       } else if (period === "Annual") {
-        key = date.slice(0, 4);
-        label = key;
+        periodKey = yearLabel;
+        periodLabel = yearLabel;
+      } else {
+        periodKey = date;
+        periodLabel = date;
       }
 
+      const key = `${yearLabel}-${periodKey}`;
       map.set(key, {
-        label,
+        year: yearLabel,
+        period: periodLabel,
         units: (map.get(key)?.units || 0) + Number(row.units || 0),
       });
     }
 
     const totalByPeriod = new Map();
-    for (const row of totalRows) {
-      const date = String(row.sales_period);
-      const month = Number(date.slice(5, 7));
-      let key = date;
 
-      if (period === "Monthly") {
-        key = date;
-      } else if (period === "Quarterly") {
-        key = `Q${Math.floor((month - 1) / 3) + 1}`;
-      } else if (period === "Half-Yearly") {
-        key = month <= 6 ? "H1" : "H2";
-      } else if (period === "Annual") {
-        key = date.slice(0, 4);
+    if (segment !== "All") {
+      for (const row of totalRows) {
+        const date = String(row.sales_period);
+        const yearLabel = date.slice(0, 4);
+        const month = Number(date.slice(5, 7));
+        let periodKey = date;
+
+        if (period === "Monthly") {
+          periodKey = date;
+        } else if (period === "Quarterly") {
+          periodKey = `Q${Math.floor((month - 1) / 3) + 1}`;
+        } else if (period === "Half-Yearly") {
+          periodKey = month <= 6 ? "H1" : "H2";
+        } else if (period === "Annual") {
+          periodKey = yearLabel;
+        }
+
+        totalByPeriod.set(
+          `${yearLabel}-${periodKey}`,
+          (totalByPeriod.get(`${yearLabel}-${periodKey}`) || 0) + Number(row.units || 0)
+        );
       }
-
-      totalByPeriod.set(key, (totalByPeriod.get(key) || 0) + Number(row.units || 0));
     }
 
     return [...map.entries()]
       .map(([key, value]) => ({
         key,
-        label: value.label,
+        year: value.year,
+        period: value.period,
         units: value.units,
-        total: totalByPeriod.get(key) || 0,
+        total: segment === "All" ? value.units : (totalByPeriod.get(key) || 0),
       }))
       .filter(row => row.units > 0)
-      .sort((a, b) => {
-        if (period === "Monthly") return a.key.localeCompare(b.key);
-        if (period === "Annual") return Number(a.key) - Number(b.key);
-        return a.key.localeCompare(b.key);
-      });
+      .sort((a, b) => a.key.localeCompare(b.key));
   }, [selectedRows, totalRows, segment, period]);
 
   const label = period === "Monthly" ? (periodValue === "All" ? "All / YTD" : periodValue)
@@ -159,13 +168,14 @@ export default function IndustryPage() {
     {error && <div className="errorBanner">{error}</div>}
     <section><div className="sectionHeading"><div><h2>Industry by segment</h2><p className="subtitle">Select a segment above to isolate its movement.</p></div></div>
       <div className="tableCard">
-        {segment !== "All" && breakdownRows.length ? (
+        {breakdownRows.length ? (
           <>
-            <div className="industryTableHeader"><div>Period</div><div>Segment</div><div>Units</div><div>Share</div></div>
+            <div className="industryTableHeader"><div>Year</div><div>Period</div><div>{segment === "All" ? "Industry" : "Segment"}</div><div>Units</div><div>Share</div></div>
             {breakdownRows.map(r => (
               <div className="industryTableRow" key={r.key}>
-                <div className="scopeName">{r.label}</div>
-                <div className="scopeName">{segment}</div>
+                <div className="scopeName">{r.year}</div>
+                <div className="scopeName">{r.period}</div>
+                <div className="scopeName">{segment === "All" ? "Industry" : segment}</div>
                 <div>{formatIndustryNumber(r.units)}</div>
                 <div>{r.total ? ((r.units / r.total) * 100).toFixed(1) + "%" : "—"}</div>
               </div>
