@@ -1312,3 +1312,76 @@ footer {
     padding: 14px 16px;
   }
 }
+
+/* Industry period breakdown: five-column desktop, clean two-column mobile cards */
+.industryBreakdownHeader,
+.industryBreakdownRow {
+  display: grid;
+  grid-template-columns: 0.8fr 0.9fr 1.4fr 1fr 0.8fr;
+  align-items: center;
+}
+.industryBreakdownHeader {
+  padding: 13px 18px;
+  background: #f7f7f8;
+  color: #6b7078;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .7px;
+}
+.industryBreakdownRow {
+  min-height: 58px;
+  padding: 13px 18px;
+  border-top: 1px solid #eceef1;
+  font-size: 13px;
+}
+@media (max-width: 650px) {
+  .industryBreakdownHeader { display: none; }
+  .industryBreakdownRow {
+    width: 100%;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 10px 16px;
+    padding: 17px 16px;
+    font-size: 17px;
+  }
+  .industryBreakdownRow > * {
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
+  .industryBreakdownRow > :nth-child(3),
+  .industryBreakdownRow > :nth-child(4),
+  .industryBreakdownRow > :nth-child(5) {
+    grid-column: 1 / -1;
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+  }
+  .industryBreakdownRow > :nth-child(3)::before {
+    content: "Industry";
+    color: #70757d;
+    font-size: 15px;
+    font-weight: 700;
+  }
+  .industryBreakdownRow > :nth-child(4)::before {
+    content: "Units";
+    color: #70757d;
+    font-size: 15px;
+    font-weight: 700;
+  }
+  .industryBreakdownRow > :nth-child(5)::before {
+    content: "Share";
+    color: #70757d;
+    font-size: 15px;
+    font-weight: 700;
+  }
+  .industryBreakdownRow > :first-child,
+  .industryBreakdownRow > :nth-child(2) {
+    font-size: 18px;
+    font-weight: 700;
+  }
+  .industryBreakdownRow > :nth-child(4) {
+    font-size: 19px;
+    font-weight: 500;
+  }
+}
