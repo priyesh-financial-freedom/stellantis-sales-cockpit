@@ -543,7 +543,7 @@ footer {
 .modelTableHeader,
 .modelTableRow {
   display: grid;
-  grid-template-columns: 1.4fr 0.8fr 0.8fr 2fr;
+  grid-template-columns: 1.4fr 0.8fr 0.8fr 1.2fr;
   align-items: center;
 }
 
@@ -671,19 +671,6 @@ footer {
   .modelTableRow > :nth-child(3),
   .modelTableRow > :nth-child(4) {
     grid-column: 1 / -1;
-  }
-
-  .trendCell {
-    width: 100%;
-  }
-
-  .trendBars {
-    flex: 1;
-    justify-content: space-between;
-  }
-
-  .trendBar {
-    width: 5px;
   }
 
   .monthWiseRow {
