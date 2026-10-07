@@ -2,9 +2,10 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
+import { readClientCache } from "../../lib/clientCache";
 import {
   INDUSTRY_HALVES, INDUSTRY_PERIODS, INDUSTRY_QUARTERS, MONTHS,
-  filterHistoryRows, formatIndustryNumber, getIndustryYears, loadIndustryData
+  filterHistoryRows, formatIndustryNumber, getIndustryYears, loadIndustryData, INDUSTRY_CACHE_KEY
 } from "../../lib/industryData";
 
 export default function IndustryPage() {
@@ -17,16 +18,36 @@ export default function IndustryPage() {
   const [customFrom, setCustomFrom] = useState("");
   const [customTo, setCustomTo] = useState("");
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState("");
+  const [cachedAt, setCachedAt] = useState(null);
 
   useEffect(() => {
     let active = true;
+    const cached = readClientCache(INDUSTRY_CACHE_KEY);
+
+    if (cached?.data?.length) {
+      setData(cached.data);
+      setCachedAt(cached.cachedAt);
+      setLoading(false);
+      setRefreshing(true);
+      const years = getIndustryYears(cached.data);
+      if (years.length) setYear(String(years[0]));
+    }
+
     loadIndustryData().then(rows => {
       if (!active) return;
       setData(rows);
+      setCachedAt(Date.now());
+      setRefreshing(false);
       const years = getIndustryYears(rows);
       if (years.length) setYear(String(years[0]));
-    }).catch(err => active && setError(err.message)).finally(() => active && setLoading(false));
+    }).catch(err => {
+      if (!active) return;
+      setRefreshing(false);
+      if (!cached?.data?.length) setError(err.message);
+    }).finally(() => active && setLoading(false));
+
     return () => { active = false; };
   }, []);
 
@@ -149,8 +170,8 @@ export default function IndustryPage() {
 
   return <main className="cockpit">
     <header className="header">
-      <div><div className="eyebrow">STELLANTIS INDIA · INDUSTRY INTELLIGENCE</div><h1>Industry</h1><p className="subtitle">Indian passenger vehicle industry TIV by segment</p></div>
-      <div className="headerStatus"><span className={loading ? "statusDot loadingDot" : "statusDot"} />{loading ? "Loading industry data" : error ? "Data error" : "Industry data connected"}</div>
+      <div><div className="eyebrow">STELLANTIS INDIA · INDUSTRY INTELLIGENCE</div><h1>Industry</h1><p className="subtitle">Indian passenger vehicle industry TIV by segment</p>{cachedAt && <div className="dataFreshness">{refreshing ? "Showing cached data · refreshing in background" : "Updated " + new Date(cachedAt).toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" })}</div>}</div>
+      <div className="headerStatus"><span className={(loading || refreshing) ? "statusDot loadingDot" : "statusDot"} />{loading ? "Loading industry data" : refreshing ? "Refreshing industry data" : error ? "Data error" : "Industry data connected"}</div>
     </header>
     <nav className="cockpitNav">
       <Link href="/">Sales Cockpit</Link><Link href="/model-wise/jeep">Jeep Model Wise</Link><Link href="/model-wise/citroen">Citroën Model Wise</Link>
