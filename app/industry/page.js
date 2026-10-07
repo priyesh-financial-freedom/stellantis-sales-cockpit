@@ -63,6 +63,69 @@ export default function IndustryPage() {
       .sort((a,b) => b.units-a.units);
   }, [selectedRows]);
 
+  const breakdownRows = useMemo(() => {
+    if (segment === "All") return [];
+
+    const map = new Map();
+    for (const row of selectedRows) {
+      const date = String(row.sales_period);
+      const month = Number(date.slice(5, 7));
+      let key = date;
+      let label = date;
+
+      if (period === "Monthly") {
+        label = MONTHS[month - 1] || date;
+      } else if (period === "Quarterly") {
+        key = `Q${Math.floor((month - 1) / 3) + 1}`;
+        label = key;
+      } else if (period === "Half-Yearly") {
+        key = month <= 6 ? "H1" : "H2";
+        label = key;
+      } else if (period === "Annual") {
+        key = date.slice(0, 4);
+        label = key;
+      }
+
+      map.set(key, {
+        label,
+        units: (map.get(key)?.units || 0) + Number(row.units || 0),
+      });
+    }
+
+    const totalByPeriod = new Map();
+    for (const row of totalRows) {
+      const date = String(row.sales_period);
+      const month = Number(date.slice(5, 7));
+      let key = date;
+
+      if (period === "Monthly") {
+        key = date;
+      } else if (period === "Quarterly") {
+        key = `Q${Math.floor((month - 1) / 3) + 1}`;
+      } else if (period === "Half-Yearly") {
+        key = month <= 6 ? "H1" : "H2";
+      } else if (period === "Annual") {
+        key = date.slice(0, 4);
+      }
+
+      totalByPeriod.set(key, (totalByPeriod.get(key) || 0) + Number(row.units || 0));
+    }
+
+    return [...map.entries()]
+      .map(([key, value]) => ({
+        key,
+        label: value.label,
+        units: value.units,
+        total: totalByPeriod.get(key) || 0,
+      }))
+      .filter(row => row.units > 0)
+      .sort((a, b) => {
+        if (period === "Monthly") return a.key.localeCompare(b.key);
+        if (period === "Annual") return Number(a.key) - Number(b.key);
+        return a.key.localeCompare(b.key);
+      });
+  }, [selectedRows, totalRows, segment, period]);
+
   const label = period === "Monthly" ? (periodValue === "All" ? "All / YTD" : periodValue)
     : period === "Quarterly" ? (periodValue === "All" ? "All / YTD" : periodValue)
     : period === "Half-Yearly" ? (periodValue === "All" ? "All / YTD" : periodValue)
@@ -96,8 +159,24 @@ export default function IndustryPage() {
     {error && <div className="errorBanner">{error}</div>}
     <section><div className="sectionHeading"><div><h2>Industry by segment</h2><p className="subtitle">Select a segment above to isolate its movement.</p></div></div>
       <div className="tableCard">
-        <div className="industryTableHeader"><div>Segment</div><div>Units</div><div>Share</div></div>
-        {grouped.length ? grouped.map(r => <div className="industryTableRow" key={r.name}><div className="scopeName">{r.name}</div><div>{formatIndustryNumber(r.units)}</div><div>{total ? ((r.units/total)*100).toFixed(1)+"%" : "—"}</div></div>) : <div className="industryEmpty">{loading ? "Loading..." : "No Industry data is available for the selected filters."}</div>}
+        {segment !== "All" && breakdownRows.length ? (
+          <>
+            <div className="industryTableHeader"><div>Period</div><div>Segment</div><div>Units</div><div>Share</div></div>
+            {breakdownRows.map(r => (
+              <div className="industryTableRow" key={r.key}>
+                <div className="scopeName">{r.label}</div>
+                <div className="scopeName">{segment}</div>
+                <div>{formatIndustryNumber(r.units)}</div>
+                <div>{r.total ? ((r.units / r.total) * 100).toFixed(1) + "%" : "—"}</div>
+              </div>
+            ))}
+          </>
+        ) : grouped.length ? (
+          <>
+            <div className="industryTableHeader"><div>Segment</div><div>Units</div><div>Share</div></div>
+            {grouped.map(r => <div className="industryTableRow" key={r.name}><div className="scopeName">{r.name}</div><div>{formatIndustryNumber(r.units)}</div><div>{total ? ((r.units/total)*100).toFixed(1)+"%" : "—"}</div></div>)}
+          </>
+        ) : <div className="industryEmpty">{loading ? "Loading..." : "No Industry data is available for the selected filters."}</div>}
       </div>
     </section>
     <footer><span>Industry filters mirror the Sales Cockpit period structure.</span><span>Historical Industry: 1991 onward</span></footer>
