@@ -260,59 +260,7 @@ export default function Home() {
     );
   }
 
-  function renderBrandComparison() {
-    const jeep = comparison.brandView?.totals?.Jeep;
-    const citroen = comparison.brandView?.totals?.Citroën;
 
-    return (
-      <div className="comparisonBlock">
-        <div className="comparisonBlockHeader">
-          <div>
-            <strong>Jeep vs Citroën</strong>
-            <span>{period} · {periodDisplay(period, periodValue, customFrom, customTo)} · {comparison.currentSelection.year}</span>
-          </div>
-        </div>
-        {comparisonMetrics.map(([label, key]) => {
-          const jeepValue = jeep?.recorded[key] ? Number(jeep[key]) : null;
-          const citroenValue = citroen?.recorded[key] ? Number(citroen[key]) : null;
-          const delta = comparisonDelta(jeepValue, citroenValue);
-          const percent = comparisonPercent(jeepValue, citroenValue);
-
-          return (
-            <div className="comparisonMetricRow" key={label}>
-              <span>{label}</span>
-              <strong className={valueClass(comparison.brandView.status, jeepValue)}>{jeepValue === null ? "—" : formatNumber(jeepValue)}</strong>
-              <span className={valueClass(comparison.brandView.status, citroenValue)}>{citroenValue === null ? "—" : formatNumber(citroenValue)}</span>
-              <span className={delta !== null && delta < 0 ? "negativeChange" : "positiveChange"}>
-                {delta === null ? "—" : `${delta >= 0 ? "+" : ""}${formatNumber(delta)}`}
-              </span>
-              <span className={percent !== null && percent < 0 ? "negativeChange" : "positiveChange"}>
-                {percent === null ? "—" : `${percent >= 0 ? "+" : ""}${percent.toFixed(1)}%`}
-              </span>
-            </div>
-          );
-        })}
-        <div className="comparisonMetricLabels">
-          <span>Metric</span><span>Jeep</span><span>Citroën</span><span>J−C</span><span>%</span>
-        </div>
-      </div>
-    );
-  }
-
-  function handlePeriodChange(value) {
-    setPeriod(value);
-    setPeriodValue("All");
-    if (value !== "Custom Period") {
-      setCustomFrom("");
-      setCustomTo("");
-    }
-  }
-
-  function renderMetric(scopeName, label, key) {
-    const item = view.totals[scopeName];
-    if (!item?.recorded[key]) return "—";
-    return formatNumber(item[key]);
-  }
 
   return (
     <main className="cockpit">
@@ -529,7 +477,7 @@ export default function Home() {
             comparison.ly,
             comparisonScopeName()
           )}
-          {renderBrandComparison()}
+
         </div>
       </section>
 
