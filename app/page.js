@@ -5,7 +5,7 @@ import { buildComparison, buildSalesView, loadSalesData } from "../lib/salesData
 
 const PERIODS = ["Monthly", "Quarterly", "Half-Yearly", "Annual", "Custom Period"];
 const SCOPES = ["All", "Jeep", "Citroën", "SAARC"];
-const YEARS = ["All", "2023", "2024", "2025", "2026"];
+const YEARS = ["All", "2024", "2025", "2026"];
 const METRICS = ["All", "Retail + Wholesale", "TD", "Bookings", "Retail", "Wholesale"];
 
 const MONTHS = [
@@ -140,7 +140,7 @@ export default function Home() {
   const breakdownViews = useMemo(() => {
     if (!showBreakdown) return [];
 
-    const years = year === "All" ? ["2023", "2024", "2025", "2026"] : [year];
+    const years = year === "All" ? ["2024", "2025", "2026"] : [year];
 
     if (periodValue === "All" && breakdownOptions.length > 0) {
       return years.flatMap((selectedYear) =>
