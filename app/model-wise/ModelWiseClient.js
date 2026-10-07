@@ -283,7 +283,15 @@ export default function ModelWiseClient({ brand }) {
       <div className="modelBreakdownRow" key={row.year + "-" + row.label} style={{ gridTemplateColumns: "0.8fr 1.1fr repeat(" + models.length + ", 1fr) 1fr 1.2fr" }}>
         <div className="scopeName">{row.year}</div>
         <div className="scopeName">{row.label}</div>
-        {values.map((value, i) => <div key={models[i]} className={valueClass(row.status, value)}>{formatNumber(value)}</div>)}
+        {values.map((value, i) => (
+          <div
+            key={models[i]}
+            className={valueClass(row.status, value) + " modelBreakdownValue"}
+            data-model={models[i]}
+          >
+            {formatNumber(value)}
+          </div>
+        ))}
         <div className={valueClass(row.status, total)}>{formatNumber(total)}</div>
         <div className={statusClass(row.status) + " statusText"}>{statusLabel(row.status)}</div>
       </div>
