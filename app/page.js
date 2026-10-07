@@ -6,7 +6,7 @@ import { buildSalesView, loadSalesData } from "../lib/salesData";
 const PERIODS = ["Monthly", "Quarterly", "Half-Yearly", "Annual", "Custom Period"];
 const SCOPES = ["All", "Jeep", "Citroën", "SAARC"];
 const YEARS = ["All", "2024", "2025", "2026"];
-const METRICS = ["All", "TD", "Bookings", "Retail", "Wholesale"];
+const METRICS = ["All", "Retail + Wholesale", "TD", "Bookings", "Retail", "Wholesale"];
 
 const MONTHS = [
   "All", "Jan", "Feb", "Mar", "Apr", "May", "Jun",
@@ -168,7 +168,9 @@ export default function Home() {
   }, [showBreakdown, breakdownOptions, rows, period, periodValue, year, customFrom, customTo]);
   const metricColumns = metric === "All"
     ? Object.values(metricMap)
-    : [metricMap[metric]];
+    : metric === "Retail + Wholesale"
+      ? [metricMap.Retail, metricMap.Wholesale]
+      : [metricMap[metric]];
 
   function handlePeriodChange(value) {
     setPeriod(value);
