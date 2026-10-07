@@ -6,6 +6,7 @@ import { supabase } from "../../lib/supabase";
 import { MODEL_NAMES, MODEL_YEARS, MODEL_PERIODS } from "../../lib/modelData";
 import { clearClientCache } from "../../lib/clientCache";
 import { SALES_CACHE_KEY } from "../../lib/salesData";
+import { MODEL_CACHE_KEY } from "../../lib/modelData";
 
 const BRANDS = ["Jeep", "Citroën", "SAARC"];
 const MODEL_BRANDS = ["Jeep", "Citroën"];
@@ -153,6 +154,7 @@ export default function DataEntryPage() {
         }
       }
       if (dataset === "Daily Sales") clearClientCache(SALES_CACHE_KEY);
+      else clearClientCache(MODEL_CACHE_KEY);
       await loadRecent();
     } catch (err) {
       setError(err.message || "Unable to save data.");
@@ -236,6 +238,7 @@ export default function DataEntryPage() {
       }
       setMessage(count + " record" + (count === 1 ? "" : "s") + " imported.");
       if (dataset === "Daily Sales") clearClientCache(SALES_CACHE_KEY);
+      else clearClientCache(MODEL_CACHE_KEY);
       await loadRecent();
     } catch (err) {
       setError(err.message || "Import failed.");
