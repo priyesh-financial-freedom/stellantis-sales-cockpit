@@ -5,7 +5,7 @@ import Link from "next/link";
 import { supabase } from "../../lib/supabase";
 import { MODEL_NAMES, MODEL_YEARS, MODEL_PERIODS } from "../../lib/modelData";
 
-const BRANDS = ["Jeep", "Citroën"];
+const BRANDS = ["Jeep", "Citroën", "SAARC"];
 const SALES_TYPES = ["Retail", "Wholesale"];
 const DATASETS = ["Daily Sales", "Model Monthly"];
 
