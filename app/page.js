@@ -6,7 +6,7 @@ import { buildComparison, buildSalesView, getScopeStatus, loadSalesData } from "
 const PERIODS = ["Monthly", "Quarterly", "Half-Yearly", "Annual", "Custom Period"];
 const SCOPES = ["All", "Jeep", "Citroën", "SAARC"];
 const YEARS = ["All", "2024", "2025", "2026"];
-const METRICS = ["All", "Retail + Wholesale", "TD", "Bookings", "Retail", "Wholesale"];
+const METRICS = ["All", "Retail + Wholesale", "Bookings", "Retail", "Wholesale"];
 
 const MONTHS = [
   "All", "Jan", "Feb", "Mar", "Apr", "May", "Jun",
@@ -16,7 +16,6 @@ const QUARTERS = ["All", "Q1", "Q2", "Q3", "Q4"];
 const HALF_YEARS = ["All", "H1", "H2"];
 
 const metricMap = {
-  TD: ["TD", "test_drives"],
   Bookings: ["Bookings", "bookings"],
   Retail: ["Retail", "retail"],
   Wholesale: ["Wholesale", "wholesale"],
@@ -283,7 +282,7 @@ export default function Home() {
           <div className="eyebrow">STELLANTIS INDIA</div>
           <h1>Sales Cockpit</h1>
           <p className="subtitle">
-            Management view of Test Drives, Bookings, Retail and Wholesale
+            Management view of Bookings, Retail and Wholesale
           </p>
         </div>
         <div className="headerStatus">
