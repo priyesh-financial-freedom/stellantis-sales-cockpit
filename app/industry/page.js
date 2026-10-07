@@ -106,7 +106,7 @@ export default function IndustryPage() {
 
     const totalByPeriod = new Map();
 
-    if (segment !== "All") {
+    if (segmentSelection.length > 0) {
       for (const row of totalRows) {
         const date = String(row.sales_period);
         const yearLabel = date.slice(0, 4);
