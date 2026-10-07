@@ -46,11 +46,13 @@ export default function IndustryPage() {
 
   const filters = { period, periodValue, year, customFrom, customTo };
   const selectedRows = useMemo(() => filterHistoryRows(
-    data.filter(r => r.segment !== "Industry Total"), filters, "segment", segment
+    data.filter(r => r.segment !== "Industry Total"),
+    { ...filters, key: "segment", value: segment }
   ), [data, period, periodValue, year, customFrom, customTo, segment]);
 
   const totalRows = useMemo(() => filterHistoryRows(
-    data.filter(r => r.segment === "Industry Total"), filters, "segment", "Industry Total"
+    data.filter(r => r.segment === "Industry Total"),
+    { ...filters, key: "segment", value: "Industry Total" }
   ), [data, period, periodValue, year, customFrom, customTo]);
 
   const total = totalRows.reduce((s, r) => s + Number(r.units || 0), 0);
