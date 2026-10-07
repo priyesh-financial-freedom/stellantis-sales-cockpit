@@ -19,6 +19,41 @@ export default function ManufacturerHistoryPage() {
   const filtered=useMemo(()=>filterHistoryRows(rows,{...filters,key:"manufacturer",value:manufacturer}),[rows,period,periodValue,year,customFrom,customTo,manufacturer]);
   const grouped=useMemo(()=>{const m=new Map();for(const r of filtered)m.set(r.manufacturer,(m.get(r.manufacturer)||0)+Number(r.units||0));const total=[...m.values()].reduce((a,b)=>a+b,0);return [...m.entries()].map(([manufacturer,units])=>({manufacturer,units,share:total?units/total*100:0})).filter(r=>r.units>0).sort((a,b)=>b.units-a.units)},[filtered]);
   const total=grouped.reduce((s,r)=>s+r.units,0);
+
+  const allManufacturerRows=useMemo(()=>filterHistoryRows(rows,{...filters,key:"manufacturer",value:"All"}),[rows,period,periodValue,year,customFrom,customTo]);
+
+  const breakdownRows=useMemo(()=>{
+    const source=manufacturer==="All"?allManufacturerRows:filtered;
+    const denominator=manufacturer==="All"?null:allManufacturerRows;
+    const map=new Map();
+    const totals=new Map();
+
+    const periodKey=(row)=>{
+      const date=String(row.sales_period);
+      const y=date.slice(0,4);
+      const m=Number(date.slice(5,7));
+      if(period==="Monthly") return {key:`${y}-${date}`,label:MONTHS[m-1]||date,year:y};
+      if(period==="Quarterly"){const q=`Q${Math.floor((m-1)/3)+1}`;return {key:`${y}-${q}`,label:q,year:y};}
+      if(period==="Half-Yearly"){const h=m<=6?"H1":"H2";return {key:`${y}-${h}`,label:h,year:y};}
+      if(period==="Annual") return {key:y,label:y,year:y};
+      return {key:date,label:date,year:y};
+    };
+
+    for(const row of source){
+      const p=periodKey(row);
+      map.set(p.key,{key:p.key,year:p.year,label:p.label,units:(map.get(p.key)?.units||0)+Number(row.units||0)});
+    }
+
+    if(denominator){
+      for(const row of denominator){
+        const p=periodKey(row);
+        totals.set(p.key,(totals.get(p.key)||0)+Number(row.units||0));
+      }
+    }
+
+    return [...map.values()].filter(r=>r.units>0).map(r=>({...r,total:manufacturer==="All"?r.units:(totals.get(r.key)||0)})).sort((a,b)=>a.key.localeCompare(b.key));
+  },[rows,filtered,allManufacturerRows,manufacturer,period]);
+
   const label=period==="Custom Period"?"Custom Period":period==="Annual"?"Annual":periodValue==="All"?"All / YTD":periodValue;
 
   function changePeriod(v){setPeriod(v);setPeriodValue("All");}
@@ -34,7 +69,14 @@ export default function ManufacturerHistoryPage() {
     </section>
     <section className="industrySummaryGrid"><div className="queryCard"><div className="eyebrow">MANUFACTURER TIV</div><h2>{manufacturer}</h2><strong className="industryHeadline">{fmt(total)}</strong><p>{label} · {year}</p></div><div className="queryCard"><div className="eyebrow">HISTORICAL LAYER</div><h2>1991 → 2026</h2><p>Annual 1991–1996 · monthly 1997 onward.</p></div></section>
     {error&&<div className="errorBanner">{error}</div>}
-    <section><div className="sectionHeading"><div><h2>Manufacturer movement</h2><p className="subtitle">Source: comp.xlsx · Master-Sep26</p></div></div><div className="tableCard"><div className="industryTableHeader"><div>Manufacturer</div><div>Units</div><div>Share</div></div>{grouped.length?grouped.map(r=><div className="industryTableRow" key={r.manufacturer}><div className="scopeName">{r.manufacturer}</div><div>{fmt(r.units)}</div><div>{r.share.toFixed(1)}%</div></div>):<div className="industryEmpty">{loading?"Loading...":"No manufacturer data is available for the selected filters."}</div>}</div></section>
+    <section><div className="sectionHeading"><div><h2>Manufacturer movement</h2><p className="subtitle">Source: comp.xlsx · Master-Sep26</p></div></div><div className="tableCard">
+      {breakdownRows.length ? <>
+        <div className="industryBreakdownHeader"><div>Year</div><div>Period</div><div>{manufacturer==="All"?"Industry":"Manufacturer"}</div><div>Units</div><div>Share</div></div>
+        {breakdownRows.map(r=><div className="industryBreakdownRow" key={r.key}>
+          <div>{r.year}</div><div>{r.label}</div><div className="scopeName">{manufacturer==="All"?"Industry":manufacturer}</div><div>{fmt(r.units)}</div><div>{r.total?((r.units/r.total)*100).toFixed(1)+"%":"—"}</div>
+        </div>)}
+      </> : <div className="industryEmpty">{loading?"Loading...":"No manufacturer data is available for the selected filters."}</div>}
+    </div></section>
     <footer><span>Manufacturer filters mirror the Sales Cockpit period structure.</span><span>1991–1996 annual · 1997 onward monthly</span></footer>
   </main>;
 }
