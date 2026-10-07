@@ -135,6 +135,7 @@ function sumPeriod(rows, brand, salesType, year, months, model) {
 export default function ModelWiseClient({ brand }) {
   const [year, setYear] = useState("2026");
   const [salesType, setSalesType] = useState("Retail");
+  const [selectedModel, setSelectedModel] = useState("All");
   const [period, setPeriod] = useState("Annual");
   const [periodValue, setPeriodValue] = useState("All");
   const [customFrom, setCustomFrom] = useState("2026-01-01");
@@ -169,7 +170,8 @@ export default function ModelWiseClient({ brand }) {
   }, [period]);
 
   const periodSelectorLabel = period === "Monthly" ? "Month" : period === "Quarterly" ? "Quarter" : period === "Half-Yearly" ? "Half-Year" : "Period";
-  const models = MODEL_NAMES[brand] || [];
+  const allModels = MODEL_NAMES[brand] || [];
+  const models = selectedModel === "All" ? allModels : allModels.filter((model) => model === selectedModel);
   const detailYears = year === "All" ? MODEL_YEARS.map(String) : [year];
 
   const breakdownOptions = useMemo(() => {
@@ -338,13 +340,20 @@ export default function ModelWiseClient({ brand }) {
             {SALES_TYPES.map((item) => <option key={item}>{item}</option>)}
           </select>
         </div>
+        <div className="filter">
+          <label>Model</label>
+          <select value={selectedModel} onChange={(e) => setSelectedModel(e.target.value)}>
+            <option>All</option>
+            {allModels.map((model) => <option key={model}>{model}</option>)}
+          </select>
+        </div>
       </section>
 
       <section className="summary">
         <div className="sectionHeading">
           <div>
             <div className="eyebrow">MODEL PERFORMANCE</div>
-            <h2>{brand} · {salesType} · {title} · {year}</h2>
+            <h2>{brand} · {selectedModel} · {salesType} · {title} · {year}</h2>
           </div>
           <span className="incompleteLegend"><span className="legendDot" />Incomplete / Forecast</span>
         </div>
