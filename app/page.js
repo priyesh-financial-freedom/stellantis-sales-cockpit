@@ -26,14 +26,22 @@ function formatNumber(value) {
   return new Intl.NumberFormat("en-IN").format(value || 0);
 }
 
-function statusClass(status) {
-  if (status === "INCOMPLETE" || status === "FUTURE") return "futureValue";
+function valueClass(status, value) {
+  if (status === "FUTURE") return "futureValue";
+  if (status === "INCOMPLETE" && Number(value) > 0) return "futureValue";
   return "";
+}
+
+function statusClass(status) {
+  return status === "INCOMPLETE" || status === "FUTURE" ? "futureValue" : "";
 }
 
 function periodDisplay(period, value, customFrom, customTo) {
   if (period === "Custom Period") {
     return customFrom && customTo ? `${customFrom} → ${customTo}` : "Custom Period";
+  }
+  if (period === "Monthly" && value !== "All") {
+    return MONTHS[Number(value)] || value;
   }
   return value;
 }
@@ -225,7 +233,7 @@ export default function Home() {
                   ? view.status
                   : "NO DATA";
                 return (
-                  <div key={label} className={statusClass(itemStatus)}>
+                  <div key={label} className={valueClass(itemStatus, item?.[key])}>
                     {renderMetric(scopeName, label, key)}
                   </div>
                 );
