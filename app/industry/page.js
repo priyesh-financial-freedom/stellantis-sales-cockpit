@@ -92,7 +92,7 @@ export default function IndustryPage() {
         <div className="queryCard">
           <div className="eyebrow">DATA SCOPE</div>
           <h2>Segment only</h2>
-          <p>Month-wise industry totals are maintained by segment. No brand, model or classification layer is stored here.</p>
+          <p>Industry Total history is maintained from 1991; current segment detail remains lightweight.</p>
         </div>
       </section>
 
@@ -102,7 +102,7 @@ export default function IndustryPage() {
         <div className="sectionHeading">
           <div>
             <h2>Industry by segment</h2>
-            <p className="subtitle">Source: India TIV Sep26.xlsx · 2026 Sep sheet</p>
+            <p className="subtitle">Source: India TIV Sep26.xlsx · Master-Sep26</p>
           </div>
         </div>
 
@@ -129,7 +129,7 @@ export default function IndustryPage() {
 
       <footer>
         <span>Industry is intentionally lightweight and independent of Sales Cockpit.</span>
-        <span>The source Excel remains the detailed backup.</span>
+        <span>Historical Industry Total: 1991 onward · Source Excel remains the detailed backup.</span>
       </footer>
     </main>
   );
