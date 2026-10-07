@@ -111,6 +111,21 @@ export default function Home() {
     ? ["Jeep", "Citroën", "SAARC", "Stellantis Total"]
     : [scope];
 
+  const breakdownOptions = useMemo(() => {
+    if (period !== "Monthly" && period !== "Quarterly" && period !== "Half-Yearly") return [];
+    if (period === "Monthly") return MONTHS.slice(1).map((label, index) => ({ label, value: String(index + 1) }));
+    if (period === "Quarterly") return QUARTERS.slice(1).map((label) => ({ label, value: label }));
+    return HALF_YEARS.slice(1).map((label) => ({ label, value: label }));
+  }, [period]);
+
+  const showBreakdown = periodValue === "All" && breakdownOptions.length > 0;
+  const breakdownViews = useMemo(() => {
+    if (!showBreakdown) return [];
+    return breakdownOptions.map((option) => ({
+      ...option,
+      view: buildSalesView(rows, { period, periodValue: option.value, year, customFrom, customTo }),
+    }));
+  }, [showBreakdown, breakdownOptions, rows, period, year, customFrom, customTo]);
   const metricColumns = metric === "All"
     ? Object.values(metricMap)
     : [metricMap[metric]];
@@ -211,40 +226,97 @@ export default function Home() {
         {error && <div className="errorBanner">{error}</div>}
 
         <div className="tableCard">
-          <div
-            className="tableHeader"
-            style={{ gridTemplateColumns: `2fr repeat(${metricColumns.length}, 1fr) 1.25fr` }}
-          >
-            <div>Scope</div>
-            {metricColumns.map(([label]) => <div key={label}>{label}</div>)}
-            <div>Status</div>
-          </div>
-
-          {displayedScopes.map((scopeName) => (
-            <div
-              className="tableRow"
-              key={scopeName}
-              style={{ gridTemplateColumns: `2fr repeat(${metricColumns.length}, 1fr) 1.25fr` }}
-            >
-              <div className="scopeName">{scopeName}</div>
-
-              {metricColumns.map(([label, key]) => {
-                const item = view.totals[scopeName];
-                const itemStatus = item?.recorded[key]
-                  ? view.status
-                  : "NO DATA";
-                return (
-                  <div key={label} className={valueClass(itemStatus, item?.[key])}>
-                    {renderMetric(scopeName, label, key)}
-                  </div>
-                );
-              })}
-
-              <div className={statusClass(view.status) + " statusText"}>
-                {view.status}
+          {showBreakdown ? (
+            <>
+              <div
+                className="tableHeader"
+                style={{ gridTemplateColumns: `1.1fr 1.6fr repeat(${metricColumns.length}, 1fr) 1.25fr` }}
+              >
+                <div>Period</div>
+                <div>Scope</div>
+                {metricColumns.map(([label]) => <div key={label}>{label}</div>)}
+                <div>Status</div>
               </div>
-            </div>
-          ))}
+
+              {breakdownViews.flatMap(({ label, view: periodView }) =>
+                displayedScopes.map((scopeName) => (
+                  <div
+                    className="tableRow"
+                    key={`${label}-${scopeName}`}
+                    style={{ gridTemplateColumns: `1.1fr 1.6fr repeat(${metricColumns.length}, 1fr) 1.25fr` }}
+                  >
+                    <div className="scopeName">{label}</div>
+                    <div className="scopeName">{scopeName}</div>
+                    {metricColumns.map(([metricLabel, key]) => {
+                      const item = periodView.totals[scopeName];
+                      const itemStatus = item?.recorded[key] ? periodView.status : "NO DATA";
+                      return (
+                        <div key={metricLabel} className={valueClass(itemStatus, item?.[key])}>
+                          {item?.recorded[key] ? formatNumber(item[key]) : "—"}
+                        </div>
+                      );
+                    })}
+                    <div className={statusClass(periodView.status) + " statusText"}>
+                      {periodView.status}
+                    </div>
+                  </div>
+                ))
+              )}
+
+              <div
+                className="tableRow totalRow"
+                style={{ gridTemplateColumns: `1.1fr 1.6fr repeat(${metricColumns.length}, 1fr) 1.25fr` }}
+              >
+                <div className="scopeName">TOTAL</div>
+                <div className="scopeName">{scope === "All" ? "Stellantis Total" : scope}</div>
+                {metricColumns.map(([label, key]) => {
+                  const item = view.totals[scope === "All" ? "Stellantis Total" : scope];
+                  const itemStatus = item?.recorded[key] ? view.status : "NO DATA";
+                  return (
+                    <div key={label} className={valueClass(itemStatus, item?.[key])}>
+                      {item?.recorded[key] ? formatNumber(item[key]) : "—"}
+                    </div>
+                  );
+                })}
+                <div className={statusClass(view.status) + " statusText"}>{view.status}</div>
+              </div>
+            </>
+          ) : (
+            <>
+              <div
+                className="tableHeader"
+                style={{ gridTemplateColumns: `2fr repeat(${metricColumns.length}, 1fr) 1.25fr` }}
+              >
+                <div>Scope</div>
+                {metricColumns.map(([label]) => <div key={label}>{label}</div>)}
+                <div>Status</div>
+              </div>
+
+              {displayedScopes.map((scopeName) => (
+                <div
+                  className="tableRow"
+                  key={scopeName}
+                  style={{ gridTemplateColumns: `2fr repeat(${metricColumns.length}, 1fr) 1.25fr` }}
+                >
+                  <div className="scopeName">{scopeName}</div>
+                  {metricColumns.map(([label, key]) => {
+                    const item = view.totals[scopeName];
+                    const itemStatus = item?.recorded[key]
+                      ? view.status
+                      : "NO DATA";
+                    return (
+                      <div key={label} className={valueClass(itemStatus, item?.[key])}>
+                        {renderMetric(scopeName, label, key)}
+                      </div>
+                    );
+                  })}
+                  <div className={statusClass(view.status) + " statusText"}>
+                    {view.status}
+                  </div>
+                </div>
+              ))}
+            </>
+          )}
         </div>
       </section>
 
