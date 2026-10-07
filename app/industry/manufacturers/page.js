@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { readClientCache, writeClientCache } from "../../../../lib/clientCache";
+import { readClientCache, writeClientCache } from "../../../lib/clientCache";
 import { supabase } from "../../../lib/supabase";
 import { INDUSTRY_HALVES, INDUSTRY_PERIODS, INDUSTRY_QUARTERS, MONTHS, filterHistoryRows } from "../../../lib/industryData";
 
