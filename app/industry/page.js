@@ -38,7 +38,7 @@ export default function IndustryPage() {
   const availableMonths = useMemo(() => getIndustryMonths(data, Number(year)), [data, year]);
   const rows = useMemo(() => buildIndustryView(data, Number(year), month), [data, year, month]);
   const total = useMemo(() => getIndustryTotal(data, Number(year), month), [data, year, month]);
-  const selectedMonthLabel = month === "All" ? "YTD" : MONTHS[Number(month) - 1];
+  const selectedMonthLabel = month === "All" ? "YTD" : month === "Annual" ? "Annual" : MONTHS[Number(month) - 1];
 
   return (
     <main className="cockpit">
