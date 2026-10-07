@@ -2,15 +2,45 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
+import { readClientCache, writeClientCache } from "../../../../lib/clientCache";
 import { supabase } from "../../../lib/supabase";
 import { INDUSTRY_HALVES, INDUSTRY_PERIODS, INDUSTRY_QUARTERS, MONTHS, filterHistoryRows } from "../../../lib/industryData";
+
+const MANUFACTURER_CACHE_KEY = "industry-manufacturer-history-v1";
 
 const fmt = value => new Intl.NumberFormat("en-IN").format(Number(value) || 0);
 
 export default function ManufacturerHistoryPage() {
   const [rows,setRows]=useState([]), [period,setPeriod]=useState("Monthly"), [manufacturer,setManufacturer]=useState("All"), [periodValue,setPeriodValue]=useState("All"), [year,setYear]=useState("2026"), [customFrom,setCustomFrom]=useState(""), [customTo,setCustomTo]=useState(""), [loading,setLoading]=useState(true), [error,setError]=useState("");
 
-  useEffect(()=>{ let active=true; async function loadAll(){const out=[]; for(let from=0;;from+=1000){const {data,error}=await supabase.from("industry_manufacturer_history_v2").select("sales_period,manufacturer,units,period_type,record_type").eq("record_type","MANUFACTURER").order("sales_period").order("manufacturer").range(from,from+999); if(error) throw error; out.push(...(data||[])); if(!data||data.length<1000) break;} return out;} loadAll().then(x=>{if(!active)return;setRows(x); const ys=[...new Set(x.map(r=>String(r.sales_period).slice(0,4)))].sort((a,b)=>b.localeCompare(a)); if(ys.length)setYear(ys[0]);}).catch(e=>active&&setError(e.message)).finally(()=>active&&setLoading(false)); return()=>{active=false};},[]);
+  const [refreshing,setRefreshing]=useState(false), [cachedAt,setCachedAt]=useState(null);
+
+  useEffect(()=>{ 
+    let active=true;
+    const cached=readClientCache(MANUFACTURER_CACHE_KEY);
+    if(cached?.data?.length){
+      setRows(cached.data); setCachedAt(cached.cachedAt); setLoading(false); setRefreshing(true);
+      const ys=[...new Set(cached.data.map(r=>String(r.sales_period).slice(0,4)))].sort((a,b)=>b.localeCompare(a));
+      if(ys.length)setYear(ys[0]);
+    }
+    async function loadAll(){
+      const out=[];
+      for(let from=0;;from+=1000){
+        const {data,error}=await supabase.from("industry_manufacturer_history_v2").select("sales_period,manufacturer,units,period_type,record_type").eq("record_type","MANUFACTURER").order("sales_period").order("manufacturer").range(from,from+999);
+        if(error) throw error;
+        out.push(...(data||[]));
+        if(!data||data.length<1000) break;
+      }
+      return out;
+    }
+    loadAll().then(x=>{
+      if(!active)return;
+      setRows(x); writeClientCache(MANUFACTURER_CACHE_KEY,x); setCachedAt(Date.now()); setRefreshing(false);
+      const ys=[...new Set(x.map(r=>String(r.sales_period).slice(0,4)))].sort((a,b)=>b.localeCompare(a));
+      if(ys.length)setYear(ys[0]);
+    }).catch(e=>{if(active){setRefreshing(false);if(!cached?.data?.length)setError(e.message)}}).finally(()=>active&&setLoading(false));
+    return()=>{active=false};
+  },[]);
 
   const years=useMemo(()=>["All",...[...new Set(rows.map(r=>String(r.sales_period).slice(0,4)))].sort((a,b)=>b.localeCompare(a))],[rows]);
   const manufacturers=useMemo(()=>["All",...[...new Set(rows.map(r=>r.manufacturer).filter(Boolean))].sort((a,b)=>a.localeCompare(b))],[rows]);
@@ -59,7 +89,7 @@ export default function ManufacturerHistoryPage() {
   function changePeriod(v){setPeriod(v);setPeriodValue("All");}
 
   return <main className="cockpit">
-    <header className="header"><div><div className="eyebrow">STELLANTIS INDIA · INDUSTRY INTELLIGENCE</div><h1>Manufacturer History</h1><p className="subtitle">Historical manufacturer movement — 1991 onward</p></div><div className="headerStatus"><span className={loading?"statusDot loadingDot":"statusDot"}/>{loading?"Loading manufacturer history":error?"Data error":"Historical data connected"}</div></header>
+    <header className="header"><div><div className="eyebrow">STELLANTIS INDIA · INDUSTRY INTELLIGENCE</div><h1>Manufacturer History</h1><p className="subtitle">Historical manufacturer movement — 1991 onward</p>{cachedAt&&<div className="dataFreshness">{refreshing?"Showing cached data · refreshing in background":"Updated "+new Date(cachedAt).toLocaleTimeString("en-IN",{hour:"2-digit",minute:"2-digit"})}</div>}</div><div className="headerStatus"><span className={loading?"statusDot loadingDot":"statusDot"}/>{loading?"Loading manufacturer history":refreshing?"Refreshing manufacturer history":error?"Data error":"Historical data connected"}</div></header>
     <nav className="cockpitNav"><Link href="/">Sales Cockpit</Link><Link href="/model-wise/jeep">Jeep Model Wise</Link><Link href="/model-wise/citroen">Citroën Model Wise</Link><Link href="/industry">Industry</Link><Link className="active" href="/industry/manufacturers">Manufacturer History</Link><Link href="/data-entry">Data Entry</Link></nav>
     <section className="filters">
       <div className="filter"><label>Period</label><select value={period} onChange={e=>changePeriod(e.target.value)}>{INDUSTRY_PERIODS.map(x=><option key={x}>{x}</option>)}</select></div>
