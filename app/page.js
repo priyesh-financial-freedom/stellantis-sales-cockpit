@@ -118,14 +118,46 @@ export default function Home() {
     return HALF_YEARS.slice(1).map((label) => ({ label, value: label }));
   }, [period]);
 
-  const showBreakdown = periodValue === "All" && breakdownOptions.length > 0;
+  const showBreakdown =
+    (periodValue === "All" && breakdownOptions.length > 0) || year === "All";
+
   const breakdownViews = useMemo(() => {
     if (!showBreakdown) return [];
-    return breakdownOptions.map((option) => ({
-      ...option,
-      view: buildSalesView(rows, { period, periodValue: option.value, year, customFrom, customTo }),
-    }));
-  }, [showBreakdown, breakdownOptions, rows, period, year, customFrom, customTo]);
+
+    const years = year === "All" ? ["2024", "2025", "2026"] : [year];
+
+    if (periodValue === "All" && breakdownOptions.length > 0) {
+      return years.flatMap((selectedYear) =>
+        breakdownOptions.map((option) => ({
+          label: option.label,
+          yearLabel: selectedYear,
+          view: buildSalesView(rows, {
+            period,
+            periodValue: option.value,
+            year: selectedYear,
+            customFrom,
+            customTo,
+          }),
+        }))
+      );
+    }
+
+    if (year === "All") {
+      return years.map((selectedYear) => ({
+        label: periodDisplay(period, periodValue, customFrom, customTo),
+        yearLabel: selectedYear,
+        view: buildSalesView(rows, {
+          period,
+          periodValue,
+          year: selectedYear,
+          customFrom,
+          customTo,
+        }),
+      }));
+    }
+
+    return [];
+  }, [showBreakdown, breakdownOptions, rows, period, periodValue, year, customFrom, customTo]);
   const metricColumns = metric === "All"
     ? Object.values(metricMap)
     : [metricMap[metric]];
@@ -230,8 +262,9 @@ export default function Home() {
             <>
               <div
                 className="tableHeader"
-                style={{ gridTemplateColumns: `1.1fr 1.6fr repeat(${metricColumns.length}, 1fr) 1.25fr` }}
+                style={{ gridTemplateColumns: `0.8fr 1.1fr 1.4fr repeat(${metricColumns.length}, 1fr) 1.25fr` }}
               >
+                <div>Year</div>
                 <div>Period</div>
                 <div>Scope</div>
                 {metricColumns.map(([label]) => <div key={label}>{label}</div>)}
@@ -243,8 +276,9 @@ export default function Home() {
                   <div
                     className="tableRow"
                     key={`${label}-${scopeName}`}
-                    style={{ gridTemplateColumns: `1.1fr 1.6fr repeat(${metricColumns.length}, 1fr) 1.25fr` }}
+                    style={{ gridTemplateColumns: `0.8fr 1.1fr 1.4fr repeat(${metricColumns.length}, 1fr) 1.25fr` }}
                   >
+                    <div className="scopeName">{yearLabel}</div>
                     <div className="scopeName">{label}</div>
                     <div className="scopeName">{scopeName}</div>
                     {metricColumns.map(([metricLabel, key]) => {
@@ -265,9 +299,10 @@ export default function Home() {
 
               <div
                 className="tableRow totalRow"
-                style={{ gridTemplateColumns: `1.1fr 1.6fr repeat(${metricColumns.length}, 1fr) 1.25fr` }}
+                style={{ gridTemplateColumns: `0.8fr 1.1fr 1.4fr repeat(${metricColumns.length}, 1fr) 1.25fr` }}
               >
                 <div className="scopeName">TOTAL</div>
+                <div className="scopeName">All periods / years</div>
                 <div className="scopeName">{scope === "All" ? "Stellantis Total" : scope}</div>
                 {metricColumns.map(([label, key]) => {
                   const item = view.totals[scope === "All" ? "Stellantis Total" : scope];
