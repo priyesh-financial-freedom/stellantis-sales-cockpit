@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { buildComparison, buildSalesView, loadSalesData } from "../lib/salesData";
+import { buildComparison, buildSalesView, getScopeStatus, loadSalesData } from "../lib/salesData";
 
 const PERIODS = ["Monthly", "Quarterly", "Half-Yearly", "Annual", "Custom Period"];
 const SCOPES = ["All", "Jeep", "Citroën", "SAARC"];
@@ -186,6 +186,7 @@ export default function Home() {
   );
 
   const comparisonMetrics = metricColumns;
+  const requiredMetricKeys = metricColumns.map(([, key]) => key);
 
   function renderMetric(scopeName, label, key) {
     const item = view.totals[scopeName];
@@ -377,7 +378,20 @@ export default function Home() {
               </div>
 
               {breakdownViews.flatMap(({ label, yearLabel, view: periodView }) =>
-                displayedScopes.map((scopeName) => (
+                displayedScopes.map((scopeName) => {
+                  const breakdownSelection = {
+                    period,
+                    periodValue: period === "Monthly"
+                      ? String(MONTHS.indexOf(label))
+                      : label,
+                    year: yearLabel,
+                    customFrom,
+                    customTo,
+                  };
+                  const scopeStatus = scopeName === "Stellantis Total"
+                    ? periodView.status
+                    : getScopeStatus(rows, breakdownSelection, scopeName, requiredMetricKeys);
+                  return (
                   <div
                     className="tableRow breakdownRow"
                     key={`${yearLabel}-${label}-${scopeName}`}
@@ -399,11 +413,12 @@ export default function Home() {
                         </div>
                       );
                     })}
-                    <div className={statusClass(periodView.status) + " statusText"}>
-                      {statusLabel(periodView.status)}
+                    <div className={statusClass(scopeStatus) + " statusText"}>
+                      {statusLabel(scopeStatus)}
                     </div>
                   </div>
-                ))
+                  );
+                })
               )}
 
               <div
