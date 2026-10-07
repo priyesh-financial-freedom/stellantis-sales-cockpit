@@ -213,7 +213,7 @@ export default function DataEntryPage() {
           }
         } else {
           const salesMonth = Number(row.sales_month);
-          if (!BRANDS.includes(row.brand) || !SALES_TYPES.includes(row.sales_type) || !row.model_name || !row.sales_year || salesMonth < 1 || salesMonth > 12) {
+          if (!MODEL_BRANDS.includes(row.brand) || !SALES_TYPES.includes(row.sales_type) || !row.model_name || !row.sales_year || salesMonth < 1 || salesMonth > 12) {
             throw new Error("Model monthly CSV has invalid required fields.");
           }
           const payload = { brand: row.brand, sales_type: row.sales_type, model_name: row.model_name, sales_year: Number(row.sales_year), sales_month: salesMonth, units: numberOrNull(row.units) };
