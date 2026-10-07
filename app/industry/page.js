@@ -21,6 +21,7 @@ export default function IndustryPage() {
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState("");
   const [cachedAt, setCachedAt] = useState(null);
+  const [selectedMonth, setSelectedMonth] = useState(null);
 
   useEffect(() => {
     let active = true;
@@ -163,6 +164,19 @@ export default function IndustryPage() {
       .sort((a, b) => a.key.localeCompare(b.key));
   }, [selectedRows, totalRows, segmentSelection, period]);
 
+  const selectedMonthSegments = useMemo(() => {
+    if (!selectedMonth) return [];
+    const rows = data.filter(r => String(r.sales_period) === selectedMonth && r.segment !== "Industry Total");
+    const totalRow = data.find(r => String(r.sales_period) === selectedMonth && r.segment === "Industry Total");
+    const totalUnits = Number(totalRow?.units || 0);
+    return rows.map(r => ({ name: r.segment, units: Number(r.units || 0), share: totalUnits ? (Number(r.units || 0) / totalUnits) * 100 : 0 })).filter(r => r.units > 0).sort((a, b) => b.units - a.units);
+  }, [data, selectedMonth]);
+
+  const selectedMonthTotal = useMemo(() => {
+    if (!selectedMonth) return 0;
+    return Number(data.find(r => String(r.sales_period) === selectedMonth && r.segment === "Industry Total")?.units || 0);
+  }, [data, selectedMonth]);
+
   const label = period === "Monthly" ? (periodValue === "All" ? "All / YTD" : periodValue)
     : period === "Quarterly" ? (periodValue === "All" ? "All / YTD" : periodValue)
     : period === "Half-Yearly" ? (periodValue === "All" ? "All / YTD" : periodValue)
@@ -236,7 +250,7 @@ export default function IndustryPage() {
           <>
             <div className="industryBreakdownHeader"><div>Year</div><div>Period</div><div>{segmentSelection.length === 0 ? "Industry" : "Segment"}</div><div>Units</div><div>Share</div></div>
             {breakdownRows.map(r => (
-              <div className="industryBreakdownRow" key={r.key}>
+              <div className={"industryBreakdownRow" + (period === "Monthly" ? " clickableIndustryRow" : "")} key={r.key} onClick={period === "Monthly" ? () => setSelectedMonth(r.year + "-" + String(MONTHS.indexOf(r.period) + 1).padStart(2, "0") + "-01") : undefined}>
                 <div className="scopeName">{r.year}</div>
                 <div className="scopeName">{r.period}</div>
                 <div className="scopeName">{segmentSelection.length === 0 ? "Industry" : segmentLabel}</div>
@@ -253,6 +267,36 @@ export default function IndustryPage() {
         ) : <div className="industryEmpty">{loading ? "Loading..." : "No Industry data is available for the selected filters."}</div>}
       </div>
     </section>
+    {selectedMonth && (
+      <div className="industryMonthOverlay" onClick={e => { if (e.target === e.currentTarget) setSelectedMonth(null); }}>
+        <section className="industryMonthSheet" role="dialog" aria-modal="true" aria-labelledby="industryMonthTitle">
+          <div className="industryMonthHandle" />
+          <div className="industryMonthHeader">
+            <div>
+              <div className="eyebrow">SEGMENT BREAKUP</div>
+              <h2 id="industryMonthTitle">{MONTHS[Number(selectedMonth.slice(5, 7)) - 1]} {selectedMonth.slice(0, 4)}</h2>
+              <p>Industry TIV · {formatIndustryNumber(selectedMonthTotal)} units</p>
+            </div>
+            <button type="button" className="industryMonthClose" onClick={() => setSelectedMonth(null)} aria-label="Close segment breakup">×</button>
+          </div>
+          <div className="industryMonthList">
+            {selectedMonthSegments.length ? selectedMonthSegments.map(row => (
+              <div className="industryMonthRow" key={row.name}>
+                <div className="industryMonthSegment">{row.name}</div>
+                <div className="industryMonthUnits">{formatIndustryNumber(row.units)}</div>
+                <div className="industryMonthShare">{row.share.toFixed(1)}%</div>
+              </div>
+            )) : <div className="industryEmpty">No segment data is available for this month.</div>}
+          </div>
+          <div className="industryMonthFooter">
+            <span>Total Industry</span>
+            <strong>{formatIndustryNumber(selectedMonthTotal)}</strong>
+            <strong>100%</strong>
+          </div>
+        </section>
+      </div>
+    )}
+
     <footer><span>Industry filters mirror the Sales Cockpit period structure.</span><span>Historical Industry: 1991 onward</span></footer>
   </main>;
 }
