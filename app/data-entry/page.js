@@ -4,6 +4,8 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { supabase } from "../../lib/supabase";
 import { MODEL_NAMES, MODEL_YEARS, MODEL_PERIODS } from "../../lib/modelData";
+import { clearClientCache } from "../../lib/clientCache";
+import { SALES_CACHE_KEY } from "../../lib/salesData";
 
 const BRANDS = ["Jeep", "Citroën", "SAARC"];
 const MODEL_BRANDS = ["Jeep", "Citroën"];
@@ -150,6 +152,7 @@ export default function DataEntryPage() {
           setMessage("Model monthly record added.");
         }
       }
+      if (dataset === "Daily Sales") clearClientCache(SALES_CACHE_KEY);
       await loadRecent();
     } catch (err) {
       setError(err.message || "Unable to save data.");
@@ -232,6 +235,7 @@ export default function DataEntryPage() {
         count += 1;
       }
       setMessage(count + " record" + (count === 1 ? "" : "s") + " imported.");
+      if (dataset === "Daily Sales") clearClientCache(SALES_CACHE_KEY);
       await loadRecent();
     } catch (err) {
       setError(err.message || "Import failed.");
