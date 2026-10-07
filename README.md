@@ -28,3 +28,5 @@ npm run build
 ## Deployment
 
 Production deployments are triggered from the `main` branch through Vercel.
+
+Vercel Git connection verified.
