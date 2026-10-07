@@ -16,20 +16,30 @@ export default function ManufacturerHistoryPage() {
 
   useEffect(() => {
     let active = true;
-    supabase
-      .from("industry_manufacturer_history_v2")
-      .select("sales_period,manufacturer,units,period_type,record_type")
-      .eq("record_type", "MANUFACTURER")
-      .order("sales_period", { ascending: true })
-      .order("manufacturer", { ascending: true })
-      .then(({ data, error: queryError }) => {
+    async function loadAll() {
+      const pageSize = 1000;
+      const allRows = [];
+      for (let from = 0; ; from += pageSize) {
+        const { data, error: queryError } = await supabase
+          .from("industry_manufacturer_history_v2")
+          .select("sales_period,manufacturer,units,period_type,record_type")
+          .eq("record_type", "MANUFACTURER")
+          .order("sales_period", { ascending: true })
+          .order("manufacturer", { ascending: true })
+          .range(from, from + pageSize - 1);
+        if (queryError) throw new Error(queryError.message);
+        allRows.push(...(data || []));
+        if (!data || data.length < pageSize) break;
+      }
+      return allRows;
+    }
+
+    loadAll()
+      .then((allRows) => {
         if (!active) return;
-        if (queryError) setError(queryError.message);
-        else {
-          setRows(data || []);
-          const years = [...new Set((data || []).map((r) => String(r.sales_period).slice(0, 4)))].sort((a,b) => b.localeCompare(a));
-          setYear(years[0] || "");
-        }
+        setRows(allRows);
+        const years = [...new Set(allRows.map((r) => String(r.sales_period).slice(0, 4)))].sort((a,b) => b.localeCompare(a));
+        setYear(years[0] || "");
       })
       .catch((err) => active && setError(err.message))
       .finally(() => active && setLoading(false));
