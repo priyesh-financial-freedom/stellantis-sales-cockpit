@@ -7,6 +7,7 @@ import {
   buildIndustryView,
   formatIndustryNumber,
   getIndustryMonths,
+  getIndustryTotal,
   getIndustryYears,
   loadIndustryData,
 } from "../../lib/industryData";
@@ -36,7 +37,7 @@ export default function IndustryPage() {
   const years = useMemo(() => getIndustryYears(data), [data]);
   const availableMonths = useMemo(() => getIndustryMonths(data, Number(year)), [data, year]);
   const rows = useMemo(() => buildIndustryView(data, Number(year), month), [data, year, month]);
-  const total = rows.reduce((sum, row) => sum + row.units, 0);
+  const total = useMemo(() => getIndustryTotal(data, Number(year), month), [data, year, month]);
   const selectedMonthLabel = month === "All" ? "YTD" : MONTHS[Number(month) - 1];
 
   return (
