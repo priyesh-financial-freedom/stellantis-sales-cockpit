@@ -6,6 +6,7 @@ import { supabase } from "../../lib/supabase";
 import { MODEL_NAMES, MODEL_YEARS, MODEL_PERIODS } from "../../lib/modelData";
 
 const BRANDS = ["Jeep", "Citroën", "SAARC"];
+const MODEL_BRANDS = ["Jeep", "Citroën"];
 const SALES_TYPES = ["Retail", "Wholesale"];
 const DATASETS = ["Daily Sales", "Model Monthly"];
 
@@ -86,6 +87,10 @@ export default function DataEntryPage() {
   const fileRef = useRef(null);
 
   const models = MODEL_NAMES[brand] || [];
+
+  useEffect(() => {
+    if (dataset === "Model Monthly" && !MODEL_BRANDS.includes(brand)) setBrand("Jeep");
+  }, [dataset, brand]);
 
   useEffect(() => {
     if (!models.includes(model)) setModel(models[0]);
@@ -255,7 +260,7 @@ export default function DataEntryPage() {
 
       <section className="filters modelFilters">
         <div className="filter"><label>Data Set</label><select value={dataset} onChange={(e) => setDataset(e.target.value)}>{DATASETS.map((item) => <option key={item}>{item}</option>)}</select></div>
-        <div className="filter"><label>Brand</label><select value={brand} onChange={(e) => setBrand(e.target.value)}>{BRANDS.map((item) => <option key={item}>{item}</option>)}</select></div>
+        <div className="filter"><label>Brand</label><select value={brand} onChange={(e) => setBrand(e.target.value)}>{(dataset === "Daily Sales" ? BRANDS : MODEL_BRANDS).map((item) => <option key={item}>{item}</option>)}</select></div>
         {dataset === "Model Monthly" && <div className="filter"><label>Sales Type</label><select value={salesType} onChange={(e) => setSalesType(e.target.value)}>{SALES_TYPES.map((item) => <option key={item}>{item}</option>)}</select></div>}
         <div className="filter"><label>Year</label><select value={year} onChange={(e) => setYear(e.target.value)}>{MODEL_YEARS.map((item) => <option key={item}>{item}</option>)}</select></div>
       </section>
