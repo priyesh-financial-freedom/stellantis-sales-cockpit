@@ -204,9 +204,7 @@ export default function ModelWiseClient({ brand }) {
       year: y,
       label: period === "Annual" ? "FY" : periodLabel(period, periodValue, customFrom, customTo),
       value: periodValue,
-      months: period === "Custom Period"
-        ? Array.from({ length: 12 }, (_, i) => i + 1)
-        : periodMonths(period, periodValue),
+      months: periodMonths(period, periodValue, Number(y), customFrom, customTo),
       status: getStatus(period, periodValue, y),
     }));
   }, [showBreakdown, showPeriodBreakdown, detailYears, breakdownOptions, period, periodValue, customFrom, customTo]);
