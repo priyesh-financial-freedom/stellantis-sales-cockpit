@@ -365,9 +365,15 @@ export default function ModelWiseClient({ brand }) {
               <div className="modelBreakdownRow modelTotalRow" style={{ gridTemplateColumns: "0.8fr 1.1fr repeat(" + models.length + ", 1fr) 1fr 1.2fr" }}>
                 <div className="scopeName">TOTAL</div>
                 <div className="scopeName">All periods / years</div>
-                {models.map((model) => <div key={model} className="scopeName">{formatNumber(totalValue[model])}</div>)}
-                <div className="scopeName">{formatNumber(totalGrand)}</div>
-                <div className={statusClass(getStatus(period, periodValue, year)) + " statusText"}>{statusLabel(getStatus(period, periodValue, year))}</div>
+                {models.map((model) => (
+                  <div key={model} className={"scopeName " + valueClass(getStatus(period, periodValue, year, customFrom, customTo), totalValue[model])}>
+                    {formatNumber(totalValue[model])}
+                  </div>
+                ))}
+                <div className={"scopeName " + valueClass(getStatus(period, periodValue, year, customFrom, customTo), totalGrand)}>
+                  {formatNumber(totalGrand)}
+                </div>
+                <div className={statusClass(getStatus(period, periodValue, year, customFrom, customTo)) + " statusText"}>{statusLabel(getStatus(period, periodValue, year, customFrom, customTo))}</div>
               </div>
             </>
           ) : (
@@ -393,7 +399,7 @@ export default function ModelWiseClient({ brand }) {
               ))}
               <div className="modelTableRow modelTotalRow">
                 <div className="scopeName">TOTAL</div>
-                <div>{formatNumber(summary?.grandTotal)}</div>
+                <div className={valueClass(getStatus(period, periodValue, year, customFrom, customTo), summary?.grandTotal)}>{formatNumber(summary?.grandTotal)}</div>
                 <div>100.0%</div>
                 <div className={statusClass(getStatus(period, periodValue, year, customFrom, customTo)) + " statusText"}>{statusLabel(getStatus(period, periodValue, year, customFrom, customTo))}</div>
               </div>
