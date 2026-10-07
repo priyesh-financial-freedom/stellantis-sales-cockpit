@@ -24,3 +24,7 @@ Build for production:
 ```bash
 npm run build
 ```
+
+## Deployment
+
+Production deployments are triggered from the `main` branch through Vercel.
