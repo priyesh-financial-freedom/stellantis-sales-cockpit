@@ -3,168 +3,38 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { supabase } from "../../../lib/supabase";
+import { INDUSTRY_HALVES, INDUSTRY_PERIODS, INDUSTRY_QUARTERS, MONTHS, filterHistoryRows } from "../../../lib/industryData";
 
-const fmt = (value) => new Intl.NumberFormat("en-IN").format(Number(value) || 0);
-const monthLabel = (date) => new Intl.DateTimeFormat("en-IN", { month: "short", year: "numeric" }).format(new Date(date));
+const fmt = value => new Intl.NumberFormat("en-IN").format(Number(value) || 0);
 
 export default function ManufacturerHistoryPage() {
-  const [rows, setRows] = useState([]);
-  const [year, setYear] = useState("");
-  const [period, setPeriod] = useState("YTD");
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
+  const [rows,setRows]=useState([]), [period,setPeriod]=useState("Monthly"), [manufacturer,setManufacturer]=useState("All"), [periodValue,setPeriodValue]=useState("All"), [year,setYear]=useState("2026"), [customFrom,setCustomFrom]=useState(""), [customTo,setCustomTo]=useState(""), [loading,setLoading]=useState(true), [error,setError]=useState("");
 
-  useEffect(() => {
-    let active = true;
-    async function loadAll() {
-      const pageSize = 1000;
-      const allRows = [];
-      for (let from = 0; ; from += pageSize) {
-        const { data, error: queryError } = await supabase
-          .from("industry_manufacturer_history_v2")
-          .select("sales_period,manufacturer,units,period_type,record_type")
-          .eq("record_type", "MANUFACTURER")
-          .order("sales_period", { ascending: true })
-          .order("manufacturer", { ascending: true })
-          .range(from, from + pageSize - 1);
-        if (queryError) throw new Error(queryError.message);
-        allRows.push(...(data || []));
-        if (!data || data.length < pageSize) break;
-      }
-      return allRows;
-    }
+  useEffect(()=>{ let active=true; async function loadAll(){const out=[]; for(let from=0;;from+=1000){const {data,error}=await supabase.from("industry_manufacturer_history_v2").select("sales_period,manufacturer,units,period_type,record_type").eq("record_type","MANUFACTURER").order("sales_period").order("manufacturer").range(from,from+999); if(error) throw error; out.push(...(data||[])); if(!data||data.length<1000) break;} return out;} loadAll().then(x=>{if(!active)return;setRows(x); const ys=[...new Set(x.map(r=>String(r.sales_period).slice(0,4)))].sort((a,b)=>b.localeCompare(a)); if(ys.length)setYear(ys[0]);}).catch(e=>active&&setError(e.message)).finally(()=>active&&setLoading(false)); return()=>{active=false};},[]);
 
-    loadAll()
-      .then((allRows) => {
-        if (!active) return;
-        setRows(allRows);
-        const years = [...new Set(allRows.map((r) => String(r.sales_period).slice(0, 4)))].sort((a,b) => b.localeCompare(a));
-        setYear(years[0] || "");
-      })
-      .catch((err) => active && setError(err.message))
-      .finally(() => active && setLoading(false));
-    return () => { active = false; };
-  }, []);
+  const years=useMemo(()=>["All",...[...new Set(rows.map(r=>String(r.sales_period).slice(0,4)))].sort((a,b)=>b.localeCompare(a))],[rows]);
+  const manufacturers=useMemo(()=>["All",...[...new Set(rows.map(r=>r.manufacturer).filter(Boolean))].sort((a,b)=>a.localeCompare(b))],[rows]);
+  const options=useMemo(()=>period==="Monthly"?["All",...MONTHS]:period==="Quarterly"?INDUSTRY_QUARTERS:period==="Half-Yearly"?INDUSTRY_HALVES:period==="Annual"?["All"]:[],[period]);
+  const filters={period,periodValue,year,customFrom,customTo};
+  const filtered=useMemo(()=>filterHistoryRows(rows,filters,"manufacturer",manufacturer),[rows,period,periodValue,year,customFrom,customTo,manufacturer]);
+  const grouped=useMemo(()=>{const m=new Map();for(const r of filtered)m.set(r.manufacturer,(m.get(r.manufacturer)||0)+Number(r.units||0));const total=[...m.values()].reduce((a,b)=>a+b,0);return [...m.entries()].map(([manufacturer,units])=>({manufacturer,units,share:total?units/total*100:0})).filter(r=>r.units>0).sort((a,b)=>b.units-a.units)},[filtered]);
+  const total=grouped.reduce((s,r)=>s+r.units,0);
+  const label=period==="Custom Period"?"Custom Period":period==="Annual"?"Annual":periodValue==="All"?"All / YTD":periodValue;
 
-  const years = useMemo(() => [...new Set(rows.map((r) => String(r.sales_period).slice(0, 4)))].sort((a,b) => b.localeCompare(a)), [rows]);
-  const yearRows = useMemo(() => rows.filter((r) => String(r.sales_period).slice(0,4) === year), [rows, year]);
+  function changePeriod(v){setPeriod(v);setPeriodValue("All");}
 
-  const availableMonths = useMemo(() => {
-    return [...new Set(yearRows.filter((r) => r.period_type === "MONTHLY").map((r) => String(r.sales_period).slice(0,7)))].sort();
-  }, [yearRows]);
-
-  const filtered = useMemo(() => {
-    if (!year) return [];
-    if (Number(year) <= 1996) return yearRows;
-    if (period === "YTD") return yearRows.filter((r) => r.period_type === "MONTHLY");
-    return yearRows.filter((r) => r.sales_period.slice(0,7) === period);
-  }, [yearRows, year, period]);
-
-  const grouped = useMemo(() => {
-    const map = new Map();
-    for (const row of filtered) {
-      map.set(row.manufacturer, (map.get(row.manufacturer) || 0) + Number(row.units || 0));
-    }
-    const total = [...map.values()].reduce((a,b) => a+b, 0);
-    return [...map.entries()].map(([manufacturer, units]) => ({ manufacturer, units, share: total ? units / total * 100 : 0 }))
-      .sort((a,b) => b.units - a.units);
-  }, [filtered]);
-
-  const total = grouped.reduce((sum, r) => sum + r.units, 0);
-
-  return (
-    <main className="cockpit">
-      <header className="header">
-        <div>
-          <div className="eyebrow">STELLANTIS INDIA · INDUSTRY INTELLIGENCE</div>
-          <h1>Manufacturer History</h1>
-          <p className="subtitle">Historical manufacturer movement — 1991 onward</p>
-        </div>
-        <div className="headerStatus">
-          <span className={loading ? "statusDot loadingDot" : "statusDot"} />
-          {loading ? "Loading manufacturer history" : error ? "Data error" : "Historical data connected"}
-        </div>
-      </header>
-
-      <nav className="cockpitNav">
-        <Link href="/">Sales Cockpit</Link>
-        <Link href="/model-wise/jeep">Jeep Model Wise</Link>
-        <Link href="/model-wise/citroen">Citroën Model Wise</Link>
-        <Link href="/industry">Industry</Link>
-        <Link className="active" href="/industry/manufacturers">Manufacturer History</Link>
-        <Link href="/data-entry">Data Entry</Link>
-      </nav>
-
-      <section className="filters modelFilters">
-        <div className="filter">
-          <label>Year</label>
-          <select value={year} onChange={(e) => { setYear(e.target.value); setPeriod("YTD"); }}>
-            {years.map((item) => <option key={item}>{item}</option>)}
-          </select>
-        </div>
-        <div className="filter">
-          <label>Period</label>
-          <select value={period} onChange={(e) => setPeriod(e.target.value)} disabled={Number(year) <= 1996 || !year}>
-            {Number(year) <= 1996 ? <option value="YTD">Annual</option> : <>
-              <option value="YTD">YTD</option>
-              {availableMonths.map((item) => <option key={item} value={item}>{monthLabel(item + "-01")}</option>)}
-            </>}
-          </select>
-        </div>
-      </section>
-
-      <section className="industrySummaryGrid">
-        <div className="queryCard">
-          <div className="eyebrow">{Number(year) <= 1996 ? "ANNUAL INDUSTRY" : period === "YTD" ? "YTD INDUSTRY" : "MONTH INDUSTRY"}</div>
-          <h2>{year || "—"}</h2>
-          <strong className="industryHeadline">{fmt(total)}</strong>
-          <p>{Number(year) <= 1996 ? "Annual manufacturer total" : period === "YTD" ? "Cumulative manufacturer movement" : "Monthly manufacturer movement"}</p>
-        </div>
-        <div className="queryCard">
-          <div className="eyebrow">HISTORICAL LAYER</div>
-          <h2>1991 → 2026</h2>
-          <p>Source manufacturer names are preserved exactly as supplied. This history is independent of the segment classification master.</p>
-        </div>
-      </section>
-
-      {error ? <div className="errorBanner">{error}</div> : null}
-
-      <section>
-        <div className="sectionHeading">
-          <div>
-            <h2>Manufacturer movement</h2>
-            <p className="subtitle">Source: comp.xlsx · Master-Sep26</p>
-          </div>
-        </div>
-        <div className="tableCard">
-          <div className="industryTableHeader">
-            <div>Manufacturer</div>
-            <div>Units</div>
-            <div>Share</div>
-          </div>
-          {grouped.length ? grouped.map((row) => (
-            <div className="industryTableRow" key={row.manufacturer}>
-              <div className="scopeName">{row.manufacturer}</div>
-              <div>{fmt(row.units)}</div>
-              <div>{row.share.toFixed(1)}%</div>
-            </div>
-          )) : (
-            <div className="industryEmpty">{loading ? "Loading..." : "No manufacturer history has been imported yet."}</div>
-          )}
-          {grouped.length ? (
-            <div className="industryTableRow industryTotalRow">
-              <div>Total</div>
-              <div>{fmt(total)}</div>
-              <div>100.0%</div>
-            </div>
-          ) : null}
-        </div>
-      </section>
-
-      <footer>
-        <span>Historical manufacturer data is preserved as a separate analytical layer.</span>
-        <span>1991–1996 annual · 1997 onward monthly</span>
-      </footer>
-    </main>
-  );
+  return <main className="cockpit">
+    <header className="header"><div><div className="eyebrow">STELLANTIS INDIA · INDUSTRY INTELLIGENCE</div><h1>Manufacturer History</h1><p className="subtitle">Historical manufacturer movement — 1991 onward</p></div><div className="headerStatus"><span className={loading?"statusDot loadingDot":"statusDot"}/>{loading?"Loading manufacturer history":error?"Data error":"Historical data connected"}</div></header>
+    <nav className="cockpitNav"><Link href="/">Sales Cockpit</Link><Link href="/model-wise/jeep">Jeep Model Wise</Link><Link href="/model-wise/citroen">Citroën Model Wise</Link><Link href="/industry">Industry</Link><Link className="active" href="/industry/manufacturers">Manufacturer History</Link><Link href="/data-entry">Data Entry</Link></nav>
+    <section className="filters">
+      <div className="filter"><label>Period</label><select value={period} onChange={e=>changePeriod(e.target.value)}>{INDUSTRY_PERIODS.map(x=><option key={x}>{x}</option>)}</select></div>
+      <div className="filter"><label>Manufacturer</label><select value={manufacturer} onChange={e=>setManufacturer(e.target.value)}>{manufacturers.map(x=><option key={x}>{x}</option>)}</select></div>
+      <div className="filter"><label>{period==="Monthly"?"Month":period==="Quarterly"?"Quarter":"Half-Year"}</label>{period==="Custom Period"?<div className="customDates"><input type="date" value={customFrom} onChange={e=>setCustomFrom(e.target.value)}/><input type="date" value={customTo} onChange={e=>setCustomTo(e.target.value)}/></div>:<select value={periodValue} onChange={e=>setPeriodValue(e.target.value)}>{options.map(x=><option key={x}>{x}</option>)}</select>}</div>
+      <div className="filter"><label>Year</label><select value={year} onChange={e=>setYear(e.target.value)}>{years.map(x=><option key={x}>{x}</option>)}</select></div>
+    </section>
+    <section className="industrySummaryGrid"><div className="queryCard"><div className="eyebrow">MANUFACTURER TIV</div><h2>{manufacturer}</h2><strong className="industryHeadline">{fmt(total)}</strong><p>{label} · {year}</p></div><div className="queryCard"><div className="eyebrow">HISTORICAL LAYER</div><h2>1991 → 2026</h2><p>Annual 1991–1996 · monthly 1997 onward.</p></div></section>
+    {error&&<div className="errorBanner">{error}</div>}
+    <section><div className="sectionHeading"><div><h2>Manufacturer movement</h2><p className="subtitle">Source: comp.xlsx · Master-Sep26</p></div></div><div className="tableCard"><div className="industryTableHeader"><div>Manufacturer</div><div>Units</div><div>Share</div></div>{grouped.length?grouped.map(r=><div className="industryTableRow" key={r.manufacturer}><div className="scopeName">{r.manufacturer}</div><div>{fmt(r.units)}</div><div>{r.share.toFixed(1)}%</div></div>):<div className="industryEmpty">{loading?"Loading...":"No manufacturer data is available for the selected filters."}</div>}</div></section>
+    <footer><span>Manufacturer filters mirror the Sales Cockpit period structure.</span><span>1991–1996 annual · 1997 onward monthly</span></footer>
+  </main>;
 }
