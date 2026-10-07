@@ -308,6 +308,7 @@ export default function ModelWiseClient({ brand }) {
         <Link href="/">Sales Cockpit</Link>
         <Link className={brand === "Jeep" ? "active" : ""} href="/model-wise/jeep">Jeep Model Wise</Link>
         <Link className={brand === "Citroën" ? "active" : ""} href="/model-wise/citroen">Citroën Model Wise</Link>
+        <Link href="/industry">Industry</Link>
         <Link href="/data-entry">Data Entry</Link>
       </nav>
 
