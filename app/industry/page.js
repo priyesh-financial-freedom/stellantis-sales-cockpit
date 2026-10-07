@@ -131,9 +131,11 @@ export default function IndustryPage() {
         <div className="queryCard">
           <div className="eyebrow">SELECTED VIEW</div>
           <h2>{view === "Industry" ? "Industry TIV" : view}</h2>
-          <strong className="industryHeadline">{formatIndustryNumber(total)}</strong>
+          <strong className="industryHeadline">{monthlyRows.length ? formatIndustryNumber(total) : formatIndustryNumber(models.length)}</strong>
           <p>
-            {period} · {periodValue === "All" ? "Full selected period" : periodValue} · {year}
+            {monthlyRows.length
+              ? period + " · " + (periodValue === "All" ? "Full selected period" : periodValue) + " · " + year
+              : "Models loaded from Master-Sep26 · monthly TIV import pending" }
           </p>
         </div>
         <div className="queryCard">
