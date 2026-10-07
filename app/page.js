@@ -271,7 +271,7 @@ export default function Home() {
                 <div>Status</div>
               </div>
 
-              {breakdownViews.flatMap(({ label, view: periodView }) =>
+              {breakdownViews.flatMap(({ label, yearLabel, view: periodView }) =>
                 displayedScopes.map((scopeName) => (
                   <div
                     className="tableRow"
