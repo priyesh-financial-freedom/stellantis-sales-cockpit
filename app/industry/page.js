@@ -59,6 +59,7 @@ export default function IndustryPage() {
         <Link href="/model-wise/jeep">Jeep Model Wise</Link>
         <Link href="/model-wise/citroen">Citroën Model Wise</Link>
         <Link className="active" href="/industry">Industry</Link>
+        <Link href="/industry/manufacturers">Manufacturer History</Link>
         <Link href="/data-entry">Data Entry</Link>
       </nav>
 
@@ -79,6 +80,15 @@ export default function IndustryPage() {
             ))}
           </select>
         </div>
+      </section>
+
+      <section className="queryCard industryHistoryLinkCard">
+        <div>
+          <div className="eyebrow">HISTORICAL GOLD MINE</div>
+          <h2>Manufacturer History</h2>
+          <p>Long-term manufacturer movement from 1991 onward is preserved separately from the segment view.</p>
+        </div>
+        <Link className="secondaryButton" href="/industry/manufacturers">Open manufacturer history</Link>
       </section>
 
       <section className="industrySummaryGrid">
