@@ -275,7 +275,7 @@ export default function Home() {
                 displayedScopes.map((scopeName) => (
                   <div
                     className="tableRow"
-                    key={`${label}-${scopeName}`}
+                    key={`${yearLabel}-${label}-${scopeName}`}
                     style={{ gridTemplateColumns: `0.8fr 1.1fr 1.4fr repeat(${metricColumns.length}, 1fr) 1.25fr` }}
                   >
                     <div className="scopeName">{yearLabel}</div>
