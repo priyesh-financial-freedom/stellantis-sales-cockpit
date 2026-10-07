@@ -229,7 +229,8 @@ export default function Home() {
               <div className="scopeName">{scopeName}</div>
 
               {metricColumns.map(([label, key]) => {
-                const itemStatus = view.totals[scopeName]?.recorded[key]
+                const item = view.totals[scopeName];
+                const itemStatus = item?.recorded[key]
                   ? view.status
                   : "NO DATA";
                 return (
