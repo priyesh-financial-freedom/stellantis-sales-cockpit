@@ -2323,3 +2323,221 @@ h2 {
     font-size: 17px;
   }
 }
+
+/* Tap a monthly Industry row to inspect its segment breakup. */
+.clickableIndustryRow {
+  cursor: pointer;
+  transition: background .15s ease, box-shadow .15s ease;
+}
+
+.clickableIndustryRow:hover {
+  background: #f7fafc;
+}
+
+.industryMonthOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding: 20px;
+  background: rgba(17, 20, 24, .42);
+}
+
+.industryMonthSheet {
+  width: min(720px, 100%);
+  max-height: min(760px, calc(100vh - 40px));
+  overflow: hidden;
+  background: #fff;
+  border: 1px solid #dfe3e8;
+  border-radius: 22px 22px 16px 16px;
+  box-shadow: 0 22px 60px rgba(17, 20, 24, .24);
+}
+
+.industryMonthHandle {
+  display: none;
+}
+
+.industryMonthHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 26px 28px 20px;
+  border-bottom: 1px solid #e7eaee;
+}
+
+.industryMonthHeader h2 {
+  margin: 5px 0 6px;
+  font-size: 34px;
+  line-height: 1.05;
+}
+
+.industryMonthHeader p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 17px;
+}
+
+.industryMonthClose {
+  width: 48px;
+  height: 48px;
+  flex: 0 0 auto;
+  border: 1px solid #d9dce1;
+  border-radius: 50%;
+  background: #fff;
+  color: var(--ink);
+  font-size: 30px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.industryMonthList {
+  max-height: 480px;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.industryMonthRow {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: 18px;
+  min-height: 64px;
+  padding: 12px 28px;
+  border-bottom: 1px solid #eceef1;
+}
+
+.industryMonthSegment {
+  font-size: 18px;
+  font-weight: 750;
+}
+
+.industryMonthUnits {
+  min-width: 110px;
+  text-align: right;
+  font-size: 20px;
+  font-weight: 800;
+}
+
+.industryMonthShare {
+  min-width: 72px;
+  text-align: right;
+  color: var(--green);
+  font-size: 18px;
+  font-weight: 800;
+}
+
+.industryMonthFooter {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: 18px;
+  padding: 17px 28px 20px;
+  background: var(--blue-soft);
+  font-size: 18px;
+}
+
+.industryMonthFooter strong {
+  font-size: 20px;
+}
+
+@media (max-width: 650px) {
+  .clickableIndustryRow {
+    position: relative;
+  }
+
+  .clickableIndustryRow::after {
+    content: "›";
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--muted);
+    font-size: 28px;
+    font-weight: 800;
+  }
+
+  .industryMonthOverlay {
+    padding: 0;
+    align-items: flex-end;
+  }
+
+  .industryMonthSheet {
+    width: 100%;
+    max-height: 88vh;
+    border-radius: 22px 22px 0 0;
+    border-bottom: 0;
+  }
+
+  .industryMonthHandle {
+    display: block;
+    width: 44px;
+    height: 5px;
+    margin: 10px auto 0;
+    border-radius: 999px;
+    background: #c8cdd3;
+  }
+
+  .industryMonthHeader {
+    padding: 18px 20px 17px;
+    gap: 12px;
+  }
+
+  .industryMonthHeader h2 {
+    font-size: 31px;
+  }
+
+  .industryMonthHeader p {
+    font-size: 17px;
+    line-height: 1.35;
+  }
+
+  .industryMonthClose {
+    width: 46px;
+    height: 46px;
+    font-size: 29px;
+  }
+
+  .industryMonthList {
+    max-height: 58vh;
+  }
+
+  .industryMonthRow {
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 6px 14px;
+    min-height: 76px;
+    padding: 14px 20px;
+  }
+
+  .industryMonthSegment {
+    font-size: 21px;
+    line-height: 1.2;
+  }
+
+  .industryMonthUnits {
+    min-width: 112px;
+    font-size: 23px;
+  }
+
+  .industryMonthShare {
+    grid-column: 1 / -1;
+    min-width: 0;
+    text-align: left;
+    color: var(--green);
+    font-size: 17px;
+  }
+
+  .industryMonthFooter {
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 8px 14px;
+    padding: 17px 20px 22px;
+    font-size: 18px;
+  }
+
+  .industryMonthFooter strong:last-child {
+    grid-column: 2;
+    color: var(--green);
+  }
+}
