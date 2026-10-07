@@ -388,9 +388,12 @@ export default function Home() {
                     customFrom,
                     customTo,
                   };
+                  const statusMetricKeys = metric === "All" && scopeName === "SAARC"
+                    ? ["retail", "wholesale"]
+                    : requiredMetricKeys;
                   const scopeStatus = scopeName === "Stellantis Total"
                     ? periodView.status
-                    : getScopeStatus(rows, breakdownSelection, scopeName, requiredMetricKeys);
+                    : getScopeStatus(rows, breakdownSelection, scopeName, statusMetricKeys);
                   return (
                   <div
                     className="tableRow breakdownRow"
