@@ -118,7 +118,7 @@ export default function MonthWiseClient() {
             >
               <div className="scopeName">{row.month}</div>
               {matrix.models.map((model) => (
-                <div key={model}>{formatNumber(row[model])}</div>
+                <div key={model} data-model={model}>{formatNumber(row[model])}</div>
               ))}
               <div className="scopeName">{formatNumber(row.total)}</div>
             </div>
@@ -130,7 +130,7 @@ export default function MonthWiseClient() {
           >
             <div className="scopeName">TOTAL</div>
             {matrix.models.map((model) => (
-              <div key={model} className="scopeName">{formatNumber(matrix.totals[model])}</div>
+              <div key={model} className="scopeName" data-model={model}>{formatNumber(matrix.totals[model])}</div>
             ))}
             <div className="scopeName">{formatNumber(matrix.grandTotal)}</div>
           </div>
