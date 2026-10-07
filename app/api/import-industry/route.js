@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
-import segmentRows from "../../../../scripts/data/industry-segment-history.json";
-import manufacturerRows from "../../../../scripts/data/industry-manufacturer-history.json";
+import segmentRows from "../../../scripts/data/industry-segment-history.json";
+import manufacturerRows from "../../../scripts/data/industry-manufacturer-history.json";
 
 const TOKEN = "industry-import-20261007-7f4c2d9a";
 const BATCH = 500;
