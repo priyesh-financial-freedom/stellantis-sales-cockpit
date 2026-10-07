@@ -170,9 +170,9 @@ export default function IndustryPage() {
       <div className="tableCard">
         {breakdownRows.length ? (
           <>
-            <div className="industryTableHeader"><div>Year</div><div>Period</div><div>{segment === "All" ? "Industry" : "Segment"}</div><div>Units</div><div>Share</div></div>
+            <div className="industryBreakdownHeader"><div>Year</div><div>Period</div><div>{segment === "All" ? "Industry" : "Segment"}</div><div>Units</div><div>Share</div></div>
             {breakdownRows.map(r => (
-              <div className="industryTableRow" key={r.key}>
+              <div className="industryBreakdownRow" key={r.key}>
                 <div className="scopeName">{r.year}</div>
                 <div className="scopeName">{r.period}</div>
                 <div className="scopeName">{segment === "All" ? "Industry" : segment}</div>
