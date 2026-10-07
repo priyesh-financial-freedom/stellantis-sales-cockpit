@@ -2,43 +2,126 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import {
-  MODEL_NAMES,
-  MODEL_PERIOD_OPTIONS,
-  MODEL_YEARS,
-  buildModelSummary,
-  buildModelTrend,
-  loadModelMonthlyData,
-  getModelPeriodLabel,
-} from "../../lib/modelData";
+import { MODEL_NAMES, MODEL_YEARS, buildModelSummary, loadModelMonthlyData } from "../../lib/modelData";
 
+const PERIODS = ["Monthly", "Quarterly", "Half-Yearly", "Annual", "Custom Period"];
 const SALES_TYPES = ["Retail", "Wholesale"];
+const MONTH_OPTIONS = ["All", "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+const QUARTER_OPTIONS = ["All", "Q1", "Q2", "Q3", "Q4"];
+const HALF_YEAR_OPTIONS = ["All", "H1", "H2"];
 
 function formatNumber(value) {
   return new Intl.NumberFormat("en-IN").format(value || 0);
 }
 
-function trendDirection(values) {
-  const firstHalf = values.slice(0, 6).reduce((sum, value) => sum + value, 0);
-  const secondHalf = values.slice(6).reduce((sum, value) => sum + value, 0);
-  if (firstHalf === secondHalf) return "→";
-  return secondHalf > firstHalf ? "↑" : "↓";
+function valueClass(status, value) {
+  if (status === "FUTURE") return "futureValue";
+  if (status === "INCOMPLETE" && Number(value) > 0) return "futureValue";
+  return "";
 }
 
-function periodSelection(period) {
-  if (period === "Month") return MODEL_PERIOD_OPTIONS.filter((item) => item.months.length === 1 && !item.label.startsWith("Q") && !item.label.startsWith("H"));
-  if (period === "Quarter") return MODEL_PERIOD_OPTIONS.filter((item) => item.label.startsWith("Q"));
-  if (period === "Half-Year") return MODEL_PERIOD_OPTIONS.filter((item) => item.label.startsWith("H"));
-  return [];
+function statusClass(status) {
+  return status === "INCOMPLETE" || status === "FUTURE" ? "incompleteStatus" : "completeStatus";
+}
+
+function statusLabel(status) {
+  return status === "INCOMPLETE" || status === "FUTURE" ? "INCOMPLETE" : "COMPLETE";
+}
+
+function periodLabel(period, value, customFrom, customTo) {
+  if (period === "Custom Period") return customFrom && customTo ? customFrom + " → " + customTo : "Custom Period";
+  return value;
+}
+
+function periodMonths(period, value) {
+  if (period === "Monthly") {
+    return value === "All" ? Array.from({ length: 12 }, (_, i) => i + 1) : [Number(value)];
+  }
+  if (period === "Quarterly") {
+    if (value === "All") return Array.from({ length: 12 }, (_, i) => i + 1);
+    const q = Number(value.slice(1));
+    return [(q - 1) * 3 + 1, (q - 1) * 3 + 2, (q - 1) * 3 + 3];
+  }
+  if (period === "Half-Yearly") {
+    return value === "All"
+      ? Array.from({ length: 12 }, (_, i) => i + 1)
+      : value === "H1" ? [1, 2, 3, 4, 5, 6] : [7, 8, 9, 10, 11, 12];
+  }
+  return Array.from({ length: 12 }, (_, i) => i + 1);
+}
+
+function intervalFor(period, value, year) {
+  const y = Number(year);
+  if (period === "Annual") return [y + "-01-01", y + "-12-31"];
+  if (period === "Monthly") {
+    const month = Number(value);
+    const end = new Date(Date.UTC(y, month, 0)).toISOString().slice(0, 10);
+    return [y + "-" + String(month).padStart(2, "0") + "-01", end];
+  }
+  if (period === "Quarterly") {
+    const q = Number(value.slice(1));
+    const startMonth = (q - 1) * 3 + 1;
+    const endMonth = startMonth + 2;
+    const end = new Date(Date.UTC(y, endMonth, 0)).toISOString().slice(0, 10);
+    return [y + "-" + String(startMonth).padStart(2, "0") + "-01", end];
+  }
+  if (period === "Half-Yearly") return value === "H1" ? [y + "-01-01", y + "-06-30"] : [y + "-07-01", y + "-12-31"];
+  return null;
+}
+
+function getStatus(period, value, year) {
+  const today = new Date().toISOString().slice(0, 10);
+  if (year === "All") {
+    const statuses = MODEL_YEARS.map((y) => getStatus(period, value, String(y)));
+    if (statuses.includes("FUTURE")) return "FUTURE";
+    if (statuses.includes("INCOMPLETE")) return "INCOMPLETE";
+    return "ACTUAL / COMPLETE";
+  }
+  if (period === "Custom Period") return "ACTUAL / COMPLETE";
+  if (period === "Monthly" && value === "All") {
+    const statuses = Array.from({ length: 12 }, (_, i) => getStatus("Monthly", String(i + 1), year));
+    if (statuses.includes("FUTURE")) return "FUTURE";
+    if (statuses.includes("INCOMPLETE")) return "INCOMPLETE";
+    return "ACTUAL / COMPLETE";
+  }
+  if (period === "Quarterly" && value === "All") {
+    const statuses = ["Q1", "Q2", "Q3", "Q4"].map((q) => getStatus("Quarterly", q, year));
+    if (statuses.includes("FUTURE")) return "FUTURE";
+    if (statuses.includes("INCOMPLETE")) return "INCOMPLETE";
+    return "ACTUAL / COMPLETE";
+  }
+  if (period === "Half-Yearly" && value === "All") {
+    const statuses = ["H1", "H2"].map((h) => getStatus("Half-Yearly", h, year));
+    if (statuses.includes("FUTURE")) return "FUTURE";
+    if (statuses.includes("INCOMPLETE")) return "INCOMPLETE";
+    return "ACTUAL / COMPLETE";
+  }
+  const interval = intervalFor(period, value, year);
+  if (!interval) return "ACTUAL / COMPLETE";
+  if (interval[0] > today) return "FUTURE";
+  if (interval[0] <= today && interval[1] >= today) return "INCOMPLETE";
+  return "ACTUAL / COMPLETE";
+}
+
+function sumPeriod(rows, brand, salesType, year, months, model) {
+  return rows
+    .filter((row) =>
+      row.brand === brand &&
+      row.sales_type === salesType &&
+      Number(row.sales_year) === Number(year) &&
+      months.includes(Number(row.sales_month)) &&
+      row.model_name === model
+    )
+    .reduce((sum, row) => sum + (Number(row.units) || 0), 0);
 }
 
 export default function ModelWiseClient({ brand }) {
   const [year, setYear] = useState("2026");
   const [salesType, setSalesType] = useState("Retail");
-  const [period, setPeriod] = useState("FY");
-  const [periodValue, setPeriodValue] = useState("Jan");
-  const [customFrom, setCustomFrom] = useState("Jan");
-  const [customTo, setCustomTo] = useState("Dec");
+  const [period, setPeriod] = useState("Annual");
+  const [periodValue, setPeriodValue] = useState("All");
+  const [customFrom, setCustomFrom] = useState("2026-01-01");
+  const [customTo, setCustomTo] = useState("2026-12-31");
   const [rows, setRows] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -61,66 +144,102 @@ export default function ModelWiseClient({ brand }) {
     return () => { active = false; };
   }, []);
 
-  const activePeriod = useMemo(() => {
-    if (period === "FY") return "FY";
-    if (period === "Custom Range") {
-      const from = MODEL_PERIOD_OPTIONS.find((item) => item.label === customFrom);
-      const to = MODEL_PERIOD_OPTIONS.find((item) => item.label === customTo);
-      if (!from || !to) return "FY";
-      const fromMonth = from.months[0];
-      const toMonth = to.months[0];
-      return {
-        label: customFrom + "–" + customTo,
-        months: Array.from({ length: Math.max(1, toMonth - fromMonth + 1) }, (_, index) => fromMonth + index),
-      };
-    }
-    return periodValue;
-  }, [period, periodValue, customFrom, customTo]);
+  const periodOptions = useMemo(() => {
+    if (period === "Monthly") return MONTH_OPTIONS;
+    if (period === "Quarterly") return QUARTER_OPTIONS;
+    if (period === "Half-Yearly") return HALF_YEAR_OPTIONS;
+    return ["All"];
+  }, [period]);
 
-  const summary = useMemo(() => {
-    if (typeof activePeriod === "string") {
-      return buildModelSummary(rows, {
-        brand,
-        salesType,
-        year,
-        period: activePeriod,
-      });
+  const periodSelectorLabel = period === "Monthly" ? "Month" : period === "Quarterly" ? "Quarter" : period === "Half-Yearly" ? "Half-Year" : "Period";
+  const models = MODEL_NAMES[brand] || [];
+  const detailYears = year === "All" ? MODEL_YEARS.map(String) : [year];
+
+  const breakdownOptions = useMemo(() => {
+    if (period === "Monthly") return MONTH_OPTIONS.slice(1).map((label, i) => ({ label, value: String(i + 1) }));
+    if (period === "Quarterly") return QUARTER_OPTIONS.slice(1).map((label) => ({ label, value: label }));
+    if (period === "Half-Yearly") return HALF_YEAR_OPTIONS.slice(1).map((label) => ({ label, value: label }));
+    return [];
+  }, [period]);
+
+  const showPeriodBreakdown = period !== "Annual" && period !== "Custom Period" && periodValue === "All";
+  const showYearBreakdown = year === "All";
+  const showBreakdown = showPeriodBreakdown || showYearBreakdown;
+
+  const breakdownRows = useMemo(() => {
+    if (!showBreakdown) return [];
+    if (showPeriodBreakdown) {
+      return detailYears.flatMap((y) =>
+        breakdownOptions.map((option) => ({
+          year: y,
+          label: option.label,
+          value: option.value,
+          months: period === "Monthly"
+            ? [Number(option.value)]
+            : period === "Quarterly"
+              ? periodMonths("Quarterly", option.value)
+              : periodMonths("Half-Yearly", option.value),
+          status: getStatus(period, option.value, y),
+        }))
+      );
     }
-    const models = MODEL_NAMES[brand] || [];
+    return detailYears.map((y) => ({
+      year: y,
+      label: period === "Annual" ? "FY" : periodLabel(period, periodValue, customFrom, customTo),
+      value: periodValue,
+      months: period === "Custom Period"
+        ? Array.from({ length: 12 }, (_, i) => i + 1)
+        : periodMonths(period, periodValue),
+      status: getStatus(period, periodValue, y),
+    }));
+  }, [showBreakdown, showPeriodBreakdown, detailYears, breakdownOptions, period, periodValue, customFrom, customTo]);
+
+  const totalValue = useMemo(() => {
     const totals = Object.fromEntries(models.map((model) => [model, 0]));
-    for (const row of rows) {
-      if (
-        row.brand === brand &&
-        row.sales_type === salesType &&
-        Number(row.sales_year) === Number(year) &&
-        activePeriod.months.includes(Number(row.sales_month)) &&
-        totals[row.model_name] !== undefined
-      ) {
-        totals[row.model_name] += Number(row.units) || 0;
+    for (const y of detailYears) {
+      for (const model of models) {
+        totals[model] += sumPeriod(
+          rows,
+          brand,
+          salesType,
+          y,
+          period === "Custom Period" ? Array.from({ length: 12 }, (_, i) => i + 1) : periodMonths(period, periodValue),
+          model
+        );
       }
     }
-    const grandTotal = Object.values(totals).reduce((sum, value) => sum + value, 0);
-    return {
-      models: models.map((model) => ({
-        model,
-        units: totals[model],
-        share: grandTotal ? (totals[model] / grandTotal) * 100 : 0,
-      })),
-      grandTotal,
-    };
-  }, [rows, brand, salesType, year, activePeriod]);
+    return totals;
+  }, [rows, brand, salesType, detailYears, models, period, periodValue]);
 
-  const trends = useMemo(() => (
-    Object.fromEntries(
-      (MODEL_NAMES[brand] || []).map((model) => [
-        model,
-        buildModelTrend(rows, { brand, salesType, model, year }),
-      ])
-    )
-  ), [rows, brand, salesType, year]);
+  const totalGrand = Object.values(totalValue).reduce((sum, value) => sum + value, 0);
 
-  const periodOptions = periodSelection(period);
-  const periodLabel = period === "Month" ? "Month" : period === "Quarter" ? "Quarter" : "Half-Year";
+  const summary = useMemo(() => {
+    if (showBreakdown) return null;
+    return buildModelSummary(rows, {
+      brand,
+      salesType,
+      year,
+      period: period === "Annual" ? "FY" : periodValue,
+    });
+  }, [rows, brand, salesType, year, period, periodValue, showBreakdown]);
+
+  const title = period === "Custom Period"
+    ? customFrom + " → " + customTo
+    : period === "Annual" ? "FY" : periodLabel(period, periodValue, customFrom, customTo);
+
+  function renderBreakdownRow(row) {
+    const values = models.map((model) => sumPeriod(rows, brand, salesType, row.year, row.months, model));
+    const total = values.reduce((sum, value) => sum + value, 0);
+    return (
+      <div className="modelBreakdownRow" key={row.year + "-" + row.label} style={{ gridTemplateColumns: "0.8fr 1.1fr repeat(" + models.length + ", 1fr) 1fr 1.2fr" }}>
+        <div className="scopeName">{row.year}</div>
+        <div className="scopeName">{row.label}</div>
+        {values.map((value, i) => <div key={models[i]} className={valueClass(row.status, value)}>{formatNumber(value)}</div>)}
+        <div className={valueClass(row.status, total)}>{formatNumber(total)}</div>
+        <div className={statusClass(row.status) + " statusText"}>{statusLabel(row.status)}</div>
+      </div>
+    );
+  }
 
   return (
     <main className="cockpit">
@@ -140,56 +259,38 @@ export default function ModelWiseClient({ brand }) {
         <Link href="/">Sales Cockpit</Link>
         <Link className={brand === "Jeep" ? "active" : ""} href="/model-wise/jeep">Jeep Model Wise</Link>
         <Link className={brand === "Citroën" ? "active" : ""} href="/model-wise/citroen">Citroën Model Wise</Link>
-        <Link href="/month-wise">Month Wise</Link>
       </nav>
 
       <section className="filters modelFilters">
         <div className="filter">
           <label>Period</label>
-          <select
-            value={period}
-            onChange={(e) => {
-              setPeriod(e.target.value);
-              if (e.target.value === "Month") setPeriodValue("Jan");
-              if (e.target.value === "Quarter") setPeriodValue("Q1");
-              if (e.target.value === "Half-Year") setPeriodValue("H1");
-            }}
-          >
-            <option>Month</option>
-            <option>Quarter</option>
-            <option>Half-Year</option>
-            <option>FY</option>
-            <option>Custom Range</option>
+          <select value={period} onChange={(e) => {
+            const next = e.target.value;
+            setPeriod(next);
+            setPeriodValue("All");
+          }}>
+            {PERIODS.map((item) => <option key={item}>{item}</option>)}
           </select>
         </div>
 
-        {period === "Custom Range" ? (
-          <>
-            <div className="filter">
-              <label>From Month</label>
-              <select value={customFrom} onChange={(e) => setCustomFrom(e.target.value)}>
-                {MODEL_PERIOD_OPTIONS.slice(0, 12).map((item) => <option key={item.label}>{item.label}</option>)}
-              </select>
+        <div className="filter">
+          <label>{periodSelectorLabel}</label>
+          {period === "Custom Period" ? (
+            <div className="customDates">
+              <input type="date" value={customFrom} onChange={(e) => setCustomFrom(e.target.value)} />
+              <input type="date" value={customTo} onChange={(e) => setCustomTo(e.target.value)} />
             </div>
-            <div className="filter">
-              <label>To Month</label>
-              <select value={customTo} onChange={(e) => setCustomTo(e.target.value)}>
-                {MODEL_PERIOD_OPTIONS.slice(0, 12).map((item) => <option key={item.label}>{item.label}</option>)}
-              </select>
-            </div>
-          </>
-        ) : period !== "FY" ? (
-          <div className="filter">
-            <label>{periodLabel}</label>
+          ) : (
             <select value={periodValue} onChange={(e) => setPeriodValue(e.target.value)}>
-              {periodOptions.map((item) => <option key={item.label}>{item.label}</option>)}
+              {periodOptions.map((item) => <option key={item}>{item}</option>)}
             </select>
-          </div>
-        ) : null}
+          )}
+        </div>
 
         <div className="filter">
           <label>Year</label>
           <select value={year} onChange={(e) => setYear(e.target.value)}>
+            <option>All</option>
             {MODEL_YEARS.map((item) => <option key={item}>{item}</option>)}
           </select>
         </div>
@@ -206,54 +307,58 @@ export default function ModelWiseClient({ brand }) {
         <div className="sectionHeading">
           <div>
             <div className="eyebrow">MODEL PERFORMANCE</div>
-            <h2>{brand} · {salesType} · {period === "FY" ? "FY" : period === "Custom Range" ? customFrom + "–" + customTo : getModelPeriodLabel(periodValue)} · {year}</h2>
+            <h2>{brand} · {salesType} · {title} · {year}</h2>
           </div>
+          <span className="incompleteLegend"><span className="legendDot" />Incomplete / Forecast</span>
         </div>
 
         {error && <div className="errorBanner">{error}</div>}
 
         <div className="tableCard modelTableCard">
-          <div className="modelTableHeader">
-            <div>Model</div>
-            <div>Units</div>
-            <div>Share</div>
-            <div>Trend</div>
-          </div>
-
-          {summary.models.map(({ model, units, share }) => (
-            <div className="modelTableRow" key={model}>
-              <div className="scopeName">{model}</div>
-              <div>{formatNumber(units)}</div>
-              <div>{share.toFixed(1)}%</div>
-              <div className="trendCell">
-                <span className="trendArrow">{trendDirection(trends[model] || [])}</span>
-                <span className="trendBars">
-                  {(trends[model] || []).map((value, index) => (
-                    <span
-                      key={index}
-                      className="trendBar"
-                      style={{ height: Math.max(3, Math.min(24, value ? 4 + Math.sqrt(value) * 1.8 : 3)) + "px" }}
-                      title={MODEL_PERIOD_OPTIONS[index]?.label + ": " + formatNumber(value)}
-                    />
-                  ))}
-                </span>
+          {showBreakdown ? (
+            <>
+              <div className="modelBreakdownHeader" style={{ gridTemplateColumns: "0.8fr 1.1fr repeat(" + models.length + ", 1fr) 1fr 1.2fr" }}>
+                <div>Year</div>
+                <div>Period</div>
+                {models.map((model) => <div key={model}>{model}</div>)}
+                <div>Total</div>
+                <div>Status</div>
               </div>
-            </div>
-          ))}
-
-          <div className="modelTableRow modelTotalRow">
-            <div className="scopeName">TOTAL</div>
-            <div>{formatNumber(summary.grandTotal)}</div>
-            <div>100.0%</div>
-            <div>—</div>
-          </div>
+              {breakdownRows.map(renderBreakdownRow)}
+              <div className="modelBreakdownRow modelTotalRow" style={{ gridTemplateColumns: "0.8fr 1.1fr repeat(" + models.length + ", 1fr) 1fr 1.2fr" }}>
+                <div className="scopeName">TOTAL</div>
+                <div className="scopeName">All periods / years</div>
+                {models.map((model) => <div key={model} className="scopeName">{formatNumber(totalValue[model])}</div>)}
+                <div className="scopeName">{formatNumber(totalGrand)}</div>
+                <div className={statusClass(getStatus(period, periodValue, year)) + " statusText"}>{statusLabel(getStatus(period, periodValue, year))}</div>
+              </div>
+            </>
+          ) : (
+            <>
+              <div className="modelTableHeader">
+                <div>Model</div>
+                <div>Units</div>
+                <div>Share</div>
+              </div>
+              {summary?.models.map(({ model, units, share }) => (
+                <div className="modelTableRow" key={model}>
+                  <div className="scopeName">{model}</div>
+                  <div className={valueClass(getStatus(period, periodValue, year), units)}>{formatNumber(units)}</div>
+                  <div>{share.toFixed(1)}%</div>
+                </div>
+              ))}
+              <div className="modelTableRow modelTotalRow">
+                <div className="scopeName">TOTAL</div>
+                <div>{formatNumber(summary?.grandTotal)}</div>
+                <div>100.0%</div>
+              </div>
+            </>
+          )}
         </div>
       </section>
 
       <footer>
-        <span>Stellantis Sales Cockpit</span>
-        <span>•</span>
-        <span>Model data: 2021–2026 · monthly source records</span>
+        <span>Stellantis Sales Cockpit</span><span>•</span><span>Model data: 2021–2026 · monthly source records</span>
       </footer>
     </main>
   );
