@@ -186,8 +186,19 @@ h2 {
   font-weight: 700;
 }
 
-.futureValue,
+.futureValue {
+  color: #b00020;
+}
+
 .statusText {
+  color: #15171a;
+}
+
+.completeStatus {
+  color: #18794e;
+}
+
+.incompleteStatus {
   color: #b00020;
 }
 
