@@ -182,6 +182,38 @@ export default function IndustryPage() {
     : period === "Half-Yearly" ? (periodValue === "All" ? "All / YTD" : periodValue)
     : period === "Annual" ? "Annual" : "Custom Period";
 
+  function exportIndustry() {
+    const rows = selectedRows.map(row => ({
+      sales_period: row.sales_period,
+      segment: row.segment,
+      units: row.units,
+    }));
+
+    if (segmentSelection.length === 0) {
+      rows.push(...totalRows.map(row => ({
+        sales_period: row.sales_period,
+        segment: "Industry Total",
+        units: row.units,
+      })));
+    }
+
+    const csvEscape = value => {
+      const text = value === null || value === undefined ? "" : String(value);
+      return /[",\n]/.test(text) ? '"' + text.replace(/"/g, '""') + '"' : text;
+    };
+    const csv = [
+      ["sales_period", "segment", "units"].join(","),
+      ...rows.map(row => [row.sales_period, row.segment, row.units].map(csvEscape).join(",")),
+    ].join("\n");
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const anchor = document.createElement("a");
+    anchor.href = url;
+    anchor.download = `industry-${year}-${period.toLowerCase().replace(/\s+/g, "-")}-${periodValue === "All" ? "all" : periodValue}.csv`;
+    anchor.click();
+    URL.revokeObjectURL(url);
+  }
+
   return <main className="cockpit">
     <header className="header">
       <div><div className="eyebrow">STELLANTIS INDIA · INDUSTRY INTELLIGENCE</div><h1>Industry</h1><p className="subtitle">Indian passenger vehicle industry TIV by segment</p>{cachedAt && <div className="dataFreshness">{refreshing ? "Showing cached data · refreshing in background" : "Updated " + new Date(cachedAt).toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" })}</div>}</div>
@@ -244,7 +276,7 @@ export default function IndustryPage() {
     </section>
 
     {error && <div className="errorBanner">{error}</div>}
-    <section><div className="sectionHeading"><div><h2>Industry by segment</h2><p className="subtitle">Select one or more segments to analyse them together.</p></div></div>
+    <section><div className="sectionHeading"><div><h2>Industry by segment</h2><p className="subtitle">Select one or more segments to analyse them together.</p></div><button type="button" className="secondaryButton" onClick={exportIndustry} disabled={loading || (!selectedRows.length && !totalRows.length)}>Export CSV</button></div>
       <div className="tableCard">
         {breakdownRows.length ? (
           <>
