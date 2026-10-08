@@ -38,7 +38,7 @@ export default function ManufacturerHistoryPage() {
       if(!active)return;
       setRows(x); writeClientCache(MANUFACTURER_CACHE_KEY,x); setCachedAt(Date.now()); setRefreshing(false);
       const ys=[...new Set(x.map(r=>String(r.sales_period).slice(0,4)))].sort((a,b)=>b.localeCompare(a));
-      if(ys.length)setYear([ys[0]]);
+      if(ys.length)setYear(ys[0]);
     }).catch(e=>{if(active){setRefreshing(false);if(!cached?.data?.length)setError(e.message)}}).finally(()=>active&&setLoading(false));
     return()=>{active=false};
   },[]);
@@ -50,7 +50,6 @@ export default function ManufacturerHistoryPage() {
   const allManufacturerRows=useMemo(()=>filterHistoryRows(rows,{...filters,key:"manufacturer",value:"All"}),[rows,period,periodValue,year,customFrom,customTo]);
   const selectedManufacturers = manufacturerSelection.length ? manufacturerSelection : manufacturers.slice(1);
   const manufacturerLabel = manufacturerSelection.length === 0 ? "All" : manufacturerSelection.length === 1 ? manufacturerSelection[0] : `${manufacturerSelection.length} selected`;
-  const yearLabel = year.length === 0 ? "All" : year.length === 1 ? year[0] : `${year.length} selected`;
   const filtered=useMemo(
     ()=>allManufacturerRows.filter(row => selectedManufacturers.includes(row.manufacturer)),
     [allManufacturerRows, manufacturerSelection, manufacturers]
@@ -90,6 +89,7 @@ export default function ManufacturerHistoryPage() {
     return [...map.values()].filter(r=>r.units>0).map(r=>({...r,total:manufacturerSelection.length===0?r.units:(totals.get(r.key)||0)})).sort((a,b)=>a.key.localeCompare(b.key));
   },[filtered,allManufacturerRows,manufacturerSelection,period]);
 
+  const yearLabel=year.length===0?"All":year.length===1?year[0]:String(year.length)+" selected";
   const label=period==="Custom Period"?"Custom Period":period==="Annual"?"Annual":periodValue.includes("All")?"All / YTD":periodValue.join(", ");
 
   function changePeriod(v){setPeriod(v);setPeriodValue(["All"]);}
