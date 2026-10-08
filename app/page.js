@@ -176,7 +176,7 @@ export default function Home() {
       );
     }
 
-    if (year === "All") {
+    if (year.length === 0) {
       return years.map((selectedYear) => ({
         label: periodDisplay(period, periodValue, customFrom, customTo),
         yearLabel: selectedYear,
