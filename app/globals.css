@@ -1331,7 +1331,7 @@ footer {
 .industryBreakdownHeader,
 .industryBreakdownRow {
   display: grid;
-  grid-template-columns: 0.8fr 0.9fr 1.4fr 1fr 0.8fr;
+  grid-template-columns: 0.7fr 0.8fr 1.25fr 0.9fr 0.75fr 1.25fr;
   align-items: center;
 }
 .industryBreakdownHeader {
@@ -1348,6 +1348,24 @@ footer {
   padding: 13px 18px;
   border-top: 1px solid #eceef1;
   font-size: 13px;
+}
+
+.industryIncompleteRow {
+  color: var(--red);
+  background: var(--red-soft);
+}
+
+.industryIncompleteRow .scopeName,
+.industryIncompleteRow > div {
+  color: var(--red);
+}
+
+.industryStatusBadge {
+  color: var(--red);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: .45px;
+  text-transform: uppercase;
 }
 @media (max-width: 650px) {
   .industryBreakdownHeader { display: none; }
@@ -1385,6 +1403,19 @@ footer {
   }
   .industryBreakdownRow > :nth-child(5)::before {
     content: "Share";
+    color: #70757d;
+    font-size: 15px;
+    font-weight: 700;
+  }
+  .industryBreakdownRow > :nth-child(6) {
+    grid-column: 1 / -1;
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+  }
+  .industryBreakdownRow > :nth-child(6)::before {
+    content: "Status";
     color: #70757d;
     font-size: 15px;
     font-weight: 700;
