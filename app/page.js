@@ -422,7 +422,7 @@ export default function Home() {
                     customFrom,
                     customTo,
                   };
-                  const statusMetricKeys = metric === "All" && scopeName === "SAARC"
+                  const statusMetricKeys = metricSelections.length === 0 && scopeName === "SAARC"
                     ? ["retail", "wholesale"]
                     : requiredMetricKeys;
                   const scopeStatus = scopeName === "Stellantis Total"
