@@ -366,7 +366,7 @@ export default function ModelWiseClient({ brand }) {
           <select value={period} onChange={(e) => {
             const next = e.target.value;
             setPeriod(next);
-            setPeriodValue("All");
+            setPeriodValue(["All"]);
           }}>
             {PERIODS.map((item) => <option key={item}>{item}</option>)}
           </select>
