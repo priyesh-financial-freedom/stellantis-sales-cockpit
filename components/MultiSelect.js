@@ -46,7 +46,9 @@ export default function MultiSelect({
   }
 
   function clearSelection() {
+    // Clear always restores the filter's default state: All.
     onChange([]);
+    setOpen(false);
   }
 
   const summary =
