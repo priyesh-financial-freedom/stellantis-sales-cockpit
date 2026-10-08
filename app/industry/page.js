@@ -69,7 +69,7 @@ export default function IndustryPage() {
 
   function changePeriod(next) {
     setPeriod(next);
-    setPeriodValue("All");
+    setPeriodValue(["All"]);
   }
 
   const filters = { period, periodValue, year, customFrom, customTo };
