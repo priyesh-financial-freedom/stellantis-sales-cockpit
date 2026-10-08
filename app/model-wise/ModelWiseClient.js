@@ -226,7 +226,7 @@ export default function ModelWiseClient({ brand }) {
     return [];
   }, [period]);
 
-  const showPeriodBreakdown = period !== "Annual" && period !== "Custom Period" && periodValue.includes("All") && periodValue.length === 1 && year.length <= 1;
+  const showPeriodBreakdown = period !== "Annual" && period !== "Custom Period" && periodValue.includes("All") && periodValue.length === 1;
   const showYearBreakdown = year.length === 0;
   const showBreakdown = showPeriodBreakdown || showYearBreakdown;
 
