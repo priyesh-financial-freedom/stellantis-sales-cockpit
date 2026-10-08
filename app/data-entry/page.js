@@ -36,6 +36,168 @@ function downloadCsv(filename, csv) {
   URL.revokeObjectURL(url);
 }
 
+function htmlEscape(value) {
+  return String(value === null || value === undefined ? "" : value)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+}
+
+function downloadExcel(filename, rows, columns, title) {
+  // Excel opens this formatted HTML workbook directly; it preserves a readable table
+  // without adding a heavyweight client-side spreadsheet dependency.
+  const tableRows = rows.map(row =>
+    "<tr>" + columns.map(column => "<td>" + htmlEscape(row[column.key]) + "</td>").join("") + "</tr>"
+  ).join("");
+  const html = `<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<style>
+body { font-family: Arial, sans-serif; }
+h1 { font-size: 18px; margin-bottom: 6px; }
+table { border-collapse: collapse; width: 100%; }
+th { background: #176da8; color: #fff; font-weight: bold; text-align: left; }
+th, td { border: 1px solid #cfd6dd; padding: 6px 8px; white-space: nowrap; }
+tr:nth-child(even) td { background: #f5f8fa; }
+</style>
+</head>
+<body>
+<h1>${htmlEscape(title)}</h1>
+<table>
+<thead><tr>${columns.map(column => "<th>" + htmlEscape(column.label) + "</th>").join("")}</tr></thead>
+<tbody>${tableRows}</tbody>
+</table>
+</body>
+</html>`;
+  const blob = new Blob(["\\ufeff", html], { type: "application/vnd.ms-excel;charset=utf-8;" });
+  const url = URL.createObjectURL(blob);
+  const anchor = document.createElement("a");
+  anchor.href = url;
+  anchor.download = filename;
+  anchor.click();
+  URL.revokeObjectURL(url);
+}
+
+function pdfEscape(value) {
+  return String(value === null || value === undefined ? "" : value)
+    .replace(/\\/g, "\\\\")
+    .replace(/\\(/g, "\\(")
+    .replace(/\\)/g, "\\)");
+}
+
+function downloadPdf(filename, rows, columns, title, subtitle) {
+  const pageWidth = 841.89;
+  const pageHeight = 595.28;
+  const margin = 28;
+  const usableWidth = pageWidth - margin * 2;
+  const rowHeight = 18;
+  const headerHeight = 22;
+  const top = 96;
+  const bottom = 30;
+  const rowsPerPage = Math.max(1, Math.floor((pageHeight - top - bottom - headerHeight) / rowHeight));
+  const widths = columns.map((column, index) => {
+    const maxLength = Math.max(
+      String(column.label).length,
+      ...rows.slice(0, 500).map(row => String(row[column.key] ?? "").length)
+    );
+    return Math.max(55, Math.min(index === columns.length - 1 ? 180 : 220, maxLength * 4.1 + 18));
+  });
+  const widthTotal = widths.reduce((sum, value) => sum + value, 0);
+  const scale = usableWidth / widthTotal;
+  const scaledWidths = widths.map(value => value * scale);
+
+  function truncate(value, maxChars) {
+    const text = String(value ?? "");
+    return text.length > maxChars ? text.slice(0, Math.max(1, maxChars - 1)) + "…" : text;
+  }
+
+  const pages = [];
+  for (let start = 0; start < rows.length || (start === 0 && rows.length === 0); start += rowsPerPage) {
+    const pageRows = rows.slice(start, start + rowsPerPage);
+    const commands = [];
+    commands.push("0.12 0.43 0.66 rg");
+    commands.push(`BT /F1 16 Tf ${margin} ${pageHeight - 34} Td (${pdfEscape(title)}) Tj ET`);
+    commands.push("0.35 0.39 0.43 rg");
+    commands.push(`BT /F1 8 Tf ${margin} ${pageHeight - 50} Td (${pdfEscape(subtitle)}) Tj ET`);
+
+    let x = margin;
+    let y = pageHeight - top;
+    commands.push("0.12 0.43 0.66 rg");
+    commands.push(`0 0 0 rg`);
+    commands.push(`BT /F1 8 Tf`);
+    columns.forEach((column, index) => {
+      const cell = truncate(column.label, Math.max(8, Math.floor(scaledWidths[index] / 4.3)));
+      commands.push(`1 0 0 1 ${x + 5} ${y} Tm (${pdfEscape(cell)}) Tj`);
+      x += scaledWidths[index];
+    });
+    commands.push("ET");
+    commands.push(`0.12 0.43 0.66 RG 0.5 w ${margin} ${y - 5} m ${pageWidth - margin} ${y - 5} l S`);
+    y -= headerHeight;
+
+    pageRows.forEach((row, rowIndex) => {
+      if (rowIndex % 2 === 0) {
+        commands.push(`0.96 0.98 0.99 rg ${margin} ${y - 13} ${usableWidth} 18 re f`);
+      }
+      commands.push("0.15 0.17 0.19 rg");
+      commands.push("BT /F1 7 Tf");
+      x = margin;
+      columns.forEach((column, index) => {
+        const maxChars = Math.max(8, Math.floor(scaledWidths[index] / 4.0));
+        const cell = truncate(row[column.key], maxChars);
+        commands.push(`1 0 0 1 ${x + 5} ${y} Tm (${pdfEscape(cell)}) Tj`);
+        x += scaledWidths[index];
+      });
+      commands.push("ET");
+      commands.push(`0.85 0.88 0.90 RG 0.35 w ${margin} ${y - 5} m ${pageWidth - margin} ${y - 5} l S`);
+      y -= rowHeight;
+    });
+
+    const pageNumber = pages.length + 1;
+    commands.push("0.40 0.43 0.46 rg");
+    commands.push(`BT /F1 7 Tf ${pageWidth - 90} 18 Td (Page ${pageNumber}) Tj ET`);
+    pages.push(commands.join("\n"));
+    if (!rows.length) break;
+  }
+
+  const objects = [];
+  objects.push("<< /Type /Catalog /Pages 2 0 R >>");
+  const pageObjectNumbers = [];
+  const fontObject = 3 + pages.length * 2;
+  const pagesObject = 2;
+  objects[pagesObject - 1] = `<< /Type /Pages /Kids [${pages.map((_, i) => (4 + i * 2) + " 0 R").join(" ")}] /Count ${pages.length} >>`;
+  pages.forEach((stream, index) => {
+    const pageObject = 4 + index * 2;
+    const contentObject = pageObject + 1;
+    pageObjectNumbers.push(pageObject);
+    objects[pageObject - 1] = `<< /Type /Page /Parent ${pagesObject} 0 R /MediaBox [0 0 ${pageWidth} ${pageHeight}] /Resources << /Font << /F1 ${fontObject} 0 R >> >> /Contents ${contentObject} 0 R >>`;
+    objects[contentObject - 1] = `<< /Length ${stream.length} >>\\nstream\\n${stream}\\nendstream`;
+  });
+  objects[fontObject - 1] = "<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>";
+
+  let pdf = "%PDF-1.4\\n";
+  const offsets = [0];
+  objects.forEach((object, index) => {
+    offsets[index + 1] = pdf.length;
+    pdf += `${index + 1} 0 obj\\n${object}\\nendobj\\n`;
+  });
+  const xref = pdf.length;
+  pdf += `xref\\n0 ${objects.length + 1}\\n0000000000 65535 f \\n`;
+  for (let i = 1; i <= objects.length; i += 1) {
+    pdf += String(offsets[i]).padStart(10, "0") + " 00000 n \\n";
+  }
+  pdf += `trailer\\n<< /Size ${objects.length + 1} /Root 1 0 R >>\\nstartxref\\n${xref}\\n%%EOF`;
+
+  const blob = new Blob([pdf], { type: "application/pdf" });
+  const url = URL.createObjectURL(blob);
+  const anchor = document.createElement("a");
+  anchor.href = url;
+  anchor.download = filename;
+  anchor.click();
+  URL.revokeObjectURL(url);
+}
+
 function parseCsv(text) {
   const rows = [];
   let row = [];
@@ -179,87 +341,138 @@ export default function DataEntryPage() {
     }
   }
 
-  async function exportData() {
+  async function getExportPayload() {
+    const selectedYears = filterYears.length ? filterYears.map(Number) : MODEL_YEARS.map(Number);
+    const selectedBrands = filterBrands.length ? filterBrands : BRANDS;
+    const selectedSalesTypes = filterSalesTypes.length ? filterSalesTypes : SALES_TYPES.filter(item => item !== "All");
+    const selectedModels = filterModels.length ? filterModels : filterModelOptions;
+    const yearList = selectedYears.sort((a, b) => a - b);
+    const yearLabel = yearList.length === 1 ? yearList[0] : "multi";
+    const brandLabel = selectedBrands.length === 1 ? selectedBrands[0] : "multi";
+    const startDate = Math.min(...yearList) + "-01-01";
+    const endDate = Math.max(...yearList) + "-12-31";
+
+    if (dataset === "Industry History") {
+      const result = await supabase.from("industry_segment_history_v2")
+        .select("sales_period,segment,units,period_type,source_workbook,source_sheet")
+        .gte("sales_period", startDate).lte("sales_period", endDate)
+        .order("sales_period").order("segment");
+      if (result.error) throw result.error;
+      return {
+        filename: "industry-history-" + yearLabel,
+        title: "Stellantis India — Industry History",
+        subtitle: "Years: " + yearLabel + " · Segment-level industry TIV",
+        rows: result.data || [],
+        columns: [
+          { key: "sales_period", label: "Date" },
+          { key: "segment", label: "Segment" },
+          { key: "units", label: "Units" },
+          { key: "period_type", label: "Period Type" },
+          { key: "source_workbook", label: "Source Workbook" },
+          { key: "source_sheet", label: "Source Sheet" },
+        ],
+      };
+    }
+
+    if (dataset === "Manufacturer History") {
+      const result = await supabase.from("industry_manufacturer_history_v2")
+        .select("sales_period,manufacturer,units,period_type,record_type,source_workbook,source_sheet")
+        .gte("sales_period", startDate).lte("sales_period", endDate)
+        .order("sales_period").order("manufacturer");
+      if (result.error) throw result.error;
+      return {
+        filename: "manufacturer-history-" + yearLabel,
+        title: "Stellantis India — Manufacturer History",
+        subtitle: "Years: " + yearLabel + " · Manufacturer-level industry TIV",
+        rows: result.data || [],
+        columns: [
+          { key: "sales_period", label: "Date" },
+          { key: "manufacturer", label: "Manufacturer" },
+          { key: "units", label: "Units" },
+          { key: "period_type", label: "Period Type" },
+          { key: "record_type", label: "Record Type" },
+          { key: "source_workbook", label: "Source Workbook" },
+          { key: "source_sheet", label: "Source Sheet" },
+        ],
+      };
+    }
+
+    if (dataset === "Retail Sales") {
+      const query = supabase.from("sales_cockpit_daily")
+        .select("brand,sales_date,retail")
+        .gte("sales_date", startDate).lte("sales_date", endDate)
+        .order("sales_date");
+      const result = selectedBrands.length === BRANDS.length ? await query : await query.in("brand", selectedBrands);
+      if (result.error) throw result.error;
+      return {
+        filename: "retail-sales-" + brandLabel + "-" + yearLabel,
+        title: "Stellantis India — Retail Sales",
+        subtitle: "Brands: " + brandLabel + " · Years: " + yearLabel,
+        rows: result.data || [],
+        columns: [
+          { key: "brand", label: "Brand" },
+          { key: "sales_date", label: "Date" },
+          { key: "retail", label: "Retail" },
+        ],
+      };
+    }
+
+    if (dataset === "Daily Sales") {
+      const query = supabase.from("sales_cockpit_daily")
+        .select("brand,sales_date,test_drives,bookings,retail,wholesale")
+        .gte("sales_date", startDate).lte("sales_date", endDate).order("sales_date");
+      const result = selectedBrands.length === BRANDS.length ? await query : await query.in("brand", selectedBrands);
+      if (result.error) throw result.error;
+      return {
+        filename: "stellantis-daily-sales-" + brandLabel + "-" + yearLabel,
+        title: "Stellantis India — Daily Sales",
+        subtitle: "Brands: " + brandLabel + " · Years: " + yearLabel,
+        rows: result.data || [],
+        columns: [
+          { key: "brand", label: "Brand" },
+          { key: "sales_date", label: "Date" },
+          { key: "test_drives", label: "Test Drives" },
+          { key: "bookings", label: "Bookings" },
+          { key: "retail", label: "Retail" },
+          { key: "wholesale", label: "Wholesale" },
+        ],
+      };
+    }
+
+    let query = supabase.from("sales_cockpit_model_monthly")
+      .select("brand,sales_type,model_name,sales_year,sales_month,units")
+      .in("sales_year", selectedYears).order("sales_year").order("sales_month");
+    if (selectedBrands.length && selectedBrands.length < MODEL_BRANDS.length) query = query.in("brand", selectedBrands);
+    if (selectedSalesTypes.length && selectedSalesTypes.length < SALES_TYPES.filter(item => item !== "All").length) query = query.in("sales_type", selectedSalesTypes);
+    if (selectedModels.length && selectedModels.length < filterModelOptions.length) query = query.in("model_name", selectedModels);
+    const result = await query;
+    if (result.error) throw result.error;
+    return {
+      filename: "stellantis-model-monthly-" + brandLabel + "-" + (selectedSalesTypes.length === 1 ? selectedSalesTypes[0] : "multi") + "-" + yearLabel,
+      title: "Stellantis India — Model Monthly Sales",
+      subtitle: "Brands: " + brandLabel + " · Sales Type: " + (selectedSalesTypes.length === 1 ? selectedSalesTypes[0] : "Multiple") + " · Years: " + yearLabel,
+      rows: result.data || [],
+      columns: [
+        { key: "brand", label: "Brand" },
+        { key: "sales_type", label: "Sales Type" },
+        { key: "model_name", label: "Model" },
+        { key: "sales_year", label: "Year" },
+        { key: "sales_month", label: "Month" },
+        { key: "units", label: "Units" },
+      ],
+    };
+  }
+
+  async function exportData(format) {
     try {
       setError("");
-      const selectedYears = filterYears.length ? filterYears.map(Number) : MODEL_YEARS.map(Number);
-      const selectedBrands = filterBrands.length ? filterBrands : BRANDS;
-      const selectedSalesTypes = filterSalesTypes.length ? filterSalesTypes : SALES_TYPES.filter(item => item !== "All");
-      const selectedModels = filterModels.length ? filterModels : filterModelOptions;
-      const yearList = selectedYears.sort((a, b) => a - b);
-      const yearLabel = yearList.length === 1 ? yearList[0] : "multi";
-      const brandLabel = selectedBrands.length === 1 ? selectedBrands[0] : "multi";
-      const startDate = Math.min(...yearList) + "-01-01";
-      const endDate = Math.max(...yearList) + "-12-31";
-
-      if (dataset === "Industry History") {
-        const result = await supabase.from("industry_segment_history_v2")
-          .select("sales_period,segment,units,period_type,source_workbook,source_sheet")
-          .gte("sales_period", startDate).lte("sales_period", endDate)
-          .order("sales_period").order("segment");
-        if (result.error) throw result.error;
-        downloadCsv("industry-history-" + yearLabel + ".csv", toCsv(result.data || [], [
-          { key: "sales_period", label: "sales_period" },
-          { key: "segment", label: "segment" },
-          { key: "units", label: "units" },
-          { key: "period_type", label: "period_type" },
-          { key: "source_workbook", label: "source_workbook" },
-          { key: "source_sheet", label: "source_sheet" },
-        ]));
-      } else if (dataset === "Manufacturer History") {
-        const result = await supabase.from("industry_manufacturer_history_v2")
-          .select("sales_period,manufacturer,units,period_type,record_type,source_workbook,source_sheet")
-          .gte("sales_period", startDate).lte("sales_period", endDate)
-          .order("sales_period").order("manufacturer");
-        if (result.error) throw result.error;
-        downloadCsv("manufacturer-history-" + yearLabel + ".csv", toCsv(result.data || [], [
-          { key: "sales_period", label: "sales_period" },
-          { key: "manufacturer", label: "manufacturer" },
-          { key: "units", label: "units" },
-          { key: "period_type", label: "period_type" },
-          { key: "record_type", label: "record_type" },
-          { key: "source_workbook", label: "source_workbook" },
-          { key: "source_sheet", label: "source_sheet" },
-        ]));
-      } else if (dataset === "Retail Sales") {
-        const query = supabase.from("sales_cockpit_daily")
-          .select("brand,sales_date,retail")
-          .gte("sales_date", startDate).lte("sales_date", endDate)
-          .order("sales_date");
-        const result = selectedBrands.length === BRANDS.length
-          ? await query
-          : await query.in("brand", selectedBrands);
-        if (result.error) throw result.error;
-        downloadCsv("retail-sales-" + brandLabel + "-" + yearLabel + ".csv", toCsv(result.data || [], [
-          { key: "brand", label: "brand" }, { key: "sales_date", label: "sales_date" }, { key: "retail", label: "retail" },
-        ]));
-      } else if (dataset === "Daily Sales") {
-        const query = supabase.from("sales_cockpit_daily")
-          .select("brand,sales_date,test_drives,bookings,retail,wholesale")
-          .gte("sales_date", startDate).lte("sales_date", endDate).order("sales_date");
-        const result = selectedBrands.length === BRANDS.length
-          ? await query
-          : await query.in("brand", selectedBrands);
-        if (result.error) throw result.error;
-        downloadCsv("stellantis-daily-sales-" + brandLabel + "-" + yearLabel + ".csv", toCsv(result.data || [], [
-          { key: "brand", label: "brand" }, { key: "sales_date", label: "sales_date" },
-          { key: "test_drives", label: "test_drives" }, { key: "bookings", label: "bookings" },
-          { key: "retail", label: "retail" }, { key: "wholesale", label: "wholesale" },
-        ]));
+      const payload = await getExportPayload();
+      if (format === "csv") {
+        downloadCsv(payload.filename + ".csv", toCsv(payload.rows, payload.columns));
+      } else if (format === "excel") {
+        downloadExcel(payload.filename + ".xls", payload.rows, payload.columns, payload.title);
       } else {
-        let query = supabase.from("sales_cockpit_model_monthly")
-          .select("brand,sales_type,model_name,sales_year,sales_month,units")
-          .in("sales_year", selectedYears).order("sales_year").order("sales_month");
-        if (selectedBrands.length && selectedBrands.length < MODEL_BRANDS.length) query = query.in("brand", selectedBrands);
-        if (selectedSalesTypes.length && selectedSalesTypes.length < SALES_TYPES.filter(item => item !== "All").length) query = query.in("sales_type", selectedSalesTypes);
-        if (selectedModels.length && selectedModels.length < filterModelOptions.length) query = query.in("model_name", selectedModels);
-        const result = await query;
-        if (result.error) throw result.error;
-        downloadCsv("stellantis-model-monthly-" + brandLabel + "-" + (selectedSalesTypes.length === 1 ? selectedSalesTypes[0] : "multi") + "-" + yearLabel + ".csv", toCsv(result.data || [], [
-          { key: "brand", label: "brand" }, { key: "sales_type", label: "sales_type" },
-          { key: "model_name", label: "model_name" }, { key: "sales_year", label: "sales_year" },
-          { key: "sales_month", label: "sales_month" }, { key: "units", label: "units" },
-        ]));
+        downloadPdf(payload.filename + ".pdf", payload.rows, payload.columns, payload.title, payload.subtitle);
       }
       setMessage("Export completed.");
     } catch (err) {
@@ -361,7 +574,9 @@ export default function DataEntryPage() {
       <section className="dataEntryActions">
         <div><div className="eyebrow">IMPORT / EXPORT</div><h2>Manage data</h2><p className="subtitle">CSV import updates a matching record or creates a new one. Historical Industry and Manufacturer datasets are export-only.</p></div>
         <div className="actionButtons">
-          <button type="button" className="secondaryButton" onClick={exportData}>Export CSV</button>
+          <button type="button" className="secondaryButton" onClick={() => exportData("csv")}>Export CSV</button>
+          <button type="button" className="secondaryButton" onClick={() => exportData("excel")}>Export Excel</button>
+          <button type="button" className="secondaryButton" onClick={() => exportData("pdf")}>Export PDF</button>
           <button type="button" className="secondaryButton" onClick={() => fileRef.current?.click()} disabled={exportOnly}>Import CSV</button>
           <input ref={fileRef} type="file" accept=".csv,text/csv" hidden onChange={(e) => importData(e.target.files?.[0])} />
         </div>
@@ -372,7 +587,7 @@ export default function DataEntryPage() {
         {exportOnly ? (
           <div className="dataScopeNotice">
             <h3>{dataset}</h3>
-            <p>This historical dataset is maintained as a read-only analytical source. Use <strong>Export CSV</strong> to download the selected year.</p>
+            <p>This historical dataset is maintained as a read-only analytical source. Use <strong>Export CSV</strong>, <strong>Export Excel</strong> or <strong>Export PDF</strong> to download the selected year.</p>
           </div>
         ) : dataset === "Daily Sales" ? (
           <div className="entryGrid">
