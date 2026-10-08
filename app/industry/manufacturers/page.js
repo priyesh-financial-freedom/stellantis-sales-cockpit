@@ -87,14 +87,14 @@ export default function ManufacturerHistoryPage() {
     }
 
     return [...map.values()].filter(r=>r.units>0).map(r=>({...r,total:manufacturerSelection.length===0?r.units:(totals.get(r.key)||0)})).sort((a,b)=>a.key.localeCompare(b.key));
-  },[rows,filtered,allManufacturerRows,manufacturer,period]);
+  },[filtered,allManufacturerRows,manufacturerSelection,period]);
 
   const label=period==="Custom Period"?"Custom Period":period==="Annual"?"Annual":periodValue==="All"?"All / YTD":periodValue;
 
   function changePeriod(v){setPeriod(v);setPeriodValue("All");}
 
   function exportManufacturer() {
-    const source = manufacturer === "All" ? allManufacturerRows : filtered;
+    const source = filtered;
     const rows = source.map(row => ({
       sales_period: row.sales_period,
       manufacturer: row.manufacturer,
