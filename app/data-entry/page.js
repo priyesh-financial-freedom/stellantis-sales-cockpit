@@ -173,7 +173,7 @@ function downloadPdf(filename, rows, columns, title, subtitle) {
     const pageObject = 4 + index * 2;
     const contentObject = pageObject + 1;
     objects[pageObject - 1] = `<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ${pageWidth} ${pageHeight}] /Resources << /Font << /F1 ${fontObject} 0 R >> >> /Contents ${contentObject} 0 R >>`;
-    objects[contentObject - 1] = `<< /Length ${stream.length} >>\\nstream\\n${stream}\\nendstream`;
+    objects[contentObject - 1] = `<< /Length ${stream.length} >>\nstream\n${stream}\nendstream`;
   });
   objects[fontObject - 1] = "<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>";
 
