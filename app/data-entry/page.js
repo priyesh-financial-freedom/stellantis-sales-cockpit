@@ -7,6 +7,7 @@ import { MODEL_NAMES, MODEL_YEARS, MODEL_PERIODS } from "../../lib/modelData";
 import { clearClientCache } from "../../lib/clientCache";
 import { SALES_CACHE_KEY } from "../../lib/salesData";
 import { MODEL_CACHE_KEY } from "../../lib/modelData";
+import MultiSelect from "../../components/MultiSelect";
 
 const BRANDS = ["Jeep", "Citroën", "SAARC"];
 const MODEL_BRANDS = ["Jeep", "Citroën"];
@@ -83,6 +84,13 @@ export default function DataEntryPage() {
   const [year, setYear] = useState("2026");
   const [month, setMonth] = useState("Oct");
   const [units, setUnits] = useState("");
+
+  // Filter selections are independent from manual-entry fields so multiple
+  // records can be exported without changing the record being entered.
+  const [filterBrands, setFilterBrands] = useState(["Jeep"]);
+  const [filterSalesTypes, setFilterSalesTypes] = useState(["Retail"]);
+  const [filterModels, setFilterModels] = useState(["Compass"]);
+  const [filterYears, setFilterYears] = useState(["2025"]);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
   const [saving, setSaving] = useState(false);
@@ -90,6 +98,10 @@ export default function DataEntryPage() {
   const fileRef = useRef(null);
 
   const models = MODEL_NAMES[brand] || [];
+  const filterModelOptions = useMemo(() => {
+    const selectedBrands = filterBrands.length ? filterBrands : MODEL_BRANDS;
+    return [...new Set(selectedBrands.flatMap(item => MODEL_NAMES[item] || []))];
+  }, [filterBrands]);
   const exportOnly = dataset === "Industry History" || dataset === "Manufacturer History" || dataset === "Retail Sales";
 
   useEffect(() => {
@@ -170,8 +182,15 @@ export default function DataEntryPage() {
   async function exportData() {
     try {
       setError("");
-      const startDate = year + "-01-01";
-      const endDate = year + "-12-31";
+      const selectedYears = filterYears.length ? filterYears.map(Number) : MODEL_YEARS.map(Number);
+      const selectedBrands = filterBrands.length ? filterBrands : BRANDS;
+      const selectedSalesTypes = filterSalesTypes.length ? filterSalesTypes : SALES_TYPES.filter(item => item !== "All");
+      const selectedModels = filterModels.length ? filterModels : filterModelOptions;
+      const yearList = selectedYears.sort((a, b) => a - b);
+      const yearLabel = yearList.length === 1 ? yearList[0] : "multi";
+      const brandLabel = selectedBrands.length === 1 ? selectedBrands[0] : "multi";
+      const startDate = Math.min(...yearList) + "-01-01";
+      const endDate = Math.max(...yearList) + "-12-31";
 
       if (dataset === "Industry History") {
         const result = await supabase.from("industry_segment_history_v2")
@@ -179,7 +198,7 @@ export default function DataEntryPage() {
           .gte("sales_period", startDate).lte("sales_period", endDate)
           .order("sales_period").order("segment");
         if (result.error) throw result.error;
-        downloadCsv("industry-history-" + year + ".csv", toCsv(result.data || [], [
+        downloadCsv("industry-history-" + yearLabel + ".csv", toCsv(result.data || [], [
           { key: "sales_period", label: "sales_period" },
           { key: "segment", label: "segment" },
           { key: "units", label: "units" },
@@ -193,7 +212,7 @@ export default function DataEntryPage() {
           .gte("sales_period", startDate).lte("sales_period", endDate)
           .order("sales_period").order("manufacturer");
         if (result.error) throw result.error;
-        downloadCsv("manufacturer-history-" + year + ".csv", toCsv(result.data || [], [
+        downloadCsv("manufacturer-history-" + yearLabel + ".csv", toCsv(result.data || [], [
           { key: "sales_period", label: "sales_period" },
           { key: "manufacturer", label: "manufacturer" },
           { key: "units", label: "units" },
@@ -207,18 +226,22 @@ export default function DataEntryPage() {
           .select("brand,sales_date,retail")
           .gte("sales_date", startDate).lte("sales_date", endDate)
           .order("sales_date");
-        const result = brand === "All" ? await query : await query.eq("brand", brand);
+        const result = selectedBrands.length === BRANDS.length
+          ? await query
+          : await query.in("brand", selectedBrands);
         if (result.error) throw result.error;
-        downloadCsv("retail-sales-" + (brand === "All" ? "all" : brand) + "-" + year + ".csv", toCsv(result.data || [], [
+        downloadCsv("retail-sales-" + brandLabel + "-" + yearLabel + ".csv", toCsv(result.data || [], [
           { key: "brand", label: "brand" }, { key: "sales_date", label: "sales_date" }, { key: "retail", label: "retail" },
         ]));
       } else if (dataset === "Daily Sales") {
         const query = supabase.from("sales_cockpit_daily")
           .select("brand,sales_date,test_drives,bookings,retail,wholesale")
           .gte("sales_date", startDate).lte("sales_date", endDate).order("sales_date");
-        const result = brand === "All" ? await query : await query.eq("brand", brand);
+        const result = selectedBrands.length === BRANDS.length
+          ? await query
+          : await query.in("brand", selectedBrands);
         if (result.error) throw result.error;
-        downloadCsv("stellantis-daily-sales-" + (brand === "All" ? "all" : brand) + "-" + year + ".csv", toCsv(result.data || [], [
+        downloadCsv("stellantis-daily-sales-" + brandLabel + "-" + yearLabel + ".csv", toCsv(result.data || [], [
           { key: "brand", label: "brand" }, { key: "sales_date", label: "sales_date" },
           { key: "test_drives", label: "test_drives" }, { key: "bookings", label: "bookings" },
           { key: "retail", label: "retail" }, { key: "wholesale", label: "wholesale" },
@@ -226,12 +249,13 @@ export default function DataEntryPage() {
       } else {
         let query = supabase.from("sales_cockpit_model_monthly")
           .select("brand,sales_type,model_name,sales_year,sales_month,units")
-          .eq("sales_year", Number(year)).order("sales_month");
-        if (brand !== "All") query = query.eq("brand", brand);
-        if (salesType !== "All") query = query.eq("sales_type", salesType);
+          .in("sales_year", selectedYears).order("sales_year").order("sales_month");
+        if (selectedBrands.length && selectedBrands.length < MODEL_BRANDS.length) query = query.in("brand", selectedBrands);
+        if (selectedSalesTypes.length && selectedSalesTypes.length < SALES_TYPES.filter(item => item !== "All").length) query = query.in("sales_type", selectedSalesTypes);
+        if (selectedModels.length && selectedModels.length < filterModelOptions.length) query = query.in("model_name", selectedModels);
         const result = await query;
         if (result.error) throw result.error;
-        downloadCsv("stellantis-model-monthly-" + (brand === "All" ? "all" : brand) + "-" + (salesType === "All" ? "all" : salesType) + "-" + year + ".csv", toCsv(result.data || [], [
+        downloadCsv("stellantis-model-monthly-" + brandLabel + "-" + (selectedSalesTypes.length === 1 ? selectedSalesTypes[0] : "multi") + "-" + yearLabel + ".csv", toCsv(result.data || [], [
           { key: "brand", label: "brand" }, { key: "sales_type", label: "sales_type" },
           { key: "model_name", label: "model_name" }, { key: "sales_year", label: "sales_year" },
           { key: "sales_month", label: "sales_month" }, { key: "units", label: "units" },
@@ -315,9 +339,23 @@ export default function DataEntryPage() {
 
       <section className="filters modelFilters">
         <div className="filter"><label>Data Set</label><select value={dataset} onChange={(e) => setDataset(e.target.value)}>{DATASETS.map((item) => <option key={item}>{item}</option>)}</select></div>
-        <div className="filter"><label>Brand</label><select value={brand} onChange={(e) => setBrand(e.target.value)}>{(dataset === "Model Monthly" ? ["All", ...MODEL_BRANDS] : ["All", ...BRANDS]).map((item) => <option key={item}>{item}</option>)}</select></div>
-        {dataset === "Model Monthly" && <div className="filter"><label>Sales Type</label><select value={salesType} onChange={(e) => setSalesType(e.target.value)}>{SALES_TYPES.map((item) => <option key={item}>{item}</option>)}</select></div>}
-        <div className="filter"><label>Year</label><select value={year} onChange={(e) => setYear(e.target.value)}>{MODEL_YEARS.map((item) => <option key={item}>{item}</option>)}</select></div>
+        {dataset !== "Industry History" && dataset !== "Manufacturer History" && (
+          <div className="filter">
+            <MultiSelect
+              label="Brand"
+              options={dataset === "Model Monthly" ? MODEL_BRANDS : BRANDS}
+              value={filterBrands}
+              onChange={setFilterBrands}
+            />
+          </div>
+        )}
+        {dataset === "Model Monthly" && (
+          <>
+            <div className="filter"><MultiSelect label="Sales Type" options={SALES_TYPES.filter(item => item !== "All")} value={filterSalesTypes} onChange={setFilterSalesTypes} /></div>
+            <div className="filter"><MultiSelect label="Model" options={filterModelOptions} value={filterModels} onChange={setFilterModels} /></div>
+          </>
+        )}
+        <div className="filter"><MultiSelect label="Year" options={MODEL_YEARS.map(String)} value={filterYears} onChange={setFilterYears} /></div>
       </section>
 
       <section className="dataEntryActions">
