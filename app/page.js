@@ -58,8 +58,8 @@ function periodDisplay(period, value, customFrom, customTo) {
 export default function Home() {
   const [period, setPeriod] = useState("Monthly");
   const [scopeSelections, setScopeSelections] = useState([]);
-  const [periodValue, setPeriodValue] = useState(["All"]);
-  const [year, setYear] = useState(["2026"]);
+  const [periodValue, setPeriodValue] = useState("All");
+  const [year, setYear] = useState("2026");
   const [metricSelections, setMetricSelections] = useState([]);
   const [customFrom, setCustomFrom] = useState("");
   const [customTo, setCustomTo] = useState("");
@@ -125,10 +125,10 @@ export default function Home() {
 
   function handlePeriodChange(nextPeriod) {
     setPeriod(nextPeriod);
-    if (nextPeriod === "Monthly") setPeriodValue(["All"]);
-    else if (nextPeriod === "Quarterly") setPeriodValue(["All"]);
-    else if (nextPeriod === "Half-Yearly") setPeriodValue(["All"]);
-    else setPeriodValue(["All"]);
+    if (nextPeriod === "Monthly") setPeriodValue("All");
+    else if (nextPeriod === "Quarterly") setPeriodValue("All");
+    else if (nextPeriod === "Half-Yearly") setPeriodValue("All");
+    else setPeriodValue("All");
   }
 
   const selection = useMemo(
@@ -153,14 +153,14 @@ export default function Home() {
   }, [period]);
 
   const showBreakdown =
-    (periodValue.includes("All") && periodValue.length === 1 && breakdownOptions.length > 0 && year.length <= 1) || (year.length === 0 && periodValue.length <= 1);
+    (periodValue === "All" && breakdownOptions.length > 0) || year === "All";
 
   const breakdownViews = useMemo(() => {
     if (!showBreakdown) return [];
 
-    const years = year.length === 0 ? ["2024", "2025", "2026"] : year;
+    const years = year === "All" ? ["2024", "2025", "2026"] : [year];
 
-    if (periodValue.includes("All") && periodValue.length === 1 && breakdownOptions.length > 0) {
+    if (periodValue === "All" && breakdownOptions.length > 0) {
       return years.flatMap((selectedYear) =>
         breakdownOptions.map((option) => ({
           label: option.label,
@@ -176,7 +176,7 @@ export default function Home() {
       );
     }
 
-    if (year.length === 0) {
+    if (year === "All") {
       return years.map((selectedYear) => ({
         label: periodDisplay(period, periodValue, customFrom, customTo),
         yearLabel: selectedYear,
@@ -203,15 +203,8 @@ export default function Home() {
       ).filter((item, index, array) => item && array.findIndex(candidate => candidate[1] === item[1]) === index);
 
   const comparison = useMemo(
-    () => (year.length === 1 && periodValue.length === 1 ? buildComparison(rows, selection) : {
-      current: view,
-      previous: null,
-      ly: null,
-      currentSelection: selection,
-      previousSelection: null,
-      lySelection: null,
-    }),
-    [rows, selection, view, year, periodValue]
+    () => buildComparison(rows, selection),
+    [rows, selection]
   );
 
   const comparisonMetrics = metricColumns;
@@ -361,18 +354,21 @@ export default function Home() {
               <input type="date" value={customTo} onChange={(e) => setCustomTo(e.target.value)} />
             </div>
           ) : (
-            <MultiSelect
-              label={periodLabel}
-              options={periodOptions}
-              value={periodValue}
-              onChange={setPeriodValue}
-            />
+            <select value={periodValue} onChange={(e) => setPeriodValue(e.target.value)}>
+              {periodOptions.map((item, index) => (
+                <option key={item} value={period === "Monthly" && index > 0 ? index : item}>
+                  {item}
+                </option>
+              ))}
+            </select>
           )}
         </div>
 
         <div className="filter">
           <label>Year</label>
-          <MultiSelect label="Year" options={YEARS.filter(item => item !== "All")} value={year} onChange={setYear} />
+          <select value={year} onChange={(e) => setYear(e.target.value)}>
+            {YEARS.map((item) => <option key={item}>{item}</option>)}
+          </select>
         </div>
 
         <div className="filter">
@@ -390,7 +386,7 @@ export default function Home() {
           <div>
             <div className="eyebrow">MANAGEMENT VIEW</div>
             <h2>
-              {period} · {scopeSelections.length === 0 ? "All" : scopeSelections.join(", ")} · {periodValue.includes("All") ? "All" : periodValue.join(", ")} · {year.length === 0 ? "All" : year.join(", ")}
+              {period} · {scopeSelections.length === 0 ? "All" : scopeSelections.join(", ")} · {periodDisplay(period, periodValue, customFrom, customTo)} · {year}
             </h2>
           </div>
           <span className="incompleteLegend">
