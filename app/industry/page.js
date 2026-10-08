@@ -232,7 +232,7 @@ export default function IndustryPage() {
         {period === "Custom Period" ? <div className="customDates"><input type="date" value={customFrom} onChange={e => setCustomFrom(e.target.value)}/><input type="date" value={customTo} onChange={e => setCustomTo(e.target.value)}/></div>
         : <MultiSelect label={period === "Monthly" ? "Month" : period === "Quarterly" ? "Quarter" : period === "Half-Yearly" ? "Half-Year" : "Period"} options={periodOptions} value={periodValue} onChange={setPeriodValue} />}
       </div>
-      <div className="filter"><MultiSelect label="Year" options={years.filter(x => x !== "All")} value={yearLabel} onChange={setYear} /></div>
+      <div className="filter"><MultiSelect label="Year" options={years.filter(x => x !== "All")} value={year} onChange={setYear} /></div>
     </section>
 
     <section className="industrySummaryGrid">
