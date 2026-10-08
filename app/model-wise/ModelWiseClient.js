@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { MODEL_NAMES, MODEL_YEARS, MODEL_CACHE_KEY, buildModelSummary, loadModelMonthlyData } from "../../lib/modelData";
 import { readClientCache } from "../../lib/clientCache";
+import MultiSelect from "../../components/MultiSelect";
 
 const PERIODS = ["Monthly", "Quarterly", "Half-Yearly", "Annual", "Custom Period"];
 const SALES_TYPES = ["Retail", "Wholesale"];
@@ -136,7 +137,7 @@ function sumPeriod(rows, brand, salesType, year, months, model) {
 export default function ModelWiseClient({ brand }) {
   const [year, setYear] = useState("2026");
   const [salesType, setSalesType] = useState("Retail");
-  const [selectedModel, setSelectedModel] = useState("All");
+  const [selectedModels, setSelectedModels] = useState([]);
   const [period, setPeriod] = useState("Annual");
   const [periodValue, setPeriodValue] = useState("All");
   const [customFrom, setCustomFrom] = useState("2026-01-01");
@@ -191,7 +192,8 @@ export default function ModelWiseClient({ brand }) {
 
   const periodSelectorLabel = period === "Monthly" ? "Month" : period === "Quarterly" ? "Quarter" : period === "Half-Yearly" ? "Half-Year" : "Period";
   const allModels = MODEL_NAMES[brand] || [];
-  const models = selectedModel === "All" ? allModels : allModels.filter((model) => model === selectedModel);
+  const models = selectedModels.length === 0 ? allModels : allModels.filter((model) => selectedModels.includes(model));
+  const modelLabel = selectedModels.length === 0 ? "All" : selectedModels.length === 1 ? selectedModels[0] : `${selectedModels.length} selected`;
   const detailYears = year === "All" ? MODEL_YEARS.map(String) : [year];
 
   const breakdownOptions = useMemo(() => {
@@ -284,13 +286,17 @@ export default function ModelWiseClient({ brand }) {
       };
     }
 
-    if (selectedModel === "All") return result;
-    const selected = result.models.find((item) => item.model === selectedModel);
+    if (selectedModels.length === 0) return result;
+    const selected = result.models.filter((item) => selectedModels.includes(item.model));
+    const selectedTotal = selected.reduce((sum, item) => sum + item.units, 0);
     return {
-      models: selected ? [{ ...selected, share: 100 }] : [],
-      grandTotal: selected?.units || 0,
+      models: selected.map((item) => ({
+        ...item,
+        share: selectedTotal ? (item.units / selectedTotal) * 100 : 0,
+      })),
+      grandTotal: selectedTotal,
     };
-  }, [rows, brand, salesType, year, period, periodValue, showBreakdown, allModels, selectedModel, customFrom, customTo]);
+  }, [rows, brand, salesType, year, period, periodValue, showBreakdown, allModels, selectedModels, customFrom, customTo]);
 
   const title = period === "Custom Period"
     ? customFrom + " → " + customTo
@@ -382,11 +388,7 @@ export default function ModelWiseClient({ brand }) {
           </select>
         </div>
         <div className="filter">
-          <label>Model</label>
-          <select value={selectedModel} onChange={(e) => setSelectedModel(e.target.value)}>
-            <option>All</option>
-            {allModels.map((model) => <option key={model}>{model}</option>)}
-          </select>
+          <MultiSelect label="Model" options={allModels} value={selectedModels} onChange={setSelectedModels} />
         </div>
       </section>
 
@@ -394,7 +396,7 @@ export default function ModelWiseClient({ brand }) {
         <div className="sectionHeading">
           <div>
             <div className="eyebrow">MODEL PERFORMANCE</div>
-            <h2>{brand} · {selectedModel} · {salesType} · {title} · {year}</h2>
+            <h2>{brand} · {modelLabel} · {salesType} · {title} · {year}</h2>
           </div>
           <span className="incompleteLegend"><span className="legendDot" />Incomplete / Forecast</span>
         </div>
