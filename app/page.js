@@ -125,10 +125,10 @@ export default function Home() {
 
   function handlePeriodChange(nextPeriod) {
     setPeriod(nextPeriod);
-    if (nextPeriod === "Monthly") setPeriodValue("All");
-    else if (nextPeriod === "Quarterly") setPeriodValue("All");
-    else if (nextPeriod === "Half-Yearly") setPeriodValue("All");
-    else setPeriodValue("All");
+    if (nextPeriod === "Monthly") setPeriodValue(["All"]);
+    else if (nextPeriod === "Quarterly") setPeriodValue(["All"]);
+    else if (nextPeriod === "Half-Yearly") setPeriodValue(["All"]);
+    else setPeriodValue(["All"]);
   }
 
   const selection = useMemo(
