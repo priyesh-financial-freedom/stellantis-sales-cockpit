@@ -2409,6 +2409,64 @@ h2 {
   border-bottom: 1px solid #eceef1;
 }
 
+.industryMonthSegmentButton {
+  width: 100%;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+  font: inherit;
+}
+.industryMonthSegmentButton:hover {
+  background: #f7fafc;
+}
+.industryMonthModels {
+  border-top: 1px solid #e7eaee;
+  background: #fbfcfd;
+}
+.industryMonthModelsHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 16px 28px;
+  background: var(--blue-soft);
+  font-weight: 800;
+}
+.industryMonthModelsHeader button {
+  border: 1px solid #d9dce1;
+  border-radius: 7px;
+  background: #fff;
+  padding: 7px 12px;
+  cursor: pointer;
+  font-weight: 700;
+}
+.industryMonthModelHeader,
+.industryMonthModelRow {
+  display: grid;
+  grid-template-columns: minmax(160px, .8fr) minmax(0, 1.5fr);
+  gap: 16px;
+  padding: 11px 28px;
+  border-bottom: 1px solid #eceef1;
+}
+.industryMonthModelHeader {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: .5px;
+}
+.industryMonthModelRow {
+  font-size: 15px;
+}
+.industryMonthModelNote {
+  margin: 0;
+  padding: 13px 28px 17px;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.4;
+}
 .industryMonthSegment {
   font-size: 18px;
   font-weight: 750;
@@ -2509,6 +2567,30 @@ h2 {
     gap: 6px 14px;
     min-height: 76px;
     padding: 14px 20px;
+  }
+
+  .industryMonthModelsHeader,
+  .industryMonthModelHeader,
+  .industryMonthModelRow {
+    padding-left: 20px;
+    padding-right: 20px;
+  }
+
+  .industryMonthModelHeader,
+  .industryMonthModelRow {
+    grid-template-columns: minmax(120px, .9fr) minmax(0, 1.4fr);
+    gap: 10px;
+  }
+
+  .industryMonthModelRow {
+    font-size: 17px;
+    min-height: 48px;
+    align-items: center;
+  }
+
+  .industryMonthModelNote {
+    padding-left: 20px;
+    padding-right: 20px;
   }
 
   .industryMonthSegment {
