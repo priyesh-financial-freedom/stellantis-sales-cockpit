@@ -337,7 +337,6 @@ export default function DataEntryPage() {
             <p>This historical dataset is maintained as a read-only analytical source. Use <strong>Export CSV</strong> to download the selected year.</p>
           </div>
         ) : dataset === "Daily Sales" ? (
-
           <div className="entryGrid">
             <div className="filter"><label>Date</label><input type="date" value={date} onChange={(e) => setDate(e.target.value)} /></div>
             <div className="filter"><label>Brand</label><select value={brand} onChange={(e) => setBrand(e.target.value)}>{BRANDS.map((item) => <option key={item}>{item}</option>)}</select></div>
@@ -346,17 +345,17 @@ export default function DataEntryPage() {
             <div className="filter"><label>Retail</label><input type="number" min="0" value={retail} onChange={(e) => setRetail(e.target.value)} placeholder="Blank = no entry" /></div>
             <div className="filter"><label>Wholesale</label><input type="number" min="0" value={wholesale} onChange={(e) => setWholesale(e.target.value)} placeholder="Blank = no entry" /></div>
           </div>
+        ) : (
           <div className="entryGrid">
             <div className="filter"><label>Brand</label><select value={brand} onChange={(e) => setBrand(e.target.value)}>{BRANDS.map((item) => <option key={item}>{item}</option>)}</select></div>
-            <div className="filter"><label>Sales Type</label><select value={salesType} onChange={(e) => setSalesType(e.target.value)}>{SALES_TYPES.map((item) => <option key={item}>{item}</option>)}</select></div>
+            <div className="filter"><label>Sales Type</label><select value={salesType} onChange={(e) => setSalesType(e.target.value)}>{SALES_TYPES.filter((item) => item !== "All").map((item) => <option key={item}>{item}</option>)}</select></div>
             <div className="filter"><label>Model</label><select value={model} onChange={(e) => setModel(e.target.value)}>{models.map((item) => <option key={item}>{item}</option>)}</select></div>
             <div className="filter"><label>Year</label><select value={year} onChange={(e) => setYear(e.target.value)}>{MODEL_YEARS.map((item) => <option key={item}>{item}</option>)}</select></div>
             <div className="filter"><label>Month</label><select value={month} onChange={(e) => setMonth(e.target.value)}>{MODEL_PERIODS.map((item) => <option key={item}>{item}</option>)}</select></div>
             <div className="filter"><label>Units</label><input type="number" min="0" value={units} onChange={(e) => setUnits(e.target.value)} /></div>
           </div>
         )}
-        ) : null}
-        <div className="entryFooter"><div className="messageArea">{message && <span className="successMessage">{message}</span>}{error && <span className="errorMessage">{error}</span>}</div><button type="button" className="primaryButton" disabled={saving || exportOnly || brand === "All"} onClick={save}>{saving ? "Saving..." : "Save Record"}</button></div>
+        <div className="entryFooter"><div className="messageArea">{message && <span className="successMessage">{message}</span>}{error && <span className="errorMessage">{error}</span>}</div><button type="button" className="primaryButton" disabled={saving || exportOnly || brand === "All" || salesType === "All"} onClick={save}>{saving ? "Saving..." : "Save Record"}</button></div>
       </section>
 
       {!exportOnly && <section className="tableCard recentDataCard">
