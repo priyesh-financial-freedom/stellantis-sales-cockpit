@@ -17,10 +17,8 @@ export default function MultiSelect({
   const normalized = Array.isArray(value) ? value : [];
   const cleanOptions = options.filter((option, index, array) => array.indexOf(option) === index);
   const allOptionPresent = cleanOptions.includes(allLabel);
-  const clearValue = "__CLEAR__";
-  const isCleared = normalized.includes(clearValue);
-  const allSelected = !isCleared && (normalized.length === 0 || normalized.includes(allLabel) || normalized.length === cleanOptions.length);
-  const effectiveSelection = allSelected || isCleared ? [] : normalized.filter(item => item !== allLabel && item !== clearValue);
+  const allSelected = normalized.length === 0 || normalized.includes(allLabel) || normalized.length === cleanOptions.length;
+  const effectiveSelection = allSelected ? [] : normalized.filter(item => item !== allLabel);
   const selectedLabels = allSelected ? [allLabel] : effectiveSelection;
 
   useEffect(() => {
@@ -48,7 +46,7 @@ export default function MultiSelect({
   }
 
   function clearSelection() {
-    onChange(["__CLEAR__"]);
+    onChange([]);
   }
 
   const summary =
