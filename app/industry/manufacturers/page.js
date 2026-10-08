@@ -6,7 +6,6 @@ import { readClientCache, writeClientCache } from "../../../lib/clientCache";
 import { supabase } from "../../../lib/supabase";
 import { INDUSTRY_HALVES, INDUSTRY_PERIODS, INDUSTRY_QUARTERS, MONTHS, filterHistoryRows } from "../../../lib/industryData";
 import MultiSelect from "../../../components/MultiSelect";
-import MultiSelect from "../../../components/MultiSelect";
 
 const MANUFACTURER_CACHE_KEY = "industry-manufacturer-history-v1";
 
@@ -126,7 +125,7 @@ export default function ManufacturerHistoryPage() {
       <div className="filter"><label>Period</label><select value={period} onChange={e=>changePeriod(e.target.value)}>{INDUSTRY_PERIODS.map(x=><option key={x}>{x}</option>)}</select></div>
       <div className="filter"><MultiSelect label="Manufacturer" options={manufacturers.slice(1)} value={manufacturerSelection} onChange={setManufacturerSelection} /></div>
       <div className="filter">{period==="Custom Period"?<><label>Custom Period</label><div className="customDates"><input type="date" value={customFrom} onChange={e=>setCustomFrom(e.target.value)}/><input type="date" value={customTo} onChange={e=>setCustomTo(e.target.value)}/></div></>:<MultiSelect label={period==="Monthly"?"Month":period==="Quarterly"?"Quarter":"Half-Year"} options={options} value={periodValue} onChange={setPeriodValue} />}</div>
-      <div className="filter"><label>Year</label><select value={yearLabel} onChange={e=>setYear(e.target.value)}>{years.map(x=><option key={x}>{x}</option>)}</select></div>
+      <div className="filter"><MultiSelect label="Year" options={years.filter(x=>x!=="All")} value={year} onChange={setYear} /></div>
     </section>
     <section className="industrySummaryGrid"><div className="queryCard"><div className="eyebrow">MANUFACTURER TIV</div><h2>{manufacturerLabel}</h2><strong className="industryHeadline">{fmt(total)}</strong><p>{label} · {yearLabel}</p></div><div className="queryCard"><div className="eyebrow">HISTORICAL LAYER</div><h2>1991 → 2026</h2><p>Annual 1991–1996 · monthly 1997 onward.</p></div></section>
     {error&&<div className="errorBanner">{error}</div>}
