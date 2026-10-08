@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { readClientCache } from "../../lib/clientCache";
+import { getModelsForSegment } from "../../lib/segmentModelMaster";
 import MultiSelect from "../../components/MultiSelect";
 import {
   INDUSTRY_HALVES, INDUSTRY_PERIODS, INDUSTRY_QUARTERS, MONTHS,
@@ -22,6 +23,7 @@ export default function IndustryPage() {
   const [error, setError] = useState("");
   const [cachedAt, setCachedAt] = useState(null);
   const [selectedMonth, setSelectedMonth] = useState(null);
+  const [selectedMonthSegment, setSelectedMonthSegment] = useState(null);
 
   useEffect(() => {
     let active = true;
@@ -173,6 +175,11 @@ export default function IndustryPage() {
     return rows.map(r => ({ name: r.segment, units: Number(r.units || 0), share: totalUnits ? (Number(r.units || 0) / totalUnits) * 100 : 0 })).filter(r => r.units > 0).sort((a, b) => b.units - a.units);
   }, [data, selectedMonth]);
 
+  const selectedMonthSegmentModels = useMemo(() => {
+    if (!selectedMonthSegment) return [];
+    return getModelsForSegment(selectedMonthSegment);
+  }, [selectedMonthSegment]);
+
   const selectedMonthTotal = useMemo(() => {
     if (!selectedMonth) return 0;
     return Number(data.find(r => String(r.sales_period) === selectedMonth && r.segment === "Industry Total")?.units || 0);
@@ -274,17 +281,33 @@ export default function IndustryPage() {
               <h2 id="industryMonthTitle">{MONTHS[Number(selectedMonth.slice(5, 7)) - 1]} {selectedMonth.slice(0, 4)}</h2>
               <p>Industry TIV · {formatIndustryNumber(selectedMonthTotal)} units</p>
             </div>
-            <button type="button" className="industryMonthClose" onClick={() => setSelectedMonth(null)} aria-label="Close segment breakup">×</button>
+            <button type="button" className="industryMonthClose" onClick={() => { setSelectedMonth(null); setSelectedMonthSegment(null); }} aria-label="Close segment breakup">×</button>
           </div>
           <div className="industryMonthList">
             {selectedMonthSegments.length ? selectedMonthSegments.map(row => (
-              <div className="industryMonthRow" key={row.name}>
+              <button type="button" className="industryMonthRow industryMonthSegmentButton" key={row.name} onClick={() => setSelectedMonthSegment(row.name)} aria-label={`Show models in ${row.name}`}>
                 <div className="industryMonthSegment">{row.name}</div>
                 <div className="industryMonthUnits">{formatIndustryNumber(row.units)}</div>
                 <div className="industryMonthShare">{row.share.toFixed(1)}%</div>
-              </div>
+              </button>
             )) : <div className="industryEmpty">No segment data is available for this month.</div>}
           </div>
+          {selectedMonthSegment && (
+            <div className="industryMonthModels">
+              <div className="industryMonthModelsHeader">
+                <div>Models in {selectedMonthSegment}</div>
+                <button type="button" onClick={() => setSelectedMonthSegment(null)}>Close</button>
+              </div>
+              <div className="industryMonthModelHeader"><div>Brand</div><div>Model</div></div>
+              {selectedMonthSegmentModels.length ? selectedMonthSegmentModels.map(item => (
+                <div className="industryMonthModelRow" key={`${item.brand}-${item.model}`}>
+                  <div>{item.brand}</div>
+                  <div>{item.model}</div>
+                </div>
+              )) : <div className="industryEmpty">No models are mapped to this segment in the IHS master.</div>}
+              <p className="industryMonthModelNote">Classification from the NEW STELLANTIS Segment (IHS) master. Model sales volumes are not inferred from this classification.</p>
+            </div>
+          )}
           <div className="industryMonthFooter">
             <span>Total Industry</span>
             <strong>{formatIndustryNumber(selectedMonthTotal)}</strong>
