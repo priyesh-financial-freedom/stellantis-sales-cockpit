@@ -464,7 +464,7 @@ export default function Home() {
               >
                 <div className="scopeName">TOTAL</div>
                 <div className="scopeName">All periods / years</div>
-                <div className="scopeName">{scope === "All" ? "Stellantis Total" : scope}</div>
+                <div className="scopeName">{scopeSelections.length === 0 ? "Stellantis Total" : scopeSelections.length === 1 ? scopeSelections[0] : `${scopeSelections.length} selected`}</div>
                 {metricColumns.map(([label, key]) => {
                   const item = view.totals[scopeSelections.length === 0 ? "Stellantis Total" : scopeSelections[0]];
                   const itemStatus = item?.recorded[key] ? view.status : "NO DATA";
