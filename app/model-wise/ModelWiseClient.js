@@ -48,7 +48,6 @@ function customMonthsForYear(year, from, to) {
 
 function periodMonths(period, value, year, customFrom, customTo) {
   const values = Array.isArray(value) ? value : [value];
-  if (values.includes("__CLEAR__")) return [];
   if (period === "Custom Period") return customMonthsForYear(year, customFrom, customTo);
   if (values.length === 0 || values.includes("All")) return Array.from({ length: 12 }, (_, i) => i + 1);
   if (period === "Monthly") return [...new Set(values.map(Number))];
@@ -83,7 +82,6 @@ function getStatus(period, value, year, customFrom, customTo) {
   const today = new Date().toISOString().slice(0, 10);
   const years = Array.isArray(year) ? year : [year];
   const values = Array.isArray(value) ? value : [value];
-  if (years.includes("__CLEAR__") || values.includes("__CLEAR__")) return "NO DATA";
   if (years.length !== 1 || values.length !== 1) {
     const statusValues = (years.length ? years : MODEL_YEARS.map(String)).flatMap(y =>
       (values.length ? values : ["All"]).map(v => getStatus(period, v, String(y), customFrom, customTo))
