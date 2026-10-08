@@ -47,19 +47,19 @@ function customMonthsForYear(year, from, to) {
 }
 
 function periodMonths(period, value, year, customFrom, customTo) {
+  const values = Array.isArray(value) ? value : [value];
   if (period === "Custom Period") return customMonthsForYear(year, customFrom, customTo);
-  if (period === "Monthly") {
-    return value === "All" ? Array.from({ length: 12 }, (_, i) => i + 1) : [Number(value)];
-  }
+  if (period === "Monthly") return values.includes("All") ? Array.from({ length: 12 }, (_, i) => i + 1) : values.map(Number);
   if (period === "Quarterly") {
-    if (value === "All") return Array.from({ length: 12 }, (_, i) => i + 1);
-    const q = Number(value.slice(1));
-    return [(q - 1) * 3 + 1, (q - 1) * 3 + 2, (q - 1) * 3 + 3];
+    if (values.includes("All")) return Array.from({ length: 12 }, (_, i) => i + 1);
+    return values.flatMap(item => {
+      const q = Number(String(item).slice(1));
+      return [(q - 1) * 3 + 1, (q - 1) * 3 + 2, (q - 1) * 3 + 3];
+    });
   }
   if (period === "Half-Yearly") {
-    return value === "All"
-      ? Array.from({ length: 12 }, (_, i) => i + 1)
-      : value === "H1" ? [1, 2, 3, 4, 5, 6] : [7, 8, 9, 10, 11, 12];
+    if (values.includes("All")) return Array.from({ length: 12 }, (_, i) => i + 1);
+    return values.flatMap(item => item === "H1" ? [1, 2, 3, 4, 5, 6] : [7, 8, 9, 10, 11, 12]);
   }
   return Array.from({ length: 12 }, (_, i) => i + 1);
 }
@@ -135,11 +135,11 @@ function sumPeriod(rows, brand, salesType, year, months, model) {
 }
 
 export default function ModelWiseClient({ brand }) {
-  const [year, setYear] = useState("2026");
-  const [salesType, setSalesType] = useState("Retail");
+  const [year, setYear] = useState(["2026"]);
+  const [salesType, setSalesType] = useState(["Retail"]);
   const [selectedModels, setSelectedModels] = useState([]);
   const [period, setPeriod] = useState("Annual");
-  const [periodValue, setPeriodValue] = useState("All");
+  const [periodValue, setPeriodValue] = useState(["All"]);
   const [customFrom, setCustomFrom] = useState("2026-01-01");
   const [customTo, setCustomTo] = useState("2026-12-31");
   const [rows, setRows] = useState([]);
@@ -194,7 +194,7 @@ export default function ModelWiseClient({ brand }) {
   const allModels = MODEL_NAMES[brand] || [];
   const models = selectedModels.length === 0 ? allModels : allModels.filter((model) => selectedModels.includes(model));
   const modelLabel = selectedModels.length === 0 ? "All" : selectedModels.length === 1 ? selectedModels[0] : `${selectedModels.length} selected`;
-  const detailYears = year === "All" ? MODEL_YEARS.map(String) : [year];
+  const detailYears = year.length === 0 ? MODEL_YEARS.map(String) : year.map(String);
 
   const breakdownOptions = useMemo(() => {
     if (period === "Monthly") return MONTH_OPTIONS.slice(1).map((label, i) => ({ label, value: String(i + 1) }));
@@ -203,8 +203,8 @@ export default function ModelWiseClient({ brand }) {
     return [];
   }, [period]);
 
-  const showPeriodBreakdown = period !== "Annual" && period !== "Custom Period" && periodValue === "All";
-  const showYearBreakdown = year === "All";
+  const showPeriodBreakdown = period !== "Annual" && period !== "Custom Period" && periodValue.includes("All") && periodValue.length === 1 && year.length <= 1;
+  const showYearBreakdown = year.length === 0 && periodValue.length <= 1;
   const showBreakdown = showPeriodBreakdown || showYearBreakdown;
 
   const breakdownRows = useMemo(() => {
@@ -260,7 +260,7 @@ export default function ModelWiseClient({ brand }) {
       result = buildModelSummary(rows, {
         brand,
         salesType,
-        year,
+        year: year.length === 0 ? "All" : year,
         period: period === "Annual" ? "FY" : periodValue,
       });
     } else {
@@ -367,25 +367,18 @@ export default function ModelWiseClient({ brand }) {
               <input type="date" value={customTo} onChange={(e) => setCustomTo(e.target.value)} />
             </div>
           ) : (
-            <select value={periodValue} onChange={(e) => setPeriodValue(e.target.value)}>
-              {periodOptions.map((item) => <option key={item}>{item}</option>)}
-            </select>
+            <MultiSelect label={periodSelectorLabel} options={periodOptions} value={periodValue} onChange={setPeriodValue} />
           )}
         </div>
 
         <div className="filter">
           <label>Year</label>
-          <select value={year} onChange={(e) => setYear(e.target.value)}>
-            <option>All</option>
-            {MODEL_YEARS.map((item) => <option key={item}>{item}</option>)}
-          </select>
+          <MultiSelect label="Year" options={MODEL_YEARS.map(String)} value={year} onChange={setYear} />
         </div>
 
         <div className="filter">
           <label>Sales Type</label>
-          <select value={salesType} onChange={(e) => setSalesType(e.target.value)}>
-            {SALES_TYPES.map((item) => <option key={item}>{item}</option>)}
-          </select>
+          <MultiSelect label="Sales Type" options={SALES_TYPES} value={salesType} onChange={setSalesType} />
         </div>
         <div className="filter">
           <MultiSelect label="Model" options={allModels} value={selectedModels} onChange={setSelectedModels} />
@@ -396,7 +389,7 @@ export default function ModelWiseClient({ brand }) {
         <div className="sectionHeading">
           <div>
             <div className="eyebrow">MODEL PERFORMANCE</div>
-            <h2>{brand} · {modelLabel} · {salesType} · {title} · {year}</h2>
+            <h2>{brand} · {modelLabel} · {salesType.length === 0 ? "All" : salesType.join(", ")} · {title} · {year.length === 0 ? "All" : year.join(", ")}</h2>
           </div>
           <span className="incompleteLegend"><span className="legendDot" />Incomplete / Forecast</span>
         </div>
