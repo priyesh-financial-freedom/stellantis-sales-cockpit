@@ -16,8 +16,10 @@ export default function MultiSelect({
 
   const normalized = Array.isArray(value) ? value : [];
   const cleanOptions = options.filter((option, index, array) => array.indexOf(option) === index);
-  const allSelected = normalized.length === 0 || normalized.length === cleanOptions.length;
-  const selectedLabels = allSelected ? [allLabel] : normalized;
+  const allOptionPresent = cleanOptions.includes(allLabel);
+  const allSelected = normalized.length === 0 || normalized.includes(allLabel) || normalized.length === cleanOptions.length;
+  const effectiveSelection = allSelected ? [] : normalized.filter(item => item !== allLabel);
+  const selectedLabels = allSelected ? [allLabel] : effectiveSelection;
 
   useEffect(() => {
     function handleOutside(event) {
@@ -28,10 +30,14 @@ export default function MultiSelect({
   }, []);
 
   function toggle(option) {
-    if (normalized.includes(option)) {
-      onChange(normalized.filter(item => item !== option));
+    if (option === allLabel) {
+      onChange([]);
+      return;
+    }
+    if (effectiveSelection.includes(option)) {
+      onChange(effectiveSelection.filter(item => item !== option));
     } else {
-      onChange([...normalized, option]);
+      onChange([...effectiveSelection, option]);
     }
   }
 
