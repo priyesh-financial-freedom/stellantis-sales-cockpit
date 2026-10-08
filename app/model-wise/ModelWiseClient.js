@@ -47,20 +47,15 @@ function customMonthsForYear(year, from, to) {
 }
 
 function periodMonths(period, value, year, customFrom, customTo) {
+  const values = Array.isArray(value) ? value : [value];
   if (period === "Custom Period") return customMonthsForYear(year, customFrom, customTo);
-  if (period === "Monthly") {
-    return value === "All" ? Array.from({ length: 12 }, (_, i) => i + 1) : [Number(value)];
-  }
-  if (period === "Quarterly") {
-    if (value === "All") return Array.from({ length: 12 }, (_, i) => i + 1);
-    const q = Number(value.slice(1));
+  if (values.length === 0 || values.includes("All")) return Array.from({ length: 12 }, (_, i) => i + 1);
+  if (period === "Monthly") return [...new Set(values.map(Number))];
+  if (period === "Quarterly") return [...new Set(values.flatMap(item => {
+    const q = Number(String(item).slice(1));
     return [(q - 1) * 3 + 1, (q - 1) * 3 + 2, (q - 1) * 3 + 3];
-  }
-  if (period === "Half-Yearly") {
-    return value === "All"
-      ? Array.from({ length: 12 }, (_, i) => i + 1)
-      : value === "H1" ? [1, 2, 3, 4, 5, 6] : [7, 8, 9, 10, 11, 12];
-  }
+  }))];
+  if (period === "Half-Yearly") return [...new Set(values.flatMap(item => item === "H1" ? [1,2,3,4,5,6] : [7,8,9,10,11,12]))];
   return Array.from({ length: 12 }, (_, i) => i + 1);
 }
 
@@ -85,6 +80,16 @@ function intervalFor(period, value, year) {
 
 function getStatus(period, value, year, customFrom, customTo) {
   const today = new Date().toISOString().slice(0, 10);
+  const years = Array.isArray(year) ? year : [year];
+  const values = Array.isArray(value) ? value : [value];
+  if (years.length !== 1 || values.length !== 1) {
+    const statusValues = (years.length ? years : MODEL_YEARS.map(String)).flatMap(y =>
+      (values.length ? values : ["All"]).map(v => getStatus(period, v, String(y), customFrom, customTo))
+    );
+    if (statusValues.includes("FUTURE")) return "FUTURE";
+    if (statusValues.includes("INCOMPLETE")) return "INCOMPLETE";
+    return "ACTUAL / COMPLETE";
+  }
   if (year === "All") {
     const statuses = MODEL_YEARS.map((y) => getStatus(period, value, String(y), customFrom, customTo));
     if (statuses.includes("FUTURE")) return "FUTURE";
@@ -123,11 +128,13 @@ function getStatus(period, value, year, customFrom, customTo) {
 }
 
 function sumPeriod(rows, brand, salesType, year, months, model) {
+  const years = Array.isArray(year) ? year.map(Number) : [Number(year)];
+  const salesTypes = Array.isArray(salesType) ? salesType : [salesType];
   return rows
     .filter((row) =>
       row.brand === brand &&
-      row.sales_type === salesType &&
-      Number(row.sales_year) === Number(year) &&
+      (salesTypes.length === 0 || salesTypes.includes(row.sales_type)) &&
+      (years.length === 0 || years.includes(Number(row.sales_year))) &&
       months.includes(Number(row.sales_month)) &&
       row.model_name === model
     )
@@ -135,11 +142,11 @@ function sumPeriod(rows, brand, salesType, year, months, model) {
 }
 
 export default function ModelWiseClient({ brand }) {
-  const [year, setYear] = useState("2026");
-  const [salesType, setSalesType] = useState("Retail");
+  const [year, setYear] = useState(["2026"]);
+  const [salesType, setSalesType] = useState(["Retail"]);
   const [selectedModels, setSelectedModels] = useState([]);
   const [period, setPeriod] = useState("Annual");
-  const [periodValue, setPeriodValue] = useState("All");
+  const [periodValue, setPeriodValue] = useState(["All"]);
   const [customFrom, setCustomFrom] = useState("2026-01-01");
   const [customTo, setCustomTo] = useState("2026-12-31");
   const [rows, setRows] = useState([]);
@@ -194,7 +201,7 @@ export default function ModelWiseClient({ brand }) {
   const allModels = MODEL_NAMES[brand] || [];
   const models = selectedModels.length === 0 ? allModels : allModels.filter((model) => selectedModels.includes(model));
   const modelLabel = selectedModels.length === 0 ? "All" : selectedModels.length === 1 ? selectedModels[0] : `${selectedModels.length} selected`;
-  const detailYears = year === "All" ? MODEL_YEARS.map(String) : [year];
+  const detailYears = year.length === 0 ? MODEL_YEARS.map(String) : year.map(String);
 
   const breakdownOptions = useMemo(() => {
     if (period === "Monthly") return MONTH_OPTIONS.slice(1).map((label, i) => ({ label, value: String(i + 1) }));
@@ -203,8 +210,8 @@ export default function ModelWiseClient({ brand }) {
     return [];
   }, [period]);
 
-  const showPeriodBreakdown = period !== "Annual" && period !== "Custom Period" && periodValue === "All";
-  const showYearBreakdown = year === "All";
+  const showPeriodBreakdown = period !== "Annual" && period !== "Custom Period" && periodValue.includes("All") && periodValue.length === 1 && year.length <= 1;
+  const showYearBreakdown = year.length === 0;
   const showBreakdown = showPeriodBreakdown || showYearBreakdown;
 
   const breakdownRows = useMemo(() => {
@@ -257,15 +264,25 @@ export default function ModelWiseClient({ brand }) {
 
     let result;
     if (period !== "Custom Period") {
-      result = buildModelSummary(rows, {
-        brand,
-        salesType,
-        year,
-        period: period === "Annual" ? "FY" : periodValue,
-      });
+      const modelsForSummary = selectedModels.length === 0 ? allModels : allModels.filter(model => selectedModels.includes(model));
+      const summaryTotals = Object.fromEntries(modelsForSummary.map(model => [model, 0]));
+      for (const y of detailYears) {
+        for (const model of modelsForSummary) {
+          summaryTotals[model] += sumPeriod(rows, brand, salesType, y, periodMonths(period === "Annual" ? "Annual" : period, period === "Annual" ? ["All"] : periodValue, Number(y), customFrom, customTo), model);
+        }
+      }
+      const summaryGrandTotal = Object.values(summaryTotals).reduce((sum, value) => sum + value, 0);
+      result = {
+        models: modelsForSummary.map(model => ({
+          model,
+          units: summaryTotals[model],
+          share: summaryGrandTotal ? (summaryTotals[model] / summaryGrandTotal) * 100 : 0,
+        })),
+        grandTotal: summaryGrandTotal,
+      };
     } else {
-      const totals = Object.fromEntries(allModels.map((model) => [model, 0]));
-      for (const model of allModels) {
+      const totals = Object.fromEntries((selectedModels.length === 0 ? allModels : allModels.filter(model => selectedModels.includes(model))).map((model) => [model, 0]));
+      for (const model of Object.keys(totals)) {
         totals[model] = sumPeriod(
           rows,
           brand,
@@ -277,7 +294,7 @@ export default function ModelWiseClient({ brand }) {
       }
       const grandTotal = Object.values(totals).reduce((sum, value) => sum + value, 0);
       result = {
-        models: allModels.map((model) => ({
+        models: Object.keys(totals).map((model) => ({
           model,
           units: totals[model],
           share: grandTotal ? (totals[model] / grandTotal) * 100 : 0,
@@ -286,16 +303,7 @@ export default function ModelWiseClient({ brand }) {
       };
     }
 
-    if (selectedModels.length === 0) return result;
-    const selected = result.models.filter((item) => selectedModels.includes(item.model));
-    const selectedTotal = selected.reduce((sum, item) => sum + item.units, 0);
-    return {
-      models: selected.map((item) => ({
-        ...item,
-        share: selectedTotal ? (item.units / selectedTotal) * 100 : 0,
-      })),
-      grandTotal: selectedTotal,
-    };
+    return result;
   }, [rows, brand, salesType, year, period, periodValue, showBreakdown, allModels, selectedModels, customFrom, customTo]);
 
   const title = period === "Custom Period"
@@ -353,7 +361,7 @@ export default function ModelWiseClient({ brand }) {
           <select value={period} onChange={(e) => {
             const next = e.target.value;
             setPeriod(next);
-            setPeriodValue("All");
+            setPeriodValue(["All"]);
           }}>
             {PERIODS.map((item) => <option key={item}>{item}</option>)}
           </select>
@@ -367,25 +375,18 @@ export default function ModelWiseClient({ brand }) {
               <input type="date" value={customTo} onChange={(e) => setCustomTo(e.target.value)} />
             </div>
           ) : (
-            <select value={periodValue} onChange={(e) => setPeriodValue(e.target.value)}>
-              {periodOptions.map((item) => <option key={item}>{item}</option>)}
-            </select>
+            <MultiSelect label={periodSelectorLabel} options={periodOptions} value={periodValue} onChange={setPeriodValue} />
           )}
         </div>
 
         <div className="filter">
           <label>Year</label>
-          <select value={year} onChange={(e) => setYear(e.target.value)}>
-            <option>All</option>
-            {MODEL_YEARS.map((item) => <option key={item}>{item}</option>)}
-          </select>
+          <MultiSelect label="Year" options={MODEL_YEARS.map(String)} value={year} onChange={setYear} />
         </div>
 
         <div className="filter">
           <label>Sales Type</label>
-          <select value={salesType} onChange={(e) => setSalesType(e.target.value)}>
-            {SALES_TYPES.map((item) => <option key={item}>{item}</option>)}
-          </select>
+          <MultiSelect label="Sales Type" options={SALES_TYPES} value={salesType} onChange={setSalesType} />
         </div>
         <div className="filter">
           <MultiSelect label="Model" options={allModels} value={selectedModels} onChange={setSelectedModels} />
@@ -396,7 +397,7 @@ export default function ModelWiseClient({ brand }) {
         <div className="sectionHeading">
           <div>
             <div className="eyebrow">MODEL PERFORMANCE</div>
-            <h2>{brand} · {modelLabel} · {salesType} · {title} · {year}</h2>
+            <h2>{brand} · {modelLabel} · {salesType.length === 0 ? "All" : salesType.join(", ")} · {title} · {year.length === 0 ? "All" : year.join(", ")}</h2>
           </div>
           <span className="incompleteLegend"><span className="legendDot" />Incomplete / Forecast</span>
         </div>
