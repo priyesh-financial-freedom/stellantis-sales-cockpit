@@ -139,8 +139,8 @@ function sumPeriod(rows, brand, salesType, year, months, model) {
   return rows
     .filter((row) =>
       brands.includes(row.brand) &&
-      salesTypes.includes(row.sales_type) &&
-      years.includes(Number(row.sales_year)) &&
+      (salesTypes.length === 0 || salesTypes.includes(row.sales_type)) &&
+      (years.length === 0 || years.includes(Number(row.sales_year))) &&
       months.includes(Number(row.sales_month)) &&
       row.model_name === model
     )
