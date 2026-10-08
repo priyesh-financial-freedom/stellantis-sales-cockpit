@@ -17,8 +17,10 @@ export default function MultiSelect({
   const normalized = Array.isArray(value) ? value : [];
   const cleanOptions = options.filter((option, index, array) => array.indexOf(option) === index);
   const allOptionPresent = cleanOptions.includes(allLabel);
-  const allSelected = normalized.length === 0 || normalized.includes(allLabel) || normalized.length === cleanOptions.length;
-  const effectiveSelection = allSelected ? [] : normalized.filter(item => item !== allLabel);
+  const clearValue = "__CLEAR__";
+  const isCleared = normalized.includes(clearValue);
+  const allSelected = !isCleared && (normalized.length === 0 || normalized.includes(allLabel) || normalized.length === cleanOptions.length);
+  const effectiveSelection = allSelected || isCleared ? [] : normalized.filter(item => item !== allLabel && item !== clearValue);
   const selectedLabels = allSelected ? [allLabel] : effectiveSelection;
 
   useEffect(() => {
@@ -45,12 +47,18 @@ export default function MultiSelect({
     onChange([]);
   }
 
+  function clearSelection() {
+    onChange(["__CLEAR__"]);
+  }
+
   const summary =
     selectedLabels.length === 1
       ? selectedLabels[0]
       : allSelected
         ? allLabel
-        : `${selectedLabels.length} selected`;
+        : selectedLabels.length === 0
+          ? placeholder
+          : `${selectedLabels.length} selected`;
 
   return (
     <div className="multiSelect" ref={ref}>
@@ -73,7 +81,7 @@ export default function MultiSelect({
             <button type="button" className={allSelected ? "selected" : ""} onClick={selectAll}>
               {allSelected ? "✓ " : ""}{allLabel}
             </button>
-            <button type="button" onClick={() => onChange([])}>Clear</button>
+            <button type="button" onClick={clearSelection}>Clear</button>
           </div>
 
           <div className="multiSelectList">
