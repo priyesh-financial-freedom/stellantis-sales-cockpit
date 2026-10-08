@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { buildComparison, buildSalesView, getScopeStatus, loadSalesData, SALES_CACHE_KEY } from "../lib/salesData";
 import { readClientCache } from "../lib/clientCache";
+import MultiSelect from "../components/MultiSelect";
 
 const PERIODS = ["Monthly", "Quarterly", "Half-Yearly", "Annual", "Custom Period"];
 const SCOPES = ["All", "Jeep", "Citroën", "SAARC"];
@@ -56,10 +57,10 @@ function periodDisplay(period, value, customFrom, customTo) {
 
 export default function Home() {
   const [period, setPeriod] = useState("Monthly");
-  const [scope, setScope] = useState("All");
+  const [scopeSelections, setScopeSelections] = useState([]);
   const [periodValue, setPeriodValue] = useState("All");
   const [year, setYear] = useState("2026");
-  const [metric, setMetric] = useState("All");
+  const [metricSelections, setMetricSelections] = useState([]);
   const [customFrom, setCustomFrom] = useState("");
   const [customTo, setCustomTo] = useState("");
   const [rows, setRows] = useState([]);
@@ -140,9 +141,9 @@ export default function Home() {
     [rows, selection]
   );
 
-  const displayedScopes = scope === "All"
+  const displayedScopes = scopeSelections.length === 0
     ? ["Jeep", "Citroën", "SAARC", "Stellantis Total"]
-    : [scope];
+    : scopeSelections;
 
   const breakdownOptions = useMemo(() => {
     if (period !== "Monthly" && period !== "Quarterly" && period !== "Half-Yearly") return [];
@@ -191,11 +192,15 @@ export default function Home() {
 
     return [];
   }, [showBreakdown, breakdownOptions, rows, period, periodValue, year, customFrom, customTo]);
-  const metricColumns = metric === "All"
+  const metricColumns = metricSelections.length === 0
     ? Object.values(metricMap)
-    : metric === "Retail + Wholesale"
-      ? [metricMap.Retail, metricMap.Wholesale]
-      : [metricMap[metric]];
+    : metricSelections.flatMap(item =>
+        item === "All"
+          ? Object.values(metricMap)
+          : item === "Retail + Wholesale"
+            ? [metricMap.Retail, metricMap.Wholesale]
+            : [metricMap[item]]
+      ).filter((item, index, array) => item && array.findIndex(candidate => candidate[1] === item[1]) === index);
 
   const comparison = useMemo(
     () => buildComparison(rows, selection),
@@ -211,7 +216,7 @@ export default function Home() {
   }
 
   function comparisonScopeName() {
-    return scope === "All" ? "Stellantis Total" : scope;
+    return scopeSelections.length === 0 ? "Stellantis Total" : scopeSelections[0];
   }
 
   function comparisonDelta(currentValue, compareValue) {
@@ -333,10 +338,12 @@ export default function Home() {
         </div>
 
         <div className="filter">
-          <label>Scope / Brand</label>
-          <select value={scope} onChange={(e) => setScope(e.target.value)}>
-            {SCOPES.map((item) => <option key={item}>{item}</option>)}
-          </select>
+          <MultiSelect
+            label="Scope / Brand"
+            options={SCOPES.slice(1)}
+            value={scopeSelections}
+            onChange={setScopeSelections}
+          />
         </div>
 
         <div className="filter">
@@ -365,10 +372,12 @@ export default function Home() {
         </div>
 
         <div className="filter">
-          <label>Metric</label>
-          <select value={metric} onChange={(e) => setMetric(e.target.value)}>
-            {METRICS.map((item) => <option key={item}>{item}</option>)}
-          </select>
+          <MultiSelect
+            label="Metric"
+            options={METRICS.slice(1)}
+            value={metricSelections}
+            onChange={setMetricSelections}
+          />
         </div>
       </section>
 
@@ -377,7 +386,7 @@ export default function Home() {
           <div>
             <div className="eyebrow">MANAGEMENT VIEW</div>
             <h2>
-              {period} · {scope} · {periodDisplay(period, periodValue, customFrom, customTo)} · {year}
+              {period} · {scopeSelections.length === 0 ? "All" : scopeSelections.join(", ")} · {periodDisplay(period, periodValue, customFrom, customTo)} · {year}
             </h2>
           </div>
           <span className="incompleteLegend">
