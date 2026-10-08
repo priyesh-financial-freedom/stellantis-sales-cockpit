@@ -5,13 +5,14 @@ import Link from "next/link";
 import { readClientCache, writeClientCache } from "../../../lib/clientCache";
 import { supabase } from "../../../lib/supabase";
 import { INDUSTRY_HALVES, INDUSTRY_PERIODS, INDUSTRY_QUARTERS, MONTHS, filterHistoryRows } from "../../../lib/industryData";
+import MultiSelect from "../../../components/MultiSelect";
 
 const MANUFACTURER_CACHE_KEY = "industry-manufacturer-history-v1";
 
 const fmt = value => new Intl.NumberFormat("en-IN").format(Number(value) || 0);
 
 export default function ManufacturerHistoryPage() {
-  const [rows,setRows]=useState([]), [period,setPeriod]=useState("Monthly"), [manufacturer,setManufacturer]=useState("All"), [periodValue,setPeriodValue]=useState("All"), [year,setYear]=useState("2026"), [customFrom,setCustomFrom]=useState(""), [customTo,setCustomTo]=useState(""), [loading,setLoading]=useState(true), [error,setError]=useState("");
+  const [rows,setRows]=useState([]), [period,setPeriod]=useState("Monthly"), [manufacturerSelection,setManufacturerSelection]=useState([]), [periodValue,setPeriodValue]=useState("All"), [year,setYear]=useState("2026"), [customFrom,setCustomFrom]=useState(""), [customTo,setCustomTo]=useState(""), [loading,setLoading]=useState(true), [error,setError]=useState("");
 
   const [refreshing,setRefreshing]=useState(false), [cachedAt,setCachedAt]=useState(null);
 
@@ -46,15 +47,19 @@ export default function ManufacturerHistoryPage() {
   const manufacturers=useMemo(()=>["All",...[...new Set(rows.map(r=>r.manufacturer).filter(Boolean))].sort((a,b)=>a.localeCompare(b))],[rows]);
   const options=useMemo(()=>period==="Monthly"?["All",...MONTHS]:period==="Quarterly"?INDUSTRY_QUARTERS:period==="Half-Yearly"?INDUSTRY_HALVES:period==="Annual"?["All"]:[],[period]);
   const filters={period,periodValue,year,customFrom,customTo};
-  const filtered=useMemo(()=>filterHistoryRows(rows,{...filters,key:"manufacturer",value:manufacturer}),[rows,period,periodValue,year,customFrom,customTo,manufacturer]);
+  const allManufacturerRows=useMemo(()=>filterHistoryRows(rows,{...filters,key:"manufacturer",value:"All"}),[rows,period,periodValue,year,customFrom,customTo]);
+  const selectedManufacturers = manufacturerSelection.length ? manufacturerSelection : manufacturers.slice(1);
+  const manufacturerLabel = manufacturerSelection.length === 0 ? "All" : manufacturerSelection.length === 1 ? manufacturerSelection[0] : `${manufacturerSelection.length} selected`;
+  const filtered=useMemo(
+    ()=>allManufacturerRows.filter(row => selectedManufacturers.includes(row.manufacturer)),
+    [allManufacturerRows, manufacturerSelection, manufacturers]
+  );
   const grouped=useMemo(()=>{const m=new Map();for(const r of filtered)m.set(r.manufacturer,(m.get(r.manufacturer)||0)+Number(r.units||0));const total=[...m.values()].reduce((a,b)=>a+b,0);return [...m.entries()].map(([manufacturer,units])=>({manufacturer,units,share:total?units/total*100:0})).filter(r=>r.units>0).sort((a,b)=>b.units-a.units)},[filtered]);
   const total=grouped.reduce((s,r)=>s+r.units,0);
 
-  const allManufacturerRows=useMemo(()=>filterHistoryRows(rows,{...filters,key:"manufacturer",value:"All"}),[rows,period,periodValue,year,customFrom,customTo]);
-
   const breakdownRows=useMemo(()=>{
-    const source=manufacturer==="All"?allManufacturerRows:filtered;
-    const denominator=manufacturer==="All"?null:allManufacturerRows;
+    const source=filtered;
+    const denominator=manufacturerSelection.length > 0 ? allManufacturerRows : null;
     const map=new Map();
     const totals=new Map();
 
@@ -81,7 +86,7 @@ export default function ManufacturerHistoryPage() {
       }
     }
 
-    return [...map.values()].filter(r=>r.units>0).map(r=>({...r,total:manufacturer==="All"?r.units:(totals.get(r.key)||0)})).sort((a,b)=>a.key.localeCompare(b.key));
+    return [...map.values()].filter(r=>r.units>0).map(r=>({...r,total:manufacturerSelection.length===0?r.units:(totals.get(r.key)||0)})).sort((a,b)=>a.key.localeCompare(b.key));
   },[rows,filtered,allManufacturerRows,manufacturer,period]);
 
   const label=period==="Custom Period"?"Custom Period":period==="Annual"?"Annual":periodValue==="All"?"All / YTD":periodValue;
@@ -107,7 +112,7 @@ export default function ManufacturerHistoryPage() {
     const url = URL.createObjectURL(blob);
     const anchor = document.createElement("a");
     anchor.href = url;
-    anchor.download = `manufacturer-${year}-${period.toLowerCase().replace(/\s+/g, "-")}-${manufacturer === "All" ? "all" : manufacturer.replace(/\s+/g, "-").toLowerCase()}.csv`;
+    anchor.download = `manufacturer-${year}-${period.toLowerCase().replace(/\s+/g, "-")}-${manufacturerSelection.length === 0 ? "all" : manufacturerSelection.join("-").replace(/\s+/g, "-").toLowerCase()}.csv`;
     anchor.click();
     URL.revokeObjectURL(url);
   }
@@ -117,17 +122,17 @@ export default function ManufacturerHistoryPage() {
     <nav className="cockpitNav"><Link href="/">Sales Cockpit</Link><Link href="/model-wise/jeep">Jeep Model Wise</Link><Link href="/model-wise/citroen">Citroën Model Wise</Link><Link href="/industry">Industry</Link><Link className="active" href="/industry/manufacturers">Manufacturer History</Link><Link href="/data-entry">Data Entry</Link></nav>
     <section className="filters">
       <div className="filter"><label>Period</label><select value={period} onChange={e=>changePeriod(e.target.value)}>{INDUSTRY_PERIODS.map(x=><option key={x}>{x}</option>)}</select></div>
-      <div className="filter"><label>Manufacturer</label><select value={manufacturer} onChange={e=>setManufacturer(e.target.value)}>{manufacturers.map(x=><option key={x}>{x}</option>)}</select></div>
+      <div className="filter"><MultiSelect label="Manufacturer" options={manufacturers.slice(1)} value={manufacturerSelection} onChange={setManufacturerSelection} /></div>
       <div className="filter"><label>{period==="Monthly"?"Month":period==="Quarterly"?"Quarter":"Half-Year"}</label>{period==="Custom Period"?<div className="customDates"><input type="date" value={customFrom} onChange={e=>setCustomFrom(e.target.value)}/><input type="date" value={customTo} onChange={e=>setCustomTo(e.target.value)}/></div>:<select value={periodValue} onChange={e=>setPeriodValue(e.target.value)}>{options.map(x=><option key={x}>{x}</option>)}</select>}</div>
       <div className="filter"><label>Year</label><select value={year} onChange={e=>setYear(e.target.value)}>{years.map(x=><option key={x}>{x}</option>)}</select></div>
     </section>
-    <section className="industrySummaryGrid"><div className="queryCard"><div className="eyebrow">MANUFACTURER TIV</div><h2>{manufacturer}</h2><strong className="industryHeadline">{fmt(total)}</strong><p>{label} · {year}</p></div><div className="queryCard"><div className="eyebrow">HISTORICAL LAYER</div><h2>1991 → 2026</h2><p>Annual 1991–1996 · monthly 1997 onward.</p></div></section>
+    <section className="industrySummaryGrid"><div className="queryCard"><div className="eyebrow">MANUFACTURER TIV</div><h2>{manufacturerLabel}</h2><strong className="industryHeadline">{fmt(total)}</strong><p>{label} · {year}</p></div><div className="queryCard"><div className="eyebrow">HISTORICAL LAYER</div><h2>1991 → 2026</h2><p>Annual 1991–1996 · monthly 1997 onward.</p></div></section>
     {error&&<div className="errorBanner">{error}</div>}
     <section><div className="sectionHeading"><div><h2>Manufacturer movement</h2><p className="subtitle">Source: comp.xlsx · Master-Sep26</p></div><button type="button" className="secondaryButton" onClick={exportManufacturer} disabled={loading || !filtered.length}>Export CSV</button></div><div className="tableCard">
       {breakdownRows.length ? <>
-        <div className="industryBreakdownHeader"><div>Year</div><div>Period</div><div>{manufacturer==="All"?"Industry":"Manufacturer"}</div><div>Units</div><div>Share</div></div>
+        <div className="industryBreakdownHeader"><div>Year</div><div>Period</div><div>{manufacturerSelection.length===0?"Industry":"Manufacturer"}</div><div>Units</div><div>Share</div></div>
         {breakdownRows.map(r=><div className="industryBreakdownRow" key={r.key}>
-          <div>{r.year}</div><div>{r.label}</div><div className="scopeName">{manufacturer==="All"?"Industry":manufacturer}</div><div>{fmt(r.units)}</div><div>{r.total?((r.units/r.total)*100).toFixed(1)+"%":"—"}</div>
+          <div>{r.year}</div><div>{r.label}</div><div className="scopeName">{manufacturerSelection.length===0?"Industry":manufacturerLabel}</div><div>{fmt(r.units)}</div><div>{r.total?((r.units/r.total)*100).toFixed(1)+"%":"—"}</div>
         </div>)}
       </> : <div className="industryEmpty">{loading?"Loading...":"No manufacturer data is available for the selected filters."}</div>}
     </div></section>
