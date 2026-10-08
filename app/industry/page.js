@@ -74,6 +74,33 @@ export default function IndustryPage() {
     setPeriodValue(["All"]);
   }
 
+  function getStatusForPeriod(yearValue, periodValueLabel) {
+    const now = new Date();
+    const yearNumber = Number(yearValue);
+    let startMonth = 1;
+    let endMonth = 12;
+
+    if (period === "Monthly") {
+      const monthIndex = MONTHS.indexOf(periodValueLabel);
+      if (monthIndex >= 0) startMonth = endMonth = monthIndex + 1;
+    } else if (period === "Quarterly" && /^Q[1-4]$/.test(periodValueLabel)) {
+      const quarter = Number(periodValueLabel.slice(1));
+      startMonth = (quarter - 1) * 3 + 1;
+      endMonth = startMonth + 2;
+    } else if (period === "Half-Yearly" && /^H[12]$/.test(periodValueLabel)) {
+      startMonth = periodValueLabel === "H1" ? 1 : 7;
+      endMonth = periodValueLabel === "H1" ? 6 : 12;
+    }
+
+    const periodStart = new Date(yearNumber, startMonth - 1, 1);
+    const periodEnd = new Date(yearNumber, endMonth, 0);
+
+    if (periodStart > now) return "FORECAST · INCOMPLETE";
+    if (periodEnd >= now || (yearNumber === now.getFullYear() && endMonth === 12 && period === "Annual")) return "INCOMPLETE";
+    return "ACTUAL / COMPLETE";
+  }
+
+
   const filters = { period, periodValue, year, customFrom, customTo };
   const selectedRows = useMemo(() => filterHistoryRows(
     data.filter(r => r.segment !== "Industry Total" && (
@@ -294,16 +321,21 @@ export default function IndustryPage() {
       <div className="tableCard">
         {breakdownRows.length ? (
           <>
-            <div className="industryBreakdownHeader"><div>Year</div><div>Period</div><div>{segmentSelection.length === 0 ? "Industry" : "Segment"}</div><div>Units</div><div>Share</div></div>
-            {breakdownRows.map(r => (
-              <div className={"industryBreakdownRow" + (period === "Monthly" ? " clickableIndustryRow" : "")} key={r.key} onClick={period === "Monthly" ? () => setSelectedMonth(r.year + "-" + String(MONTHS.indexOf(r.period) + 1).padStart(2, "0") + "-01") : undefined}>
-                <div className="scopeName">{r.year}</div>
-                <div className="scopeName">{r.period}</div>
-                <div className="scopeName">{segmentSelection.length === 0 ? "Industry" : segmentLabel}</div>
-                <div>{formatIndustryNumber(r.units)}</div>
-                <div>{r.total ? ((r.units / r.total) * 100).toFixed(1) + "%" : "—"}</div>
-              </div>
-            ))}
+            <div className="industryBreakdownHeader"><div>Year</div><div>Period</div><div>{segmentSelection.length === 0 ? "Industry" : "Segment"}</div><div>Units</div><div>Share</div><div>Status</div></div>
+            {breakdownRows.map(r => {
+              const status = getStatusForPeriod(r.year, r.period);
+              const incomplete = status !== "ACTUAL / COMPLETE";
+              return (
+                <div className={"industryBreakdownRow" + (incomplete ? " industryIncompleteRow" : "") + (period === "Monthly" ? " clickableIndustryRow" : "")} key={r.key} onClick={period === "Monthly" ? () => setSelectedMonth(r.year + "-" + String(MONTHS.indexOf(r.period) + 1).padStart(2, "0") + "-01") : undefined}>
+                  <div className="scopeName">{r.year}</div>
+                  <div className="scopeName">{r.period}</div>
+                  <div className="scopeName">{segmentSelection.length === 0 ? "Industry" : segmentLabel}</div>
+                  <div>{formatIndustryNumber(r.units)}</div>
+                  <div>{r.total ? ((r.units / r.total) * 100).toFixed(1) + "%" : "—"}</div>
+                  <div className="industryStatusBadge">{status}</div>
+                </div>
+              );
+            })}
           </>
         ) : grouped.length ? (
           <>
@@ -321,7 +353,7 @@ export default function IndustryPage() {
             <div>
               <div className="eyebrow">SEGMENT BREAKUP</div>
               <h2 id="industryMonthTitle">{MONTHS[Number(selectedMonth.slice(5, 7)) - 1]} {selectedMonth.slice(0, 4)}</h2>
-              <p>Industry TIV · {formatIndustryNumber(selectedMonthTotal)} units</p>
+              <p>Industry TIV · {formatIndustryNumber(selectedMonthTotal)} units · <span className="industryStatusBadge">{getStatusForPeriod(selectedMonth.slice(0, 4), MONTHS[Number(selectedMonth.slice(5, 7)) - 1])}</span></p>
             </div>
             <button type="button" className="industryMonthClose" onClick={() => { setSelectedMonth(null); setSelectedMonthSegment(null); }} aria-label="Close segment breakup">×</button>
           </div>
