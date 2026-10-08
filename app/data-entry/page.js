@@ -45,8 +45,7 @@ function htmlEscape(value) {
 }
 
 function downloadExcel(filename, rows, columns, title) {
-  // Excel opens this formatted HTML workbook directly; it preserves a readable table
-  // without adding a heavyweight client-side spreadsheet dependency.
+  // Excel-compatible formatted workbook using an HTML table.
   const tableRows = rows.map(row =>
     "<tr>" + columns.map(column => "<td>" + htmlEscape(row[column.key]) + "</td>").join("") + "</tr>"
   ).join("");
@@ -71,7 +70,7 @@ tr:nth-child(even) td { background: #f5f8fa; }
 </table>
 </body>
 </html>`;
-  const blob = new Blob(["\\ufeff", html], { type: "application/vnd.ms-excel;charset=utf-8;" });
+  const blob = new Blob(["\ufeff", html], { type: "application/vnd.ms-excel;charset=utf-8;" });
   const url = URL.createObjectURL(blob);
   const anchor = document.createElement("a");
   anchor.href = url;
@@ -80,11 +79,13 @@ tr:nth-child(even) td { background: #f5f8fa; }
   URL.revokeObjectURL(url);
 }
 
-function pdfEscape(value) {
+function pdfSafeText(value) {
   return String(value === null || value === undefined ? "" : value)
+    .normalize("NFKD")
+    .replace(/[^\x20-\x7E]/g, "")
     .replace(/\\/g, "\\\\")
-    .replace(/\\(/g, "\\(")
-    .replace(/\\)/g, "\\)");
+    .replace(/\(/g, "\\(")
+    .replace(/\)/g, "\\)");
 }
 
 function downloadPdf(filename, rows, columns, title, subtitle) {
@@ -97,6 +98,7 @@ function downloadPdf(filename, rows, columns, title, subtitle) {
   const top = 96;
   const bottom = 30;
   const rowsPerPage = Math.max(1, Math.floor((pageHeight - top - bottom - headerHeight) / rowHeight));
+
   const widths = columns.map((column, index) => {
     const maxLength = Math.max(
       String(column.label).length,
@@ -110,26 +112,26 @@ function downloadPdf(filename, rows, columns, title, subtitle) {
 
   function truncate(value, maxChars) {
     const text = String(value ?? "");
-    return text.length > maxChars ? text.slice(0, Math.max(1, maxChars - 1)) + "…" : text;
+    return text.length > maxChars ? text.slice(0, Math.max(1, maxChars - 1)) + "..." : text;
   }
 
   const pages = [];
   for (let start = 0; start < rows.length || (start === 0 && rows.length === 0); start += rowsPerPage) {
     const pageRows = rows.slice(start, start + rowsPerPage);
     const commands = [];
+
     commands.push("0.12 0.43 0.66 rg");
-    commands.push(`BT /F1 16 Tf ${margin} ${pageHeight - 34} Td (${pdfEscape(title)}) Tj ET`);
+    commands.push(`BT /F1 16 Tf 1 0 0 1 ${margin} ${pageHeight - 34} Tm (${pdfSafeText(title)}) Tj ET`);
     commands.push("0.35 0.39 0.43 rg");
-    commands.push(`BT /F1 8 Tf ${margin} ${pageHeight - 50} Td (${pdfEscape(subtitle)}) Tj ET`);
+    commands.push(`BT /F1 8 Tf 1 0 0 1 ${margin} ${pageHeight - 50} Tm (${pdfSafeText(subtitle)}) Tj ET`);
 
     let x = margin;
     let y = pageHeight - top;
     commands.push("0.12 0.43 0.66 rg");
-    commands.push(`0 0 0 rg`);
-    commands.push(`BT /F1 8 Tf`);
+    commands.push("BT /F1 8 Tf");
     columns.forEach((column, index) => {
       const cell = truncate(column.label, Math.max(8, Math.floor(scaledWidths[index] / 4.3)));
-      commands.push(`1 0 0 1 ${x + 5} ${y} Tm (${pdfEscape(cell)}) Tj`);
+      commands.push(`1 0 0 1 ${x + 5} ${y} Tm (${pdfSafeText(cell)}) Tj`);
       x += scaledWidths[index];
     });
     commands.push("ET");
@@ -146,7 +148,7 @@ function downloadPdf(filename, rows, columns, title, subtitle) {
       columns.forEach((column, index) => {
         const maxChars = Math.max(8, Math.floor(scaledWidths[index] / 4.0));
         const cell = truncate(row[column.key], maxChars);
-        commands.push(`1 0 0 1 ${x + 5} ${y} Tm (${pdfEscape(cell)}) Tj`);
+        commands.push(`1 0 0 1 ${x + 5} ${y} Tm (${pdfSafeText(cell)}) Tj`);
         x += scaledWidths[index];
       });
       commands.push("ET");
@@ -156,38 +158,37 @@ function downloadPdf(filename, rows, columns, title, subtitle) {
 
     const pageNumber = pages.length + 1;
     commands.push("0.40 0.43 0.46 rg");
-    commands.push(`BT /F1 7 Tf ${pageWidth - 90} 18 Td (Page ${pageNumber}) Tj ET`);
+    commands.push(`BT /F1 7 Tf 1 0 0 1 ${pageWidth - 90} 18 Tm (Page ${pageNumber}) Tj ET`);
     pages.push(commands.join("\n"));
     if (!rows.length) break;
   }
 
   const objects = [];
   objects.push("<< /Type /Catalog /Pages 2 0 R >>");
-  const pageObjectNumbers = [];
-  const fontObject = 3 + pages.length * 2;
-  const pagesObject = 2;
-  objects[pagesObject - 1] = `<< /Type /Pages /Kids [${pages.map((_, i) => (4 + i * 2) + " 0 R").join(" ")}] /Count ${pages.length} >>`;
+  objects.push("");
+  const fontObject = 4 + pages.length * 2;
+  objects[1] = `<< /Type /Pages /Kids [${pages.map((_, i) => (4 + i * 2) + " 0 R").join(" ")}] /Count ${pages.length} >>`;
+
   pages.forEach((stream, index) => {
     const pageObject = 4 + index * 2;
     const contentObject = pageObject + 1;
-    pageObjectNumbers.push(pageObject);
-    objects[pageObject - 1] = `<< /Type /Page /Parent ${pagesObject} 0 R /MediaBox [0 0 ${pageWidth} ${pageHeight}] /Resources << /Font << /F1 ${fontObject} 0 R >> >> /Contents ${contentObject} 0 R >>`;
+    objects[pageObject - 1] = `<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ${pageWidth} ${pageHeight}] /Resources << /Font << /F1 ${fontObject} 0 R >> >> /Contents ${contentObject} 0 R >>`;
     objects[contentObject - 1] = `<< /Length ${stream.length} >>\\nstream\\n${stream}\\nendstream`;
   });
   objects[fontObject - 1] = "<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>";
 
-  let pdf = "%PDF-1.4\\n";
+  let pdf = "%PDF-1.4\n";
   const offsets = [0];
   objects.forEach((object, index) => {
     offsets[index + 1] = pdf.length;
-    pdf += `${index + 1} 0 obj\\n${object}\\nendobj\\n`;
+    pdf += `${index + 1} 0 obj\n${object}\nendobj\n`;
   });
   const xref = pdf.length;
-  pdf += `xref\\n0 ${objects.length + 1}\\n0000000000 65535 f \\n`;
+  pdf += `xref\n0 ${objects.length + 1}\n0000000000 65535 f \n`;
   for (let i = 1; i <= objects.length; i += 1) {
-    pdf += String(offsets[i]).padStart(10, "0") + " 00000 n \\n";
+    pdf += String(offsets[i]).padStart(10, "0") + " 00000 n \n";
   }
-  pdf += `trailer\\n<< /Size ${objects.length + 1} /Root 1 0 R >>\\nstartxref\\n${xref}\\n%%EOF`;
+  pdf += `trailer\n<< /Size ${objects.length + 1} /Root 1 0 R >>\nstartxref\n${xref}\n%%EOF`;
 
   const blob = new Blob([pdf], { type: "application/pdf" });
   const url = URL.createObjectURL(blob);
