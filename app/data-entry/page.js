@@ -230,6 +230,18 @@ function numberOrNull(value) {
   return Number.isFinite(number) ? Math.trunc(number) : null;
 }
 
+function formatMonthYear(value) {
+  const text = String(value ?? "");
+  const match = text.match(/^(\\d{4})-(\\d{2})/);
+  if (!match) return text;
+  const date = new Date(Date.UTC(Number(match[1]), Number(match[2]) - 1, 1));
+  return new Intl.DateTimeFormat("en-US", {
+    month: "long",
+    year: "numeric",
+    timeZone: "UTC",
+  }).format(date);
+}
+
 function todayString() {
   return new Date().toISOString().slice(0, 10);
 }
@@ -363,9 +375,12 @@ export default function DataEntryPage() {
         filename: "industry-history-" + yearLabel,
         title: "Stellantis India — Industry History",
         subtitle: "Years: " + yearLabel + " · Segment-level industry TIV",
-        rows: result.data || [],
+        rows: (result.data || []).map((row) => ({
+          ...row,
+          sales_period: formatMonthYear(row.sales_period),
+        })),
         columns: [
-          { key: "sales_period", label: "Date" },
+          { key: "sales_period", label: "Month" },
           { key: "segment", label: "Segment" },
           { key: "units", label: "Units" },
           { key: "period_type", label: "Period Type" },
@@ -385,9 +400,12 @@ export default function DataEntryPage() {
         filename: "manufacturer-history-" + yearLabel,
         title: "Stellantis India — Manufacturer History",
         subtitle: "Years: " + yearLabel + " · Manufacturer-level industry TIV",
-        rows: result.data || [],
+        rows: (result.data || []).map((row) => ({
+          ...row,
+          sales_period: formatMonthYear(row.sales_period),
+        })),
         columns: [
-          { key: "sales_period", label: "Date" },
+          { key: "sales_period", label: "Month" },
           { key: "manufacturer", label: "Manufacturer" },
           { key: "units", label: "Units" },
           { key: "period_type", label: "Period Type" },
