@@ -180,6 +180,17 @@ export default function IndustryPage() {
     return getModelsForSegment(selectedMonthSegment);
   }, [selectedMonthSegment]);
 
+  const selectedSegmentModels = useMemo(() => {
+    if (segmentSelection.length === 0) return [];
+    return segmentSelection.flatMap(segment =>
+      getModelsForSegment(segment).map(item => ({
+        segment,
+        brand: item.brand,
+        model: item.model,
+      }))
+    );
+  }, [segmentSelection]);
+
   const selectedMonthTotal = useMemo(() => {
     if (!selectedMonth) return 0;
     return Number(data.find(r => String(r.sales_period) === selectedMonth && r.segment === "Industry Total")?.units || 0);
@@ -237,7 +248,7 @@ export default function IndustryPage() {
       <div className="filter"><MultiSelect label="Segment" options={segments} value={segmentSelection} onChange={setSegmentSelection} /></div>
       <div className="filter"><label>{period === "Monthly" ? "Month" : period === "Quarterly" ? "Quarter" : period === "Half-Yearly" ? "Half-Year" : "Period"}</label>
         {period === "Custom Period" ? <div className="customDates"><input type="date" value={customFrom} onChange={e => setCustomFrom(e.target.value)}/><input type="date" value={customTo} onChange={e => setCustomTo(e.target.value)}/></div>
-        : <MultiSelect label={period === "Monthly" ? "Month" : period === "Quarterly" ? "Quarter" : period === "Half-Yearly" ? "Half-Year" : "Period"} options={periodOptions} value={periodValue} onChange={setPeriodValue} />}
+        : <MultiSelect label="" options={periodOptions} value={periodValue} onChange={setPeriodValue} />}
       </div>
       <div className="filter"><MultiSelect label="Year" options={years.filter(x => x !== "All")} value={year} onChange={setYear} /></div>
     </section>
@@ -246,6 +257,37 @@ export default function IndustryPage() {
       <div className="queryCard"><div className="eyebrow">{segmentSelection.length === 0 ? "INDUSTRY TIV" : "SEGMENT TIV"}</div><h2>{segmentSelection.length === 0 ? "Industry" : segmentLabel}</h2><strong className="industryHeadline">{formatIndustryNumber(segmentSelection.length === 0 ? total : grouped.reduce((s,r)=>s+r.units,0))}</strong><p>{label} · {yearLabel}</p></div>
       <div className="queryCard"><div className="eyebrow">DATA SCOPE</div><h2>Segment history</h2><p>1991–1996 annual · 1997 onward monthly · source IND.xlsx</p></div>
     </section>
+
+    {segmentSelection.length > 0 && (
+      <section className="industryModelDetailCard">
+        <div className="sectionHeading industryModelDetailHeading">
+          <div>
+            <div className="eyebrow">SEGMENT MODEL DETAIL</div>
+            <h2>{segmentSelection.length === 1 ? segmentSelection[0] : "Selected segments"}</h2>
+            <p className="subtitle">
+              {selectedSegmentModels.length} model{selectedSegmentModels.length === 1 ? "" : "s"} classified in the NEW STELLANTIS Segment (IHS) master.
+            </p>
+          </div>
+        </div>
+        <div className="industryModelDetailTable">
+          <div className="industryModelDetailHeader">
+            <div>Segment</div><div>Brand</div><div>Model</div>
+          </div>
+          {selectedSegmentModels.length ? selectedSegmentModels.map(item => (
+            <div className="industryModelDetailRow" key={item.segment + "-" + item.brand + "-" + item.model}>
+              <div>{item.segment}</div>
+              <div>{item.brand}</div>
+              <div>{item.model}</div>
+            </div>
+          )) : (
+            <div className="industryEmpty">No models are mapped to the selected segment(s) in the IHS master.</div>
+          )}
+        </div>
+        <p className="industryModelDetailNote">
+          This is the authoritative segment-to-model classification. Model-level sales volumes are not inferred because the current Industry history is segment-level.
+        </p>
+      </section>
+    )}
 
     {error && <div className="errorBanner">{error}</div>}
     <section><div className="sectionHeading"><div><h2>Industry by segment</h2><p className="subtitle">Select one or more segments to analyse them together.</p></div><button type="button" className="secondaryButton" onClick={exportIndustry} disabled={loading || (!selectedRows.length && !totalRows.length)}>Export CSV</button></div>
