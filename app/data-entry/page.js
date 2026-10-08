@@ -232,7 +232,7 @@ function numberOrNull(value) {
 
 function formatMonthYear(value) {
   const text = String(value ?? "");
-  const match = text.match(/^(\\d{4})-(\\d{2})/);
+  const match = text.match(/^(\d{4})-(\d{2})/);
   if (!match) return text;
   const date = new Date(Date.UTC(Number(match[1]), Number(match[2]) - 1, 1));
   return new Intl.DateTimeFormat("en-US", {
