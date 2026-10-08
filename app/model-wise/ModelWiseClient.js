@@ -82,44 +82,60 @@ function getStatus(period, value, year, customFrom, customTo) {
   const today = new Date().toISOString().slice(0, 10);
   const years = Array.isArray(year) ? year : [year];
   const values = Array.isArray(value) ? value : [value];
-  if (years.length !== 1 || values.length !== 1) {
-    const statusValues = (years.length ? years : MODEL_YEARS.map(String)).flatMap(y =>
-      (values.length ? values : ["All"]).map(v => getStatus(period, v, String(y), customFrom, customTo))
-    );
-    if (statusValues.includes("FUTURE")) return "FUTURE";
-    if (statusValues.includes("INCOMPLETE")) return "INCOMPLETE";
-    return "ACTUAL / COMPLETE";
-  }
-  if (year === "All") {
-    const statuses = MODEL_YEARS.map((y) => getStatus(period, value, String(y), customFrom, customTo));
-    if (statuses.includes("FUTURE")) return "FUTURE";
-    if (statuses.includes("INCOMPLETE")) return "INCOMPLETE";
-    return "ACTUAL / COMPLETE";
-  }
+
+  // Multi-select filters use an empty array or "All" to represent the full set.
+  // Normalize those states before calling intervalFor(), which expects scalar values.
+  const normalizedYears = years.length === 0 || years.includes("All")
+    ? MODEL_YEARS.map(String)
+    : years.map(String);
+  const normalizedValues = values.length === 0 || values.includes("All")
+    ? ["All"]
+    : values;
+
+  const statusValues = normalizedYears.flatMap((y) =>
+    normalizedValues.map((v) => getStatusScalar(period, v, y, customFrom, customTo, today))
+  );
+
+  if (statusValues.includes("FUTURE")) return "FUTURE";
+  if (statusValues.includes("INCOMPLETE")) return "INCOMPLETE";
+  return "ACTUAL / COMPLETE";
+}
+
+function getStatusScalar(period, value, year, customFrom, customTo, today) {
   if (period === "Custom Period") {
     if (!customFrom || !customTo) return "NO DATA";
     if (customFrom > today) return "FUTURE";
     if (customTo >= today) return "INCOMPLETE";
     return "ACTUAL / COMPLETE";
   }
+
   if (period === "Monthly" && value === "All") {
-    const statuses = Array.from({ length: 12 }, (_, i) => getStatus("Monthly", String(i + 1), year));
+    const statuses = Array.from({ length: 12 }, (_, i) =>
+      getStatusScalar("Monthly", String(i + 1), year, customFrom, customTo, today)
+    );
     if (statuses.includes("FUTURE")) return "FUTURE";
     if (statuses.includes("INCOMPLETE")) return "INCOMPLETE";
     return "ACTUAL / COMPLETE";
   }
+
   if (period === "Quarterly" && value === "All") {
-    const statuses = ["Q1", "Q2", "Q3", "Q4"].map((q) => getStatus("Quarterly", q, year));
+    const statuses = ["Q1", "Q2", "Q3", "Q4"].map((q) =>
+      getStatusScalar("Quarterly", q, year, customFrom, customTo, today)
+    );
     if (statuses.includes("FUTURE")) return "FUTURE";
     if (statuses.includes("INCOMPLETE")) return "INCOMPLETE";
     return "ACTUAL / COMPLETE";
   }
+
   if (period === "Half-Yearly" && value === "All") {
-    const statuses = ["H1", "H2"].map((h) => getStatus("Half-Yearly", h, year));
+    const statuses = ["H1", "H2"].map((h) =>
+      getStatusScalar("Half-Yearly", h, year, customFrom, customTo, today)
+    );
     if (statuses.includes("FUTURE")) return "FUTURE";
     if (statuses.includes("INCOMPLETE")) return "INCOMPLETE";
     return "ACTUAL / COMPLETE";
   }
+
   const interval = intervalFor(period, value, year);
   if (!interval) return "ACTUAL / COMPLETE";
   if (interval[0] > today) return "FUTURE";
