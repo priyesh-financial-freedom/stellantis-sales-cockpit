@@ -88,6 +88,30 @@ export default function ManufacturerHistoryPage() {
 
   function changePeriod(v){setPeriod(v);setPeriodValue("All");}
 
+  function exportManufacturer() {
+    const source = manufacturer === "All" ? allManufacturerRows : filtered;
+    const rows = source.map(row => ({
+      sales_period: row.sales_period,
+      manufacturer: row.manufacturer,
+      units: row.units,
+    }));
+    const csvEscape = value => {
+      const text = value === null || value === undefined ? "" : String(value);
+      return /[",\n]/.test(text) ? '"' + text.replace(/"/g, '""') + '"' : text;
+    };
+    const csv = [
+      ["sales_period", "manufacturer", "units"].join(","),
+      ...rows.map(row => [row.sales_period, row.manufacturer, row.units].map(csvEscape).join(",")),
+    ].join("\n");
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const anchor = document.createElement("a");
+    anchor.href = url;
+    anchor.download = `manufacturer-${year}-${period.toLowerCase().replace(/\s+/g, "-")}-${manufacturer === "All" ? "all" : manufacturer.replace(/\s+/g, "-").toLowerCase()}.csv`;
+    anchor.click();
+    URL.revokeObjectURL(url);
+  }
+
   return <main className="cockpit">
     <header className="header"><div><div className="eyebrow">STELLANTIS INDIA · INDUSTRY INTELLIGENCE</div><h1>Manufacturer History</h1><p className="subtitle">Historical manufacturer movement — 1991 onward</p>{cachedAt&&<div className="dataFreshness">{refreshing?"Showing cached data · refreshing in background":"Updated "+new Date(cachedAt).toLocaleTimeString("en-IN",{hour:"2-digit",minute:"2-digit"})}</div>}</div><div className="headerStatus"><span className={loading?"statusDot loadingDot":"statusDot"}/>{loading?"Loading manufacturer history":refreshing?"Refreshing manufacturer history":error?"Data error":"Historical data connected"}</div></header>
     <nav className="cockpitNav"><Link href="/">Sales Cockpit</Link><Link href="/model-wise/jeep">Jeep Model Wise</Link><Link href="/model-wise/citroen">Citroën Model Wise</Link><Link href="/industry">Industry</Link><Link className="active" href="/industry/manufacturers">Manufacturer History</Link><Link href="/data-entry">Data Entry</Link></nav>
@@ -99,7 +123,7 @@ export default function ManufacturerHistoryPage() {
     </section>
     <section className="industrySummaryGrid"><div className="queryCard"><div className="eyebrow">MANUFACTURER TIV</div><h2>{manufacturer}</h2><strong className="industryHeadline">{fmt(total)}</strong><p>{label} · {year}</p></div><div className="queryCard"><div className="eyebrow">HISTORICAL LAYER</div><h2>1991 → 2026</h2><p>Annual 1991–1996 · monthly 1997 onward.</p></div></section>
     {error&&<div className="errorBanner">{error}</div>}
-    <section><div className="sectionHeading"><div><h2>Manufacturer movement</h2><p className="subtitle">Source: comp.xlsx · Master-Sep26</p></div></div><div className="tableCard">
+    <section><div className="sectionHeading"><div><h2>Manufacturer movement</h2><p className="subtitle">Source: comp.xlsx · Master-Sep26</p></div><button type="button" className="secondaryButton" onClick={exportManufacturer} disabled={loading || !filtered.length}>Export CSV</button></div><div className="tableCard">
       {breakdownRows.length ? <>
         <div className="industryBreakdownHeader"><div>Year</div><div>Period</div><div>{manufacturer==="All"?"Industry":"Manufacturer"}</div><div>Units</div><div>Share</div></div>
         {breakdownRows.map(r=><div className="industryBreakdownRow" key={r.key}>
