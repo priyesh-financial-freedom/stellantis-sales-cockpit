@@ -6,13 +6,14 @@ import { readClientCache, writeClientCache } from "../../../lib/clientCache";
 import { supabase } from "../../../lib/supabase";
 import { INDUSTRY_HALVES, INDUSTRY_PERIODS, INDUSTRY_QUARTERS, MONTHS, filterHistoryRows } from "../../../lib/industryData";
 import MultiSelect from "../../../components/MultiSelect";
+import MultiSelect from "../../../components/MultiSelect";
 
 const MANUFACTURER_CACHE_KEY = "industry-manufacturer-history-v1";
 
 const fmt = value => new Intl.NumberFormat("en-IN").format(Number(value) || 0);
 
 export default function ManufacturerHistoryPage() {
-  const [rows,setRows]=useState([]), [period,setPeriod]=useState("Monthly"), [manufacturerSelection,setManufacturerSelection]=useState([]), [periodValue,setPeriodValue]=useState("All"), [year,setYear]=useState("2026"), [customFrom,setCustomFrom]=useState(""), [customTo,setCustomTo]=useState(""), [loading,setLoading]=useState(true), [error,setError]=useState("");
+  const [rows,setRows]=useState([]), [period,setPeriod]=useState("Monthly"), [manufacturerSelection,setManufacturerSelection]=useState([]), [periodValue,setPeriodValue]=useState(["All"]), [year,setYear]=useState(["2026"]), [customFrom,setCustomFrom]=useState(""), [customTo,setCustomTo]=useState(""), [loading,setLoading]=useState(true), [error,setError]=useState("");
 
   const [refreshing,setRefreshing]=useState(false), [cachedAt,setCachedAt]=useState(null);
 
@@ -22,7 +23,7 @@ export default function ManufacturerHistoryPage() {
     if(cached?.data?.length){
       setRows(cached.data); setCachedAt(cached.cachedAt); setLoading(false); setRefreshing(true);
       const ys=[...new Set(cached.data.map(r=>String(r.sales_period).slice(0,4)))].sort((a,b)=>b.localeCompare(a));
-      if(ys.length)setYear(ys[0]);
+      if(ys.length)setYear([ys[0]]);
     }
     async function loadAll(){
       const out=[];
@@ -38,7 +39,7 @@ export default function ManufacturerHistoryPage() {
       if(!active)return;
       setRows(x); writeClientCache(MANUFACTURER_CACHE_KEY,x); setCachedAt(Date.now()); setRefreshing(false);
       const ys=[...new Set(x.map(r=>String(r.sales_period).slice(0,4)))].sort((a,b)=>b.localeCompare(a));
-      if(ys.length)setYear(ys[0]);
+      if(ys.length)setYear([ys[0]]);
     }).catch(e=>{if(active){setRefreshing(false);if(!cached?.data?.length)setError(e.message)}}).finally(()=>active&&setLoading(false));
     return()=>{active=false};
   },[]);
@@ -50,6 +51,7 @@ export default function ManufacturerHistoryPage() {
   const allManufacturerRows=useMemo(()=>filterHistoryRows(rows,{...filters,key:"manufacturer",value:"All"}),[rows,period,periodValue,year,customFrom,customTo]);
   const selectedManufacturers = manufacturerSelection.length ? manufacturerSelection : manufacturers.slice(1);
   const manufacturerLabel = manufacturerSelection.length === 0 ? "All" : manufacturerSelection.length === 1 ? manufacturerSelection[0] : `${manufacturerSelection.length} selected`;
+  const yearLabel = year.length === 0 ? "All" : year.length === 1 ? year[0] : `${year.length} selected`;
   const filtered=useMemo(
     ()=>allManufacturerRows.filter(row => selectedManufacturers.includes(row.manufacturer)),
     [allManufacturerRows, manufacturerSelection, manufacturers]
@@ -89,7 +91,7 @@ export default function ManufacturerHistoryPage() {
     return [...map.values()].filter(r=>r.units>0).map(r=>({...r,total:manufacturerSelection.length===0?r.units:(totals.get(r.key)||0)})).sort((a,b)=>a.key.localeCompare(b.key));
   },[filtered,allManufacturerRows,manufacturerSelection,period]);
 
-  const label=period==="Custom Period"?"Custom Period":period==="Annual"?"Annual":periodValue==="All"?"All / YTD":periodValue;
+  const label=period==="Custom Period"?"Custom Period":period==="Annual"?"Annual":periodValue.includes("All")?"All / YTD":periodValue.join(", ");
 
   function changePeriod(v){setPeriod(v);setPeriodValue("All");}
 
@@ -112,7 +114,7 @@ export default function ManufacturerHistoryPage() {
     const url = URL.createObjectURL(blob);
     const anchor = document.createElement("a");
     anchor.href = url;
-    anchor.download = `manufacturer-${year}-${period.toLowerCase().replace(/\s+/g, "-")}-${manufacturerSelection.length === 0 ? "all" : manufacturerSelection.join("-").replace(/\s+/g, "-").toLowerCase()}.csv`;
+    anchor.download = `manufacturer-${yearLabel}-${period.toLowerCase().replace(/\s+/g, "-")}-${manufacturerSelection.length === 0 ? "all" : manufacturerSelection.join("-").replace(/\s+/g, "-").toLowerCase()}.csv`;
     anchor.click();
     URL.revokeObjectURL(url);
   }
@@ -124,9 +126,9 @@ export default function ManufacturerHistoryPage() {
       <div className="filter"><label>Period</label><select value={period} onChange={e=>changePeriod(e.target.value)}>{INDUSTRY_PERIODS.map(x=><option key={x}>{x}</option>)}</select></div>
       <div className="filter"><MultiSelect label="Manufacturer" options={manufacturers.slice(1)} value={manufacturerSelection} onChange={setManufacturerSelection} /></div>
       <div className="filter"><label>{period==="Monthly"?"Month":period==="Quarterly"?"Quarter":"Half-Year"}</label>{period==="Custom Period"?<div className="customDates"><input type="date" value={customFrom} onChange={e=>setCustomFrom(e.target.value)}/><input type="date" value={customTo} onChange={e=>setCustomTo(e.target.value)}/></div>:<select value={periodValue} onChange={e=>setPeriodValue(e.target.value)}>{options.map(x=><option key={x}>{x}</option>)}</select>}</div>
-      <div className="filter"><label>Year</label><select value={year} onChange={e=>setYear(e.target.value)}>{years.map(x=><option key={x}>{x}</option>)}</select></div>
+      <div className="filter"><label>Year</label><select value={yearLabel} onChange={e=>setYear(e.target.value)}>{years.map(x=><option key={x}>{x}</option>)}</select></div>
     </section>
-    <section className="industrySummaryGrid"><div className="queryCard"><div className="eyebrow">MANUFACTURER TIV</div><h2>{manufacturerLabel}</h2><strong className="industryHeadline">{fmt(total)}</strong><p>{label} · {year}</p></div><div className="queryCard"><div className="eyebrow">HISTORICAL LAYER</div><h2>1991 → 2026</h2><p>Annual 1991–1996 · monthly 1997 onward.</p></div></section>
+    <section className="industrySummaryGrid"><div className="queryCard"><div className="eyebrow">MANUFACTURER TIV</div><h2>{manufacturerLabel}</h2><strong className="industryHeadline">{fmt(total)}</strong><p>{label} · {yearLabel}</p></div><div className="queryCard"><div className="eyebrow">HISTORICAL LAYER</div><h2>1991 → 2026</h2><p>Annual 1991–1996 · monthly 1997 onward.</p></div></section>
     {error&&<div className="errorBanner">{error}</div>}
     <section><div className="sectionHeading"><div><h2>Manufacturer movement</h2><p className="subtitle">Source: comp.xlsx · Master-Sep26</p></div><button type="button" className="secondaryButton" onClick={exportManufacturer} disabled={loading || !filtered.length}>Export CSV</button></div><div className="tableCard">
       {breakdownRows.length ? <>
