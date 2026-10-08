@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { readClientCache } from "../../lib/clientCache";
+import MultiSelect from "../../components/MultiSelect";
 import {
   INDUSTRY_HALVES, INDUSTRY_PERIODS, INDUSTRY_QUARTERS, MONTHS,
   filterHistoryRows, formatIndustryNumber, getIndustryYears, loadIndustryData, INDUSTRY_CACHE_KEY
@@ -12,9 +13,8 @@ export default function IndustryPage() {
   const [data, setData] = useState([]);
   const [period, setPeriod] = useState("Monthly");
   const [segmentSelection, setSegmentSelection] = useState([]);
-  const [segmentMenuOpen, setSegmentMenuOpen] = useState(false);
-  const [periodValue, setPeriodValue] = useState("All");
-  const [year, setYear] = useState("2026");
+  const [periodValue, setPeriodValue] = useState(["All"]);
+  const [year, setYear] = useState(["2026"]);
   const [customFrom, setCustomFrom] = useState("");
   const [customTo, setCustomTo] = useState("");
   const [loading, setLoading] = useState(true);
@@ -33,7 +33,7 @@ export default function IndustryPage() {
       setLoading(false);
       setRefreshing(true);
       const years = getIndustryYears(cached.data);
-      if (years.length) setYear(String(years[0]));
+      if (years.length) setYear([String(years[0])]);
     }
 
     loadIndustryData().then(rows => {
@@ -42,7 +42,7 @@ export default function IndustryPage() {
       setCachedAt(Date.now());
       setRefreshing(false);
       const years = getIndustryYears(rows);
-      if (years.length) setYear(String(years[0]));
+      if (years.length) setYear([String(years[0])]);
     }).catch(err => {
       if (!active) return;
       setRefreshing(false);
@@ -58,6 +58,7 @@ export default function IndustryPage() {
   const segmentLabel = segmentSelection.length === 0 ? "All"
     : segmentSelection.length === 1 ? segmentSelection[0]
     : String(segmentSelection.length) + " Segments Selected";
+  const yearLabel = year.length === 0 ? "All" : year.length === 1 ? year[0] : String(year.length) + " Years Selected";
   const periodOptions = useMemo(() => {
     if (period === "Monthly") return ["All", ...MONTHS];
     if (period === "Quarterly") return INDUSTRY_QUARTERS;
@@ -177,9 +178,9 @@ export default function IndustryPage() {
     return Number(data.find(r => String(r.sales_period) === selectedMonth && r.segment === "Industry Total")?.units || 0);
   }, [data, selectedMonth]);
 
-  const label = period === "Monthly" ? (periodValue === "All" ? "All / YTD" : periodValue)
-    : period === "Quarterly" ? (periodValue === "All" ? "All / YTD" : periodValue)
-    : period === "Half-Yearly" ? (periodValue === "All" ? "All / YTD" : periodValue)
+  const label = period === "Monthly" ? (periodValue.includes("All") ? "All / YTD" : periodValue.join(", "))
+    : period === "Quarterly" ? (periodValue.includes("All") ? "All / YTD" : periodValue.join(", "))
+    : period === "Half-Yearly" ? (periodValue.includes("All") ? "All / YTD" : periodValue.join(", "))
     : period === "Annual" ? "Annual" : "Custom Period";
 
   function exportIndustry() {
@@ -209,7 +210,7 @@ export default function IndustryPage() {
     const url = URL.createObjectURL(blob);
     const anchor = document.createElement("a");
     anchor.href = url;
-    anchor.download = `industry-${year}-${period.toLowerCase().replace(/\s+/g, "-")}-${periodValue === "All" ? "all" : periodValue}.csv`;
+    anchor.download = `industry-${yearLabel.replace(/\s+/g, "-")}-${period.toLowerCase().replace(/\s+/g, "-")}-${periodValue.includes("All") ? "all" : periodValue.join("-")}.csv`;
     anchor.click();
     URL.revokeObjectURL(url);
   }
@@ -226,52 +227,16 @@ export default function IndustryPage() {
 
     <section className="filters">
       <div className="filter"><label>Period</label><select value={period} onChange={e => changePeriod(e.target.value)}>{INDUSTRY_PERIODS.map(x => <option key={x}>{x}</option>)}</select></div>
-      <div className="filter segmentFilter">
-        <label>Segment</label>
-        <div className="segmentMultiSelect">
-          <button type="button" className={"segmentSelectButton" + (segmentMenuOpen ? " open" : "")} onClick={() => setSegmentMenuOpen(open => !open)} aria-expanded={segmentMenuOpen} aria-haspopup="listbox">
-            <span>{segmentLabel}</span><span className="segmentSelectChevron">{segmentMenuOpen ? "⌃" : "⌄"}</span>
-          </button>
-          {segmentMenuOpen && (
-            <div className="segmentMenu" role="listbox" aria-label="Segment selection" aria-multiselectable="true">
-              <div className="segmentMenuQuickActions">
-                <button type="button" className={segmentSelection.length === 0 ? "selected" : ""} onClick={() => setSegmentSelection([])}>
-                  {segmentSelection.length === 0 ? "✓ " : ""}All
-                </button>
-                {suvSegments.length > 0 && (
-                  <button type="button" className={segmentSelection.length === suvSegments.length && suvSegments.every(s => segmentSelection.includes(s)) ? "selected" : ""} onClick={() => setSegmentSelection(suvSegments)}>
-                    SUVs
-                  </button>
-                )}
-              </div>
-              <div className="segmentMenuList">
-                {segments.map(name => {
-                  const checked = segmentSelection.includes(name);
-                  return (
-                    <label className={"segmentOption" + (checked ? " checked" : "")} key={name}>
-                      <input type="checkbox" checked={checked} onChange={() => setSegmentSelection(current => checked ? current.filter(item => item !== name) : [...current, name])} />
-                      <span>{name}</span>
-                    </label>
-                  );
-                })}
-              </div>
-              <div className="segmentMenuFooter">
-                <button type="button" className="segmentClearButton" onClick={() => setSegmentSelection([])}>All</button>
-                <button type="button" className="segmentDoneButton" onClick={() => setSegmentMenuOpen(false)}>Done</button>
-              </div>
-            </div>
-          )}
-        </div>
-      </div>
+      <div className="filter"><MultiSelect label="Segment" options={segments} value={segmentSelection} onChange={setSegmentSelection} /></div>
       <div className="filter"><label>{period === "Monthly" ? "Month" : period === "Quarterly" ? "Quarter" : period === "Half-Yearly" ? "Half-Year" : "Period"}</label>
         {period === "Custom Period" ? <div className="customDates"><input type="date" value={customFrom} onChange={e => setCustomFrom(e.target.value)}/><input type="date" value={customTo} onChange={e => setCustomTo(e.target.value)}/></div>
-        : <select value={periodValue} onChange={e => setPeriodValue(e.target.value)}>{periodOptions.map(x => <option key={x}>{x}</option>)}</select>}
+        : <MultiSelect label={period === "Monthly" ? "Month" : period === "Quarterly" ? "Quarter" : period === "Half-Yearly" ? "Half-Year" : "Period"} options={periodOptions} value={periodValue} onChange={setPeriodValue} />}
       </div>
-      <div className="filter"><label>Year</label><select value={year} onChange={e => setYear(e.target.value)}>{years.map(x => <option key={x}>{x}</option>)}</select></div>
+      <div className="filter"><MultiSelect label="Year" options={years.filter(x => x !== "All")} value={yearLabel} onChange={setYear} /></div>
     </section>
 
     <section className="industrySummaryGrid">
-      <div className="queryCard"><div className="eyebrow">{segmentSelection.length === 0 ? "INDUSTRY TIV" : "SEGMENT TIV"}</div><h2>{segmentSelection.length === 0 ? "Industry" : segmentLabel}</h2><strong className="industryHeadline">{formatIndustryNumber(segmentSelection.length === 0 ? total : grouped.reduce((s,r)=>s+r.units,0))}</strong><p>{label} · {year}</p></div>
+      <div className="queryCard"><div className="eyebrow">{segmentSelection.length === 0 ? "INDUSTRY TIV" : "SEGMENT TIV"}</div><h2>{segmentSelection.length === 0 ? "Industry" : segmentLabel}</h2><strong className="industryHeadline">{formatIndustryNumber(segmentSelection.length === 0 ? total : grouped.reduce((s,r)=>s+r.units,0))}</strong><p>{label} · {yearLabel}</p></div>
       <div className="queryCard"><div className="eyebrow">DATA SCOPE</div><h2>Segment history</h2><p>1991–1996 annual · 1997 onward monthly · source IND.xlsx</p></div>
     </section>
 
