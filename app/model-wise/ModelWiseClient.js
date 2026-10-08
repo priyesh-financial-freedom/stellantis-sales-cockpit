@@ -85,6 +85,16 @@ function intervalFor(period, value, year) {
 
 function getStatus(period, value, year, customFrom, customTo) {
   const today = new Date().toISOString().slice(0, 10);
+  const years = Array.isArray(year) ? year : [year];
+  const values = Array.isArray(value) ? value : [value];
+  if (years.length > 1 || values.length > 1 || years.length === 0 || values.length === 0) {
+    const statuses = (years.length ? years : MODEL_YEARS.map(String)).flatMap(y =>
+      (values.length ? values : ["All"]).map(v => getStatus(period, v, String(y), customFrom, customTo))
+    );
+    if (statuses.includes("FUTURE")) return "FUTURE";
+    if (statuses.includes("INCOMPLETE")) return "INCOMPLETE";
+    return "ACTUAL / COMPLETE";
+  }
   if (year === "All") {
     const statuses = MODEL_YEARS.map((y) => getStatus(period, value, String(y), customFrom, customTo));
     if (statuses.includes("FUTURE")) return "FUTURE";
@@ -123,11 +133,14 @@ function getStatus(period, value, year, customFrom, customTo) {
 }
 
 function sumPeriod(rows, brand, salesType, year, months, model) {
+  const brands = Array.isArray(brand) ? brand : [brand];
+  const salesTypes = Array.isArray(salesType) ? salesType : [salesType];
+  const years = Array.isArray(year) ? year.map(Number) : [Number(year)];
   return rows
     .filter((row) =>
-      row.brand === brand &&
-      row.sales_type === salesType &&
-      Number(row.sales_year) === Number(year) &&
+      brands.includes(row.brand) &&
+      salesTypes.includes(row.sales_type) &&
+      years.includes(Number(row.sales_year)) &&
       months.includes(Number(row.sales_month)) &&
       row.model_name === model
     )
