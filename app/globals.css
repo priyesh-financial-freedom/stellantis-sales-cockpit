@@ -643,6 +643,23 @@ footer {
   background: #fafafa;
 }
 
+.infoBanner {
+  margin: 12px 0 16px;
+  padding: 14px 16px;
+  border: 1px solid #e6c98c;
+  border-left: 4px solid #c18a27;
+  border-radius: 10px;
+  background: #fff9eb;
+  color: #59451f;
+  font-size: 13px;
+  line-height: 1.55;
+}
+.infoBanner strong {
+  display: block;
+  margin-bottom: 4px;
+  color: #704d0d;
+}
+
 .errorBanner {
   margin-bottom: 12px;
   padding: 10px 12px;
