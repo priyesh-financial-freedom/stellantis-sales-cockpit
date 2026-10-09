@@ -50,7 +50,7 @@ function periodDisplay(period, value, customFrom, customTo) {
     return customFrom && customTo ? `${customFrom} → ${customTo}` : "Custom Period";
   }
   if (period === "Monthly" && value !== "All") {
-    return MONTHS[Number(value)] || value;
+    return typeof value === "string" && MONTHS.includes(value) ? value : MONTHS[Number(value)] || value;
   }
   return value;
 }
@@ -144,7 +144,7 @@ export default function Home() {
 
   const breakdownOptions = useMemo(() => {
     if (period !== "Monthly" && period !== "Quarterly" && period !== "Half-Yearly") return [];
-    if (period === "Monthly") return MONTHS.slice(1).map((label, index) => ({ label, value: String(index + 1) }));
+    if (period === "Monthly") return MONTHS.slice(1).map((label) => ({ label, value: label }));
     if (period === "Quarterly") return QUARTERS.slice(1).map((label) => ({ label, value: label }));
     return HALF_YEARS.slice(1).map((label) => ({ label, value: label }));
   }, [period]);
@@ -424,9 +424,7 @@ export default function Home() {
                 displayedScopes.map((scopeName) => {
                   const breakdownSelection = {
                     period,
-                    periodValue: period === "Monthly"
-                      ? String(MONTHS.indexOf(label))
-                      : label,
+                    periodValue: label,
                     year: yearLabel,
                     customFrom,
                     customTo,
