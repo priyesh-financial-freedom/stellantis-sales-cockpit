@@ -17,10 +17,8 @@ function formatNumber(value) {
   return new Intl.NumberFormat("en-IN").format(value || 0);
 }
 
-function valueClass(status, value) {
-  if (status === "FUTURE") return "futureValue";
-  if (status === "INCOMPLETE" && Number(value) > 0) return "futureValue";
-  return "";
+function valueClass(status) {
+  return status === "ACTUAL / COMPLETE" ? "completedValue" : status === "FUTURE" || status === "INCOMPLETE" ? "futureValue" : "";
 }
 
 function statusClass(status) {
@@ -28,7 +26,7 @@ function statusClass(status) {
 }
 
 function statusLabel(status) {
-  return status === "INCOMPLETE" || status === "FUTURE" ? "INCOMPLETE" : "COMPLETE";
+  return status === "INCOMPLETE" || status === "FUTURE" ? "Forecast" : "Completed";
 }
 
 function periodLabel(period, value, customFrom, customTo) {
@@ -461,7 +459,7 @@ export default function ModelWiseClient({ brand }) {
               <h2>{brand} · Monthly bookings · {year.length === 0 ? "All years" : year.join(", ")}</h2>
               <p className="subtitle">These are the monthly brand totals supplied for Jeep. They are not split by model.</p>
             </div>
-            <span className="incompleteLegend"><span className="legendDot" />Incomplete / Forecast</span>
+            <span className="incompleteLegend"><span className="legendDot" />Forecast</span>
           </div>
           {brandBookingsError ? (
             <div className="errorBanner">Brand monthly bookings could not be loaded. The database table may not yet be available: {brandBookingsError}</div>
