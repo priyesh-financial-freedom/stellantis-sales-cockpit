@@ -56,6 +56,15 @@ export default function ManufacturerHistoryPage() {
   );
   const grouped=useMemo(()=>{const m=new Map();for(const r of filtered)m.set(r.manufacturer,(m.get(r.manufacturer)||0)+Number(r.units||0));const total=[...m.values()].reduce((a,b)=>a+b,0);return [...m.entries()].map(([manufacturer,units])=>({manufacturer,units,share:total?units/total*100:0})).filter(r=>r.units>0).sort((a,b)=>b.units-a.units)},[filtered]);
   const total=grouped.reduce((s,r)=>s+r.units,0);
+  function rowStatus(row) {
+    const now = new Date();
+    const date = String(row.sales_period).slice(0, 10);
+    const y = Number(date.slice(0,4)), m = Number(date.slice(5,7));
+    if (!y || !m) return "COMPLETED";
+    const start = new Date(y, m - 1, 1);
+    const end = new Date(y, m, 0);
+    return end >= new Date(now.getFullYear(), now.getMonth(), now.getDate()) || start > now ? "FORECAST" : "COMPLETED";
+  }
 
   const breakdownRows=useMemo(()=>{
     const source=filtered;
@@ -131,10 +140,10 @@ export default function ManufacturerHistoryPage() {
     {error&&<div className="errorBanner">{error}</div>}
     <section><div className="sectionHeading"><div><h2>Manufacturer movement</h2><p className="subtitle">Source: comp.xlsx · Master-Sep26</p></div><button type="button" className="secondaryButton" onClick={exportManufacturer} disabled={loading || !filtered.length}>Export CSV</button></div><div className="tableCard">
       {breakdownRows.length ? <>
-        <div className="industryBreakdownHeader"><div>Year</div><div>Period</div><div>{manufacturerSelection.length===0?"Industry":"Manufacturer"}</div><div>Units</div><div>Share</div></div>
-        {breakdownRows.map(r=><div className="industryBreakdownRow" key={r.key}>
-          <div>{r.year}</div><div>{r.label}</div><div className="scopeName">{manufacturerSelection.length===0?"Industry":manufacturerLabel}</div><div>{fmt(r.units)}</div><div>{r.total?((r.units/r.total)*100).toFixed(1)+"%":"—"}</div>
-        </div>)}
+        <div className="industryBreakdownHeader"><div>Year</div><div>Period</div><div>{manufacturerSelection.length===0?"Industry":"Manufacturer"}</div><div>Units</div><div>Share</div><div>Status</div></div>
+        {breakdownRows.map(r=>{ const status=rowStatus({sales_period: r.key}); const forecast=status==="FORECAST"; return <div className={"industryBreakdownRow " + (forecast ? "industryIncompleteRow" : "industryCompletedRow")} key={r.key}>
+          <div>{r.year}</div><div>{r.label}</div><div className="scopeName">{manufacturerSelection.length===0?"Industry":manufacturerLabel}</div><div>{fmt(r.units)}</div><div>{r.total?((r.units/r.total)*100).toFixed(1)+"%":"—"}</div><div className={forecast?"industryStatusBadge":"industryCompletedBadge"}>{forecast?"Forecast":"Completed"}</div>
+        </div>})}
       </> : <div className="industryEmpty">{loading?"Loading...":"No manufacturer data is available for the selected filters."}</div>}
     </div></section>
     <footer><span>Manufacturer filters mirror the Sales Cockpit period structure.</span><span>1991–1996 annual · 1997 onward monthly</span></footer>
