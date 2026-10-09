@@ -328,7 +328,7 @@ export default function DataEntryPage() {
     const selectedBrands = filterBrands.length ? filterBrands : MODEL_BRANDS;
     return [...new Set(selectedBrands.flatMap(item => MODEL_NAMES[item] || []))];
   }, [filterBrands]);
-  const exportOnly = dataset === "Retail Sales";\n  const templateAvailable = Boolean(TEMPLATE_SCHEMAS[dataset]);
+  const exportOnly = dataset === "Industry History" || dataset === "Manufacturer History" || dataset === "Retail Sales";\n  const templateAvailable = Boolean(TEMPLATE_SCHEMAS[dataset]);
 
   useEffect(() => {
     if (dataset === "Model Monthly" && !MODEL_BRANDS.includes(brand)) setBrand("Jeep");
@@ -359,7 +359,7 @@ export default function DataEntryPage() {
 
   async function save() {
     try {
-      if (exportOnly) throw new Error("Import is available for the supported dataset templates only.");
+      if (dataset === "Retail Sales") throw new Error("Retail Sales is a derived export view; import Daily Sales records instead.");
       setSaving(true); setError(""); setMessage("");
       if (dataset === "Daily Sales") {
         if (!date) throw new Error("Please select a date.");
