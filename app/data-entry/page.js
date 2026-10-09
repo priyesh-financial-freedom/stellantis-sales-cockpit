@@ -328,7 +328,8 @@ export default function DataEntryPage() {
     const selectedBrands = filterBrands.length ? filterBrands : MODEL_BRANDS;
     return [...new Set(selectedBrands.flatMap(item => MODEL_NAMES[item] || []))];
   }, [filterBrands]);
-  const exportOnly = dataset === "Industry History" || dataset === "Manufacturer History" || dataset === "Retail Sales";\n  const templateAvailable = Boolean(TEMPLATE_SCHEMAS[dataset]);
+  const exportOnly = dataset === "Industry History" || dataset === "Manufacturer History" || dataset === "Retail Sales";
+  const templateAvailable = Boolean(TEMPLATE_SCHEMAS[dataset]);
 
   useEffect(() => {
     if (dataset === "Model Monthly" && !MODEL_BRANDS.includes(brand)) setBrand("Jeep");
@@ -396,7 +397,8 @@ export default function DataEntryPage() {
         }
       }
       if (dataset === "Daily Sales") clearClientCache(SALES_CACHE_KEY);
-      else clearClientCache(MODEL_CACHE_KEY);
+      else if (dataset === "Model Monthly") clearClientCache(MODEL_CACHE_KEY);
+      setMessage(count + " validated record" + (count === 1 ? "" : "s") + " imported. Matching records were updated; new keys were inserted.");
       await loadRecent();
     } catch (err) {
       setError(err.message || "Unable to save data.");
@@ -717,7 +719,8 @@ export default function DataEntryPage() {
           <button type="button" className="secondaryButton" onClick={() => exportData("csv")}>Export CSV</button>
           <button type="button" className="secondaryButton" onClick={() => exportData("excel")}>Export Excel</button>
           <button type="button" className="secondaryButton" onClick={() => exportData("pdf")}>Export PDF</button>
-          <button type="button" className="secondaryButton" onClick={() => fileRef.current?.click()} disabled={exportOnly}>Import CSV</button>
+          {templateAvailable && <button type="button" className="secondaryButton" onClick={() => downloadTemplate(dataset)}>Download Template</button>}
+          <button type="button" className="secondaryButton" onClick={() => fileRef.current?.click()} disabled={!templateAvailable || saving}>Import CSV</button>
           <input ref={fileRef} type="file" accept=".csv,text/csv" hidden onChange={(e) => importData(e.target.files?.[0])} />
         </div>
       </section>
