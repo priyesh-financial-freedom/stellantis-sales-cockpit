@@ -84,7 +84,7 @@ function downloadTemplate(dataset) {
   downloadCsv(schema.filename, [
     schema.columns.map((column) => csvEscape(column.label)).join(","),
     sample.map(csvEscape).join(","),
-  ].join("\\n"));
+  ].join("\n"));
 }
 
 function htmlEscape(value) {
@@ -566,12 +566,12 @@ export default function DataEntryPage() {
       const seenKeys = new Set();
       imported.forEach((row, index) => {
         const line = index + 2;
-        const integer = (value) => value !== "" && /^\\d+$/.test(String(value).trim());
-        const validMonthDate = (value) => /^\\d{4}-(0[1-9]|1[0-2])-01$/.test(String(value || "").trim());
+        const integer = (value) => value !== "" && /^\d+$/.test(String(value).trim());
+        const validMonthDate = (value) => /^\d{4}-(0[1-9]|1[0-2])-01$/.test(String(value || "").trim());
         let key = "";
         if (dataset === "Daily Sales") {
           if (!BRANDS.includes(row.brand)) rowErrors.push("Row " + line + ": brand must be Jeep, Citroën or SAARC.");
-          if (!/^\\d{4}-\\d{2}-\\d{2}$/.test(row.sales_date || "") || Number.isNaN(Date.parse(row.sales_date))) rowErrors.push("Row " + line + ": sales_date must use YYYY-MM-DD.");
+          if (!/^\d{4}-\d{2}-\d{2}$/.test(row.sales_date || "") || Number.isNaN(Date.parse(row.sales_date))) rowErrors.push("Row " + line + ": sales_date must use YYYY-MM-DD.");
           ["test_drives", "bookings", "retail", "wholesale"].forEach((field) => { if (row[field] !== "" && !integer(row[field])) rowErrors.push("Row " + line + ": " + field + " must be a non-negative whole number or blank."); });
           key = [row.brand, row.sales_date].join("|");
         } else if (dataset === "Model Monthly") {
