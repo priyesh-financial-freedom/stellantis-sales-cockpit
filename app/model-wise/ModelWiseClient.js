@@ -7,7 +7,7 @@ import { readClientCache } from "../../lib/clientCache";
 import MultiSelect from "../../components/MultiSelect";
 
 const PERIODS = ["Monthly", "Quarterly", "Half-Yearly", "Annual", "Custom Period"];
-const SALES_TYPES = ["Retail", "Wholesale"];
+const SALES_TYPES = ["Bookings", "Retail", "Wholesale"];
 const MONTH_OPTIONS = ["All", "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 const QUARTER_OPTIONS = ["All", "Q1", "Q2", "Q3", "Q4"];
 const HALF_YEAR_OPTIONS = ["All", "H1", "H2"];
@@ -354,7 +354,7 @@ export default function ModelWiseClient({ brand }) {
         <div>
           <div className="eyebrow">STELLANTIS INDIA · MODEL ANALYSIS</div>
           <h1>{brand} Model Wise</h1>
-          <p className="subtitle">Model-level Retail and Wholesale performance from monthly source data</p>
+          <p className="subtitle">Monthly model-level Bookings, Retail and Wholesale performance</p>
           {cachedAt && <div className="dataFreshness">{refreshing ? "Showing cached data · refreshing in background" : "Updated " + new Date(cachedAt).toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" })}</div>}
         </div>
         <div className="headerStatus">
@@ -364,7 +364,6 @@ export default function ModelWiseClient({ brand }) {
       </header>
 
       <nav className="cockpitNav">
-        <Link href="/">Sales Cockpit</Link>
         <Link className={brand === "Jeep" ? "active" : ""} href="/model-wise/jeep">Jeep Model Wise</Link>
         <Link className={brand === "Citroën" ? "active" : ""} href="/model-wise/citroen">Citroën Model Wise</Link>
         <Link href="/industry">Industry</Link>
