@@ -64,7 +64,7 @@ function intervalFor(period, value, year) {
   const y = Number(year);
   if (period === "Annual") return [y + "-01-01", y + "-12-31"];
   if (period === "Monthly") {
-    const month = Number(value);
+    const month = Number(value) || MONTH_OPTIONS.indexOf(value);
     const end = new Date(Date.UTC(y, month, 0)).toISOString().slice(0, 10);
     return [y + "-" + String(month).padStart(2, "0") + "-01", end];
   }
@@ -302,7 +302,7 @@ export default function ModelWiseClient({ brand }) {
   const totalGrand = Object.values(totalValue).reduce((sum, value) => sum + value, 0);
 
   const legacyBookingRows = useMemo(() => {
-    if (!salesType.includes("Bookings")) return [];
+    if (salesType.length > 0 && !salesType.includes("Bookings")) return [];
     const selectedYearValues = year.length === 0 || year.includes("All") ? MODEL_YEARS.map(String) : year.map(String);
     return legacyBookings
       .filter(row => selectedYearValues.includes(String(row.sales_year)))
@@ -511,7 +511,7 @@ export default function ModelWiseClient({ brand }) {
         </div>
       </section>
 
-      {salesType.includes("Bookings") && legacyBookingRows.length > 0 && (
+      {(salesType.length === 0 || salesType.includes("Bookings")) && legacyBookingRows.length > 0 && (
         <section className="summary">
           <div className="sectionHeading">
             <div>
