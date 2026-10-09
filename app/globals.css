@@ -2783,3 +2783,37 @@ h2 {
     font-size: 10px;
   }
 }
+
+
+/* Consistent data status colours across all analytical pages */
+.completedValue,
+.industryCompletedBadge {
+  color: #166534 !important;
+}
+.futureValue,
+.industryStatusBadge {
+  color: #b91c1c !important;
+}
+.industryCompletedRow {
+  background: #f0fdf4;
+  color: #166534;
+}
+.industryCompletedRow .scopeName,
+.industryCompletedRow > div {
+  color: #166534;
+}
+.industryIncompleteRow {
+  background: #fff1f2;
+  color: #b91c1c;
+}
+.industryIncompleteRow .scopeName,
+.industryIncompleteRow > div {
+  color: #b91c1c;
+}
+.industryCompletedBadge,
+.industryStatusBadge {
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: .45px;
+  text-transform: uppercase;
+}
