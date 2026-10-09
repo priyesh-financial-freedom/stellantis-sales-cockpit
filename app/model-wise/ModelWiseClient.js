@@ -426,7 +426,6 @@ export default function ModelWiseClient({ brand }) {
         </div>
 
         <div className="filter">
-          <label>{periodSelectorLabel}</label>
           {period === "Custom Period" ? (
             <div className="customDates">
               <input type="date" value={customFrom} onChange={(e) => setCustomFrom(e.target.value)} />
@@ -438,12 +437,10 @@ export default function ModelWiseClient({ brand }) {
         </div>
 
         <div className="filter">
-          <label>Year</label>
           <MultiSelect label="Year" options={MODEL_YEARS.map(String)} value={year} onChange={setYear} />
         </div>
 
         <div className="filter">
-          <label>Sales Type</label>
           <MultiSelect label="Sales Type" options={SALES_TYPES} value={salesType} onChange={setSalesType} />
         </div>
         <div className="filter">
@@ -457,7 +454,7 @@ export default function ModelWiseClient({ brand }) {
             <div>
               <div className="eyebrow">BRAND-LEVEL BOOKINGS</div>
               <h2>{brand} · Monthly bookings · {year.length === 0 ? "All years" : year.join(", ")}</h2>
-              <p className="subtitle">These are the monthly brand totals supplied for Jeep. They are not split by model.</p>
+              <p className="subtitle">These are the monthly brand totals supplied for {brand}. They are not split by model.</p>
             </div>
             <span className="incompleteLegend"><span className="legendDot" />Forecast</span>
           </div>
@@ -494,7 +491,7 @@ export default function ModelWiseClient({ brand }) {
             <div className="eyebrow">MODEL PERFORMANCE</div>
             <h2>{brand} · {modelLabel} · {salesType.length === 0 ? "All" : salesType.join(", ")} · {title} · {year.length === 0 ? "All" : year.join(", ")}</h2>
           </div>
-          <span className="incompleteLegend"><span className="legendDot" />Incomplete / Forecast</span>
+          <span className="incompleteLegend"><span className="legendDot" />Forecast</span>
         </div>
 
         {error && <div className="errorBanner">{error}</div>}
@@ -532,11 +529,6 @@ export default function ModelWiseClient({ brand }) {
             </>
           ) : (
             <>
-              <div className="modelTableHeader">
-                <div>Model</div>
-                <div>Units</div>
-                <div>Share</div>
-              </div>
               <div className="modelTableHeader">
                 <div>Model</div>
                 <div>Units</div>
