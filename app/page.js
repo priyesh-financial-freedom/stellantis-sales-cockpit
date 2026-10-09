@@ -58,8 +58,8 @@ function periodDisplay(period, value, customFrom, customTo) {
 export default function Home() {
   const [period, setPeriod] = useState("Monthly");
   const [scopeSelections, setScopeSelections] = useState([]);
-  const [periodValue, setPeriodValue] = useState("All");
-  const [year, setYear] = useState("2026");
+  const [periodValue, setPeriodValue] = useState(["All"]);
+  const [year, setYear] = useState(["2026"]);
   const [metricSelections, setMetricSelections] = useState([]);
   const [customFrom, setCustomFrom] = useState("");
   const [customTo, setCustomTo] = useState("");
@@ -125,10 +125,7 @@ export default function Home() {
 
   function handlePeriodChange(nextPeriod) {
     setPeriod(nextPeriod);
-    if (nextPeriod === "Monthly") setPeriodValue("All");
-    else if (nextPeriod === "Quarterly") setPeriodValue("All");
-    else if (nextPeriod === "Half-Yearly") setPeriodValue("All");
-    else setPeriodValue("All");
+    setPeriodValue(["All"]);
   }
 
   const selection = useMemo(
@@ -152,13 +149,20 @@ export default function Home() {
     return HALF_YEARS.slice(1).map((label) => ({ label, value: label }));
   }, [period]);
 
+  const allPeriodValuesSelected = periodValue.includes("All") || (breakdownOptions.length > 0 && breakdownOptions.every(option => periodValue.includes(option.value)));
+  const selectedPeriodBreakdowns = allPeriodValuesSelected
+    ? breakdownOptions
+    : breakdownOptions.filter(option => periodValue.includes(option.value));
+  const allYearsSelected = year.includes("All") || year.length === 0 || YEARS.slice(1).every(item => year.includes(item));
+  const selectedYears = allYearsSelected ? YEARS.slice(1) : year.filter(item => item !== "All");
   const showBreakdown =
-    (periodValue === "All" && breakdownOptions.length > 0) || year === "All";
+    (breakdownOptions.length > 0 && (allPeriodValuesSelected || selectedPeriodBreakdowns.length > 1 || selectedYears.length > 1)) ||
+    allYearsSelected || selectedYears.length > 1;
 
   const breakdownViews = useMemo(() => {
     if (!showBreakdown) return [];
 
-    const years = year === "All" ? ["2024", "2025", "2026"] : [year];
+    const years = selectedYears;
 
     if (periodValue === "All" && breakdownOptions.length > 0) {
       return years.flatMap((selectedYear) =>
@@ -191,7 +195,7 @@ export default function Home() {
     }
 
     return [];
-  }, [showBreakdown, breakdownOptions, rows, period, periodValue, year, customFrom, customTo]);
+  }, [showBreakdown, breakdownOptions, selectedPeriodBreakdowns, allPeriodValuesSelected, allYearsSelected, selectedYears, rows, period, periodValue, year, customFrom, customTo]);
   const metricColumns = metricSelections.length === 0
     ? Object.values(metricMap)
     : metricSelections.flatMap(item =>
@@ -354,21 +358,26 @@ export default function Home() {
               <input type="date" value={customTo} onChange={(e) => setCustomTo(e.target.value)} />
             </div>
           ) : (
-            <select value={periodValue} onChange={(e) => setPeriodValue(e.target.value)}>
-              {periodOptions.map((item, index) => (
-                <option key={item} value={period === "Monthly" && index > 0 ? index : item}>
-                  {item}
-                </option>
-              ))}
-            </select>
+            {period === "Annual" ? (
+              <div className="periodStaticValue">All</div>
+            ) : (
+              <MultiSelect
+                label=""
+                options={periodOptions.filter(item => item !== "All")}
+                value={periodValue}
+                onChange={(next) => setPeriodValue(next.length ? next : ["All"])}
+              />
+            )}
           )}
         </div>
 
         <div className="filter">
-          <label>Year</label>
-          <select value={year} onChange={(e) => setYear(e.target.value)}>
-            {YEARS.map((item) => <option key={item}>{item}</option>)}
-          </select>
+          <MultiSelect
+            label="Year"
+            options={YEARS.slice(1)}
+            value={year}
+            onChange={(next) => setYear(next.length ? next : ["All"])}
+          />
         </div>
 
         <div className="filter">
@@ -386,7 +395,7 @@ export default function Home() {
           <div>
             <div className="eyebrow">MANAGEMENT VIEW</div>
             <h2>
-              {period} · {scopeSelections.length === 0 ? "All" : scopeSelections.join(", ")} · {periodDisplay(period, periodValue, customFrom, customTo)} · {year}
+              {period} · {scopeSelections.length === 0 ? "All" : scopeSelections.join(", ")} · {periodDisplay(period, periodValue.length === 1 ? periodValue[0] : `${periodValue.length} selected`, customFrom, customTo)} · {year.includes("All") ? "All" : year.join(", ")}
             </h2>
           </div>
           <span className="incompleteLegend">
