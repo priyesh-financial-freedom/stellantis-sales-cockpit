@@ -166,6 +166,8 @@ export default function ModelWiseClient({ brand }) {
   const [customFrom, setCustomFrom] = useState("2026-01-01");
   const [customTo, setCustomTo] = useState("2026-12-31");
   const [rows, setRows] = useState([]);
+  const [brandBookings, setBrandBookings] = useState([]);
+  const [brandBookingsError, setBrandBookingsError] = useState("");
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState("");
@@ -205,6 +207,30 @@ export default function ModelWiseClient({ brand }) {
     fetchData();
     return () => { active = false; };
   }, []);
+
+  useEffect(() => {
+    let active = true;
+    async function loadBrandBookings() {
+      try {
+        setBrandBookingsError("");
+        const { data, error } = await supabase
+          .from("sales_cockpit_brand_monthly_bookings")
+          .select("brand,sales_year,sales_month,units,source")
+          .eq("brand", brand)
+          .order("sales_year", { ascending: true })
+          .order("sales_month", { ascending: true });
+        if (error) throw error;
+        if (active) setBrandBookings(data || []);
+      } catch (err) {
+        if (active) {
+          setBrandBookings([]);
+          setBrandBookingsError(err.message || "Unable to load brand monthly bookings.");
+        }
+      }
+    }
+    loadBrandBookings();
+    return () => { active = false; };
+  }, [brand]);
 
   const periodOptions = useMemo(() => {
     if (period === "Monthly") return MONTH_OPTIONS;
@@ -284,6 +310,14 @@ export default function ModelWiseClient({ brand }) {
     periodMonths(period, periodValue, Number(row.sales_year), customFrom, customTo).includes(Number(row.sales_month))
   );
   const bookingsDataMissing = selectedSalesTypeSet.has("Bookings") && !hasSelectedModelData;
+  const brandBookingRows = useMemo(() => {
+    const selectedYearValues = year.length === 0 || year.includes("All") ? MODEL_YEARS.map(Number) : year.map(Number);
+    return brandBookings
+      .filter(row => selectedYearValues.includes(Number(row.sales_year)))
+      .filter(row => periodMonths(period, periodValue, Number(row.sales_year), customFrom, customTo).includes(Number(row.sales_month)))
+      .sort((a, b) => Number(a.sales_year) - Number(b.sales_year) || Number(a.sales_month) - Number(b.sales_month));
+  }, [brandBookings, year, period, periodValue, customFrom, customTo]);
+  const bookingsOnly = salesType.length === 1 && salesType[0] === "Bookings";
 
   const summary = useMemo(() => {
     if (showBreakdown) return null;
@@ -418,6 +452,43 @@ export default function ModelWiseClient({ brand }) {
         </div>
       </section>
 
+      {bookingsOnly ? (
+        <section className="summary">
+          <div className="sectionHeading">
+            <div>
+              <div className="eyebrow">BRAND-LEVEL BOOKINGS</div>
+              <h2>{brand} · Monthly bookings · {year.length === 0 ? "All years" : year.join(", ")}</h2>
+              <p className="subtitle">These are the monthly brand totals supplied for Jeep. They are not split by model.</p>
+            </div>
+            <span className="incompleteLegend"><span className="legendDot" />Incomplete / Forecast</span>
+          </div>
+          {brandBookingsError ? (
+            <div className="errorBanner">Brand monthly bookings could not be loaded. The database table may not yet be available: {brandBookingsError}</div>
+          ) : brandBookingRows.length === 0 ? (
+            <div className="infoBanner"><strong>No brand-level monthly bookings found for this selection.</strong> Upload the monthly brand totals in Data Entry or check the selected year and period.</div>
+          ) : (
+            <div className="tableCard modelTableCard">
+              <div className="modelBreakdownHeader" style={{ gridTemplateColumns: "1fr 1fr 1.2fr 1fr" }}>
+                <div>Year</div><div>Month</div><div>Bookings</div><div>Status</div>
+              </div>
+              {brandBookingRows.map((row) => {
+                const rowStatus = getStatus("Monthly", String(row.sales_month), String(row.sales_year));
+                return (
+                  <div className="modelBreakdownRow" key={row.sales_year + "-" + row.sales_month} style={{ gridTemplateColumns: "1fr 1fr 1.2fr 1fr" }}>
+                    <div>{row.sales_year}</div>
+                    <div>{MONTH_OPTIONS[Number(row.sales_month)]}</div>
+                    <div className={valueClass(rowStatus, row.units)}>{formatNumber(row.units)}</div>
+                    <div className={statusClass(rowStatus) + " statusText"}>{statusLabel(rowStatus)}</div>
+                  </div>
+                );
+              })}
+              <div className="modelBreakdownRow modelTotalRow" style={{ gridTemplateColumns: "1fr 1fr 1.2fr 1fr" }}>
+                <div className="scopeName">TOTAL</div><div>Selected periods</div><div>{formatNumber(brandBookingRows.reduce((sum, row) => sum + (Number(row.units) || 0), 0))}</div><div>Brand total</div>
+              </div>
+            </div>
+          )}
+        </section>
+      ) : (
       <section className="summary">
         <div className="sectionHeading">
           <div>
@@ -431,7 +502,7 @@ export default function ModelWiseClient({ brand }) {
         {bookingsDataMissing && (
           <div className="infoBanner">
             <strong>No model-level bookings data is loaded for this selection.</strong>
-            The previous daily records contain brand-level bookings only, so they cannot be used as model bookings. Upload monthly bookings by model in Data Entry to populate this table. Annual totals below are calendar-year totals (January–December), not an April–March financial year.
+            The supplied bookings are brand-level totals and are shown separately when Bookings is selected alone. Upload monthly bookings by model if you want model-level bookings. Annual totals below are calendar-year totals (January–December), not an April–March financial year.
           </div>
         )}
 
@@ -491,7 +562,7 @@ export default function ModelWiseClient({ brand }) {
           )}
         </div>
       </section>
-
+      )}
       <footer>
         <span>Stellantis Sales Cockpit</span><span>•</span><span>Model data: 2021–2026 · monthly source records</span>
       </footer>
