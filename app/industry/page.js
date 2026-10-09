@@ -331,7 +331,7 @@ export default function IndustryPage() {
                   <div className="scopeName">{segmentSelection.length === 0 ? "Industry" : segmentLabel}</div>
                   <div>{formatIndustryNumber(r.units)}</div>
                   <div>{r.total ? ((r.units / r.total) * 100).toFixed(1) + "%" : "—"}</div>
-                  <div className="industryStatusBadge">{status}</div>
+                  <div className={incomplete ? "industryStatusBadge" : "industryCompletedBadge"}>{status}</div>
                 </div>
               );
             })}
