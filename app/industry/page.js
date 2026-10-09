@@ -95,9 +95,8 @@ export default function IndustryPage() {
     const periodStart = new Date(yearNumber, startMonth - 1, 1);
     const periodEnd = new Date(yearNumber, endMonth, 0);
 
-    if (periodStart > now) return "FORECAST · INCOMPLETE";
-    if (periodEnd >= now || (yearNumber === now.getFullYear() && endMonth === 12 && period === "Annual")) return "INCOMPLETE";
-    return "ACTUAL / COMPLETE";
+    if (periodEnd >= now || periodStart > now) return "FORECAST";
+    return "COMPLETED";
   }
 
 
@@ -324,7 +323,7 @@ export default function IndustryPage() {
             <div className="industryBreakdownHeader"><div>Year</div><div>Period</div><div>{segmentSelection.length === 0 ? "Industry" : "Segment"}</div><div>Units</div><div>Share</div><div>Status</div></div>
             {breakdownRows.map(r => {
               const status = getStatusForPeriod(r.year, r.period);
-              const incomplete = status !== "ACTUAL / COMPLETE";
+              const incomplete = status !== "COMPLETED";
               return (
                 <div className={"industryBreakdownRow" + (incomplete ? " industryIncompleteRow" : "") + (period === "Monthly" ? " clickableIndustryRow" : "")} key={r.key} onClick={period === "Monthly" ? () => setSelectedMonth(r.year + "-" + String(MONTHS.indexOf(r.period) + 1).padStart(2, "0") + "-01") : undefined}>
                   <div className="scopeName">{r.year}</div>
