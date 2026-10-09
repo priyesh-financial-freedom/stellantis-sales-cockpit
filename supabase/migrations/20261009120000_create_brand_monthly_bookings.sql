@@ -11,8 +11,12 @@ create table if not exists public.sales_cockpit_brand_monthly_bookings (
 );
 alter table public.sales_cockpit_brand_monthly_bookings enable row level security;
 grant select, insert, update, delete on public.sales_cockpit_brand_monthly_bookings to anon, authenticated;
-create policy if not exists "Allow public read brand monthly bookings" on public.sales_cockpit_brand_monthly_bookings for select to anon, authenticated using (true);
-create policy if not exists "Allow public insert brand monthly bookings" on public.sales_cockpit_brand_monthly_bookings for insert to anon, authenticated with check (true);
-create policy if not exists "Allow public update brand monthly bookings" on public.sales_cockpit_brand_monthly_bookings for update to anon, authenticated using (true) with check (true);
-create policy if not exists "Allow public delete brand monthly bookings" on public.sales_cockpit_brand_monthly_bookings for delete to anon, authenticated using (true);
+drop policy if exists "Allow public read brand monthly bookings" on public.sales_cockpit_brand_monthly_bookings;
+create policy "Allow public read brand monthly bookings" on public.sales_cockpit_brand_monthly_bookings for select to anon, authenticated using (true);
+drop policy if exists "Allow public insert brand monthly bookings" on public.sales_cockpit_brand_monthly_bookings;
+create policy "Allow public insert brand monthly bookings" on public.sales_cockpit_brand_monthly_bookings for insert to anon, authenticated with check (true);
+drop policy if exists "Allow public update brand monthly bookings" on public.sales_cockpit_brand_monthly_bookings;
+create policy "Allow public update brand monthly bookings" on public.sales_cockpit_brand_monthly_bookings for update to anon, authenticated using (true) with check (true);
+drop policy if exists "Allow public delete brand monthly bookings" on public.sales_cockpit_brand_monthly_bookings;
+create policy "Allow public delete brand monthly bookings" on public.sales_cockpit_brand_monthly_bookings for delete to anon, authenticated using (true);
 grant usage, select on sequence public.sales_cockpit_brand_monthly_bookings_id_seq to anon, authenticated;
