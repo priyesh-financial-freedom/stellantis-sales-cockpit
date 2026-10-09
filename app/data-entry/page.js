@@ -11,8 +11,8 @@ import MultiSelect from "../../components/MultiSelect";
 
 const BRANDS = ["Jeep", "Citroën", "SAARC"];
 const MODEL_BRANDS = ["Jeep", "Citroën"];
-const SALES_TYPES = ["All", "Retail", "Wholesale"];
-const DATASETS = ["Daily Sales", "Model Monthly", "Industry History", "Manufacturer History", "Retail Sales"];
+const SALES_TYPES = ["All", "Bookings", "Retail", "Wholesale"];
+const DATASETS = ["Model Monthly", "Industry History", "Manufacturer History"];
 
 function csvEscape(value) {
   const text = value === null || value === undefined ? "" : String(value);
@@ -298,7 +298,7 @@ function todayString() {
 }
 
 export default function DataEntryPage() {
-  const [dataset, setDataset] = useState("Daily Sales");
+  const [dataset, setDataset] = useState("Model Monthly");
   const [brand, setBrand] = useState("Jeep");
   const [salesType, setSalesType] = useState("Retail");
   const [date, setDate] = useState(todayString());
@@ -360,7 +360,7 @@ export default function DataEntryPage() {
 
   async function save() {
     try {
-      if (dataset === "Retail Sales") throw new Error("Retail Sales is a derived export view; import Daily Sales records instead.");
+      if (dataset === "Retail Sales" || dataset === "Daily Sales") throw new Error("Daily Sales entry has been retired. Use Model Monthly for Bookings, Retail and Wholesale.");
       setSaving(true); setError(""); setMessage("");
       if (dataset === "Daily Sales") {
         if (!date) throw new Error("Please select a date.");
@@ -396,9 +396,8 @@ export default function DataEntryPage() {
           setMessage("Model monthly record added.");
         }
       }
-      if (dataset === "Daily Sales") clearClientCache(SALES_CACHE_KEY);
-      else if (dataset === "Model Monthly") clearClientCache(MODEL_CACHE_KEY);
-      setMessage(count + " validated record" + (count === 1 ? "" : "s") + " imported. Matching records were updated; new keys were inserted.");
+      if (dataset === "Model Monthly") clearClientCache(MODEL_CACHE_KEY);
+      setMessage("Model monthly record saved.");
       await loadRecent();
     } catch (err) {
       setError(err.message || "Unable to save data.");
@@ -579,7 +578,7 @@ export default function DataEntryPage() {
         } else if (dataset === "Model Monthly") {
           const monthNum = Number(row.sales_month);
           if (!MODEL_BRANDS.includes(row.brand)) rowErrors.push("Row " + line + ": brand must be Jeep or Citroën.");
-          if (!["Retail", "Wholesale"].includes(row.sales_type)) rowErrors.push("Row " + line + ": sales_type must be Retail or Wholesale.");
+          if (!["Bookings", "Retail", "Wholesale"].includes(row.sales_type)) rowErrors.push("Row " + line + ": sales_type must be Bookings, Retail or Wholesale.");
           if (!(MODEL_NAMES[row.brand] || []).includes(row.model_name)) rowErrors.push("Row " + line + ": model_name is not in the selected brand's model master.");
           if (!integer(row.sales_year) || Number(row.sales_year) < 2021 || Number(row.sales_year) > 2035) rowErrors.push("Row " + line + ": sales_year must be a valid year.");
           if (!integer(row.sales_month) || monthNum < 1 || monthNum > 12) rowErrors.push("Row " + line + ": sales_month must be 1–12.");
@@ -664,8 +663,7 @@ export default function DataEntryPage() {
         count += 1;
       }
       setMessage(count + " record" + (count === 1 ? "" : "s") + " imported.");
-      if (dataset === "Daily Sales") clearClientCache(SALES_CACHE_KEY);
-      else clearClientCache(MODEL_CACHE_KEY);
+      if (dataset === "Model Monthly") clearClientCache(MODEL_CACHE_KEY);
       await loadRecent();
     } catch (err) {
       setError(err.message || "Import failed.");
@@ -675,18 +673,17 @@ export default function DataEntryPage() {
     }
   }
 
-  const columns = dataset === "Daily Sales" ? ["Date", "TD", "Bookings", "Retail", "Wholesale"] : ["Model", "Year", "Month", "Units"];
+  const columns = ["Model", "Sales Type", "Year", "Month", "Units"];
   const recentRows = useMemo(() => recent, [recent]);
 
   return (
     <main className="cockpit">
       <header className="header">
-        <div><div className="eyebrow">STELLANTIS INDIA · DATA MANAGEMENT</div><h1>Data Entry</h1><p className="subtitle">Enter, import and export Sales Cockpit data</p></div>
+        <div><div className="eyebrow">STELLANTIS INDIA · DATA MANAGEMENT</div><h1>Data Entry</h1><p className="subtitle">Upload monthly model-level Bookings, Retail and Wholesale; export Industry and Manufacturer history</p></div>
         <div className="headerStatus"><span className="statusDot" /> Data connected</div>
       </header>
 
       <nav className="cockpitNav">
-        <Link href="/">Sales Cockpit</Link>
         <Link href="/model-wise/jeep">Jeep Model Wise</Link>
         <Link href="/model-wise/citroen">Citroën Model Wise</Link>
         <Link className="active" href="/data-entry">Data Entry</Link>
@@ -758,10 +755,8 @@ export default function DataEntryPage() {
         <div className="sectionHeading"><div><div className="eyebrow">RECENT RECORDS</div><h2>Latest {dataset.toLowerCase()}</h2></div></div>
         <div className="recentTable">
           <div className="recentHeader">{columns.map((column) => <div key={column}>{column}</div>)}</div>
-          {recentRows.map((row, index) => dataset === "Daily Sales" ? (
-            <div className="recentRow" key={row.brand + row.sales_date + index}><div>{row.sales_date}</div><div>{row.test_drives ?? "—"}</div><div>{row.bookings ?? "—"}</div><div>{row.retail ?? "—"}</div><div>{row.wholesale ?? "—"}</div></div>
-          ) : (
-            <div className="recentRow" key={row.model_name + row.sales_year + row.sales_month + index}><div>{row.model_name}</div><div>{row.sales_year}</div><div>{MODEL_PERIODS[row.sales_month - 1]}</div><div>{row.units ?? "—"}</div></div>
+          {recentRows.map((row, index) => (
+            <div className="recentRow" key={row.model_name + row.sales_type + row.sales_year + row.sales_month + index}><div>{row.model_name}</div><div>{row.sales_type}</div><div>{row.sales_year}</div><div>{MODEL_PERIODS[row.sales_month - 1]}</div><div>{row.units ?? "—"}</div></div>
           ))}
         </div>
       </section>}
