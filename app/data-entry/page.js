@@ -77,11 +77,17 @@ const TEMPLATE_SCHEMAS = {
   },
 };
 
-function downloadTemplate(dataset) {
+function downloadTemplate(dataset, salesTypeOverride = null) {
   const schema = TEMPLATE_SCHEMAS[dataset];
   if (!schema) return;
-  const sample = schema.columns.map((column) => schema.sample[column.key] ?? "");
-  downloadCsv(schema.filename, [
+  const sampleRow = salesTypeOverride && dataset === "Model Monthly"
+    ? { ...schema.sample, sales_type: salesTypeOverride }
+    : schema.sample;
+  const sample = schema.columns.map((column) => sampleRow[column.key] ?? "");
+  const filename = salesTypeOverride && dataset === "Model Monthly"
+    ? "template-model-monthly-" + salesTypeOverride.toLowerCase() + ".csv"
+    : schema.filename;
+  downloadCsv(filename, [
     schema.columns.map((column) => csvEscape(column.label)).join(","),
     sample.map(csvEscape).join(","),
   ].join("\n"));
@@ -716,7 +722,15 @@ export default function DataEntryPage() {
           <button type="button" className="secondaryButton" onClick={() => exportData("csv")}>Export CSV</button>
           <button type="button" className="secondaryButton" onClick={() => exportData("excel")}>Export Excel</button>
           <button type="button" className="secondaryButton" onClick={() => exportData("pdf")}>Export PDF</button>
-          {templateAvailable && <button type="button" className="secondaryButton" onClick={() => downloadTemplate(dataset)}>Download Template</button>}
+          {dataset === "Model Monthly" ? (
+            <>
+              <button type="button" className="secondaryButton" onClick={() => downloadTemplate(dataset, "Bookings")}>Bookings Template</button>
+              <button type="button" className="secondaryButton" onClick={() => downloadTemplate(dataset, "Retail")}>Retail Template</button>
+              <button type="button" className="secondaryButton" onClick={() => downloadTemplate(dataset, "Wholesale")}>Wholesale Template</button>
+            </>
+          ) : templateAvailable ? (
+            <button type="button" className="secondaryButton" onClick={() => downloadTemplate(dataset)}>Download Template</button>
+          ) : null}
           <button type="button" className="secondaryButton" onClick={() => fileRef.current?.click()} disabled={!templateAvailable || saving}>Import CSV</button>
           <input ref={fileRef} type="file" accept=".csv,text/csv" hidden onChange={(e) => importData(e.target.files?.[0])} />
         </div>
