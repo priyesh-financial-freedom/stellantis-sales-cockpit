@@ -618,7 +618,7 @@ export default function DataEntryPage() {
           }
         } else if (dataset === "Model Monthly") {
           const salesMonth = Number(row.sales_month);
-          if (!MODEL_BRANDS.includes(row.brand) || !SALES_TYPES.includes(row.sales_type) || !row.model_name || !row.sales_year || salesMonth < 1 || salesMonth > 12) {
+          if (!MODEL_BRANDS.includes(row.brand) || !["Bookings", "Retail", "Wholesale"].includes(row.sales_type) || !row.model_name || !row.sales_year || salesMonth < 1 || salesMonth > 12) {
             throw new Error("Model monthly CSV has invalid required fields.");
           }
           const payload = { brand: row.brand, sales_type: row.sales_type, model_name: row.model_name, sales_year: Number(row.sales_year), sales_month: salesMonth, units: numberOrNull(row.units) };
@@ -740,7 +740,7 @@ export default function DataEntryPage() {
           </div>
         ) : (
           <div className="entryGrid">
-            <div className="filter"><label>Brand</label><select value={brand} onChange={(e) => setBrand(e.target.value)}>{BRANDS.map((item) => <option key={item}>{item}</option>)}</select></div>
+            <div className="filter"><label>Brand</label><select value={brand} onChange={(e) => setBrand(e.target.value)}>{MODEL_BRANDS.map((item) => <option key={item}>{item}</option>)}</select></div>
             <div className="filter"><label>Sales Type</label><select value={salesType} onChange={(e) => setSalesType(e.target.value)}>{SALES_TYPES.filter((item) => item !== "All").map((item) => <option key={item}>{item}</option>)}</select></div>
             <div className="filter"><label>Model</label><select value={model} onChange={(e) => setModel(e.target.value)}>{models.map((item) => <option key={item}>{item}</option>)}</select></div>
             <div className="filter"><label>Year</label><select value={year} onChange={(e) => setYear(e.target.value)}>{MODEL_YEARS.map((item) => <option key={item}>{item}</option>)}</select></div>
