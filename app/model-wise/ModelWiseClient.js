@@ -5,6 +5,7 @@ import Link from "next/link";
 import { MODEL_NAMES, MODEL_YEARS, MODEL_CACHE_KEY, buildModelSummary, loadModelMonthlyData } from "../../lib/modelData";
 import { readClientCache } from "../../lib/clientCache";
 import MultiSelect from "../../components/MultiSelect";
+import { supabase } from "../../lib/supabase";
 
 const PERIODS = ["Monthly", "Quarterly", "Half-Yearly", "Annual", "Custom Period"];
 const SALES_TYPES = ["Bookings", "Retail", "Wholesale"];
@@ -211,7 +212,7 @@ export default function ModelWiseClient({ brand }) {
     let active = true;
     async function loadLegacyBookings() {
       try {
-        const { data, error } = await (await import("../../lib/supabase")).supabase
+        const { data, error } = await supabase
           .from("sales_cockpit_daily")
           .select("brand,sales_date,bookings")
           .eq("brand", brand)
