@@ -266,7 +266,7 @@ export default function IndustryPage() {
       <div className="headerStatus"><span className={(loading || refreshing) ? "statusDot loadingDot" : "statusDot"} />{loading ? "Loading industry data" : refreshing ? "Refreshing industry data" : error ? "Data error" : "Industry data connected"}</div>
     </header>
     <nav className="cockpitNav">
-      <Link href="/">Sales Cockpit</Link><Link href="/model-wise/jeep">Jeep Model Wise</Link><Link href="/model-wise/citroen">Citroën Model Wise</Link>
+      <Link href="/model-wise/jeep">Jeep Model Wise</Link><Link href="/model-wise/citroen">Citroën Model Wise</Link>
       <Link className="active" href="/industry">Industry</Link><Link href="/industry/manufacturers">Manufacturer History</Link><Link href="/data-entry">Data Entry</Link>
     </nav>
 
