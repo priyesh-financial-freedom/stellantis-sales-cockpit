@@ -36,6 +36,57 @@ function downloadCsv(filename, csv) {
   URL.revokeObjectURL(url);
 }
 
+
+const TEMPLATE_SCHEMAS = {
+  "Daily Sales": {
+    filename: "template-daily-sales.csv",
+    columns: [
+      { key: "brand", label: "brand" }, { key: "sales_date", label: "sales_date" },
+      { key: "test_drives", label: "test_drives" }, { key: "bookings", label: "bookings" },
+      { key: "retail", label: "retail" }, { key: "wholesale", label: "wholesale" },
+    ],
+    sample: { brand: "Jeep", sales_date: "2026-10-01", test_drives: 10, bookings: 5, retail: 3, wholesale: 2 },
+  },
+  "Model Monthly": {
+    filename: "template-model-monthly.csv",
+    columns: [
+      { key: "brand", label: "brand" }, { key: "sales_type", label: "sales_type" },
+      { key: "model_name", label: "model_name" }, { key: "sales_year", label: "sales_year" },
+      { key: "sales_month", label: "sales_month" }, { key: "units", label: "units" },
+    ],
+    sample: { brand: "Jeep", sales_type: "Retail", model_name: "Compass", sales_year: 2026, sales_month: 10, units: 25 },
+  },
+  "Industry History": {
+    filename: "template-industry-history.csv",
+    columns: [
+      { key: "sales_period", label: "sales_period" }, { key: "segment", label: "segment" },
+      { key: "units", label: "units" }, { key: "period_type", label: "period_type" },
+      { key: "source_workbook", label: "source_workbook" }, { key: "source_sheet", label: "source_sheet" },
+    ],
+    sample: { sales_period: "2027-01-01", segment: "A-SUV", units: 30482, period_type: "MONTHLY", source_workbook: "Industry Forecast 2027", source_sheet: "2027 Estimate" },
+  },
+  "Manufacturer History": {
+    filename: "template-manufacturer-history.csv",
+    columns: [
+      { key: "sales_period", label: "sales_period" }, { key: "manufacturer", label: "manufacturer" },
+      { key: "units", label: "units" }, { key: "period_type", label: "period_type" },
+      { key: "record_type", label: "record_type" }, { key: "source_workbook", label: "source_workbook" },
+      { key: "source_sheet", label: "source_sheet" },
+    ],
+    sample: { sales_period: "2027-01-01", manufacturer: "MARUTI SUZUKI", units: 100000, period_type: "MONTHLY", record_type: "FORECAST", source_workbook: "Manufacturer Forecast 2027", source_sheet: "2027 Estimate" },
+  },
+};
+
+function downloadTemplate(dataset) {
+  const schema = TEMPLATE_SCHEMAS[dataset];
+  if (!schema) return;
+  const sample = schema.columns.map((column) => schema.sample[column.key] ?? "");
+  downloadCsv(schema.filename, [
+    schema.columns.map((column) => csvEscape(column.label)).join(","),
+    sample.map(csvEscape).join(","),
+  ].join("\\n"));
+}
+
 function htmlEscape(value) {
   return String(value === null || value === undefined ? "" : value)
     .replace(/&/g, "&amp;")
@@ -277,7 +328,7 @@ export default function DataEntryPage() {
     const selectedBrands = filterBrands.length ? filterBrands : MODEL_BRANDS;
     return [...new Set(selectedBrands.flatMap(item => MODEL_NAMES[item] || []))];
   }, [filterBrands]);
-  const exportOnly = dataset === "Industry History" || dataset === "Manufacturer History" || dataset === "Retail Sales";
+  const exportOnly = dataset === "Retail Sales";\n  const templateAvailable = Boolean(TEMPLATE_SCHEMAS[dataset]);
 
   useEffect(() => {
     if (dataset === "Model Monthly" && !MODEL_BRANDS.includes(brand)) setBrand("Jeep");
@@ -308,7 +359,7 @@ export default function DataEntryPage() {
 
   async function save() {
     try {
-      if (exportOnly) throw new Error("Import is available for Daily Sales and Model Monthly only.");
+      if (exportOnly) throw new Error("Import is available for the supported dataset templates only.");
       setSaving(true); setError(""); setMessage("");
       if (dataset === "Daily Sales") {
         if (!date) throw new Error("Please select a date.");
@@ -505,6 +556,50 @@ export default function DataEntryPage() {
       setSaving(true); setError(""); setMessage("");
       const imported = parseCsv(await file.text());
       if (!imported.length) throw new Error("The CSV contains no data rows.");
+      const requiredHeaders = TEMPLATE_SCHEMAS[dataset]?.columns.map((column) => column.key) || [];
+      const actualHeaders = Object.keys(imported[0] || {});
+      const missingHeaders = requiredHeaders.filter((header) => !actualHeaders.includes(header));
+      if (missingHeaders.length) throw new Error("Template columns are missing: " + missingHeaders.join(", ") + ". Download the current template and keep its header names unchanged.");
+
+      // Validate the complete file before making any database changes.
+      const rowErrors = [];
+      const seenKeys = new Set();
+      imported.forEach((row, index) => {
+        const line = index + 2;
+        const integer = (value) => value !== "" && /^\\d+$/.test(String(value).trim());
+        const validMonthDate = (value) => /^\\d{4}-(0[1-9]|1[0-2])-01$/.test(String(value || "").trim());
+        let key = "";
+        if (dataset === "Daily Sales") {
+          if (!BRANDS.includes(row.brand)) rowErrors.push("Row " + line + ": brand must be Jeep, Citroën or SAARC.");
+          if (!/^\\d{4}-\\d{2}-\\d{2}$/.test(row.sales_date || "") || Number.isNaN(Date.parse(row.sales_date))) rowErrors.push("Row " + line + ": sales_date must use YYYY-MM-DD.");
+          ["test_drives", "bookings", "retail", "wholesale"].forEach((field) => { if (row[field] !== "" && !integer(row[field])) rowErrors.push("Row " + line + ": " + field + " must be a non-negative whole number or blank."); });
+          key = [row.brand, row.sales_date].join("|");
+        } else if (dataset === "Model Monthly") {
+          const monthNum = Number(row.sales_month);
+          if (!MODEL_BRANDS.includes(row.brand)) rowErrors.push("Row " + line + ": brand must be Jeep or Citroën.");
+          if (!["Retail", "Wholesale"].includes(row.sales_type)) rowErrors.push("Row " + line + ": sales_type must be Retail or Wholesale.");
+          if (!(MODEL_NAMES[row.brand] || []).includes(row.model_name)) rowErrors.push("Row " + line + ": model_name is not in the selected brand's model master.");
+          if (!integer(row.sales_year) || Number(row.sales_year) < 2021 || Number(row.sales_year) > 2035) rowErrors.push("Row " + line + ": sales_year must be a valid year.");
+          if (!integer(row.sales_month) || monthNum < 1 || monthNum > 12) rowErrors.push("Row " + line + ": sales_month must be 1–12.");
+          if (!integer(row.units)) rowErrors.push("Row " + line + ": units must be a non-negative whole number.");
+          key = [row.brand, row.sales_type, row.model_name, row.sales_year, row.sales_month].join("|");
+        } else if (dataset === "Industry History") {
+          if (!validMonthDate(row.sales_period)) rowErrors.push("Row " + line + ": sales_period must be the first day of the month (YYYY-MM-01).");
+          if (!row.segment?.trim()) rowErrors.push("Row " + line + ": segment is required.");
+          if (!integer(row.units)) rowErrors.push("Row " + line + ": units must be a non-negative whole number.");
+          if (String(row.period_type).toUpperCase() !== "MONTHLY") rowErrors.push("Row " + line + ": period_type must be MONTHLY.");
+          key = [row.sales_period, row.segment].join("|");
+        } else if (dataset === "Manufacturer History") {
+          if (!validMonthDate(row.sales_period)) rowErrors.push("Row " + line + ": sales_period must be the first day of the month (YYYY-MM-01).");
+          if (!row.manufacturer?.trim()) rowErrors.push("Row " + line + ": manufacturer is required.");
+          if (!integer(row.units)) rowErrors.push("Row " + line + ": units must be a non-negative whole number.");
+          if (!String(row.period_type).trim()) rowErrors.push("Row " + line + ": period_type is required.");
+          key = [row.sales_period, row.manufacturer].join("|");
+        }
+        if (key && seenKeys.has(key)) rowErrors.push("Row " + line + ": duplicate key within this file (" + key + ").");
+        if (key) seenKeys.add(key);
+      });
+      if (rowErrors.length) throw new Error("Import validation failed (" + rowErrors.length + " issue(s)). " + rowErrors.slice(0, 8).join(" "));
       let count = 0;
 
       for (const row of imported) {
@@ -520,7 +615,7 @@ export default function DataEntryPage() {
             const result = await supabase.from("sales_cockpit_daily").insert(payload);
             if (result.error) throw result.error;
           }
-        } else {
+        } else if (dataset === "Model Monthly") {
           const salesMonth = Number(row.sales_month);
           if (!MODEL_BRANDS.includes(row.brand) || !SALES_TYPES.includes(row.sales_type) || !row.model_name || !row.sales_year || salesMonth < 1 || salesMonth > 12) {
             throw new Error("Model monthly CSV has invalid required fields.");
@@ -537,6 +632,32 @@ export default function DataEntryPage() {
             const result = await supabase.from("sales_cockpit_model_monthly").insert(payload);
             if (result.error) throw result.error;
           }
+        } else if (dataset === "Industry History") {
+          const payload = {
+            sales_period: row.sales_period, segment: row.segment.trim(), units: Number(row.units),
+            period_type: "MONTHLY", source_workbook: row.source_workbook || "CSV Import",
+            source_sheet: row.source_sheet || "Imported",
+          };
+          const found = await supabase.from("industry_segment_history_v2").select("sales_period,segment")
+            .eq("sales_period", payload.sales_period).eq("segment", payload.segment).maybeSingle();
+          if (found.error) throw found.error;
+          const result = found.data
+            ? await supabase.from("industry_segment_history_v2").update(payload).eq("sales_period", payload.sales_period).eq("segment", payload.segment)
+            : await supabase.from("industry_segment_history_v2").insert(payload);
+          if (result.error) throw result.error;
+        } else if (dataset === "Manufacturer History") {
+          const payload = {
+            sales_period: row.sales_period, manufacturer: row.manufacturer.trim(), units: Number(row.units),
+            period_type: row.period_type.toUpperCase(), record_type: row.record_type || "ACTUAL",
+            source_workbook: row.source_workbook || "CSV Import", source_sheet: row.source_sheet || "Imported",
+          };
+          const found = await supabase.from("industry_manufacturer_history_v2").select("sales_period,manufacturer")
+            .eq("sales_period", payload.sales_period).eq("manufacturer", payload.manufacturer).maybeSingle();
+          if (found.error) throw found.error;
+          const result = found.data
+            ? await supabase.from("industry_manufacturer_history_v2").update(payload).eq("sales_period", payload.sales_period).eq("manufacturer", payload.manufacturer)
+            : await supabase.from("industry_manufacturer_history_v2").insert(payload);
+          if (result.error) throw result.error;
         }
         count += 1;
       }
@@ -591,7 +712,7 @@ export default function DataEntryPage() {
       </section>
 
       <section className="dataEntryActions">
-        <div><div className="eyebrow">IMPORT / EXPORT</div><h2>Manage data</h2><p className="subtitle">CSV import updates a matching record or creates a new one. Historical Industry and Manufacturer datasets are export-only.</p></div>
+        <div><div className="eyebrow">IMPORT / EXPORT</div><h2>Manage data</h2><p className="subtitle">Download the dataset template, fill its sample row/columns in Excel, save as CSV UTF-8, then upload. The complete file is validated before any writes; matching records are updated and new keys inserted.</p></div>
         <div className="actionButtons">
           <button type="button" className="secondaryButton" onClick={() => exportData("csv")}>Export CSV</button>
           <button type="button" className="secondaryButton" onClick={() => exportData("excel")}>Export Excel</button>
@@ -606,7 +727,7 @@ export default function DataEntryPage() {
         {exportOnly ? (
           <div className="dataScopeNotice">
             <h3>{dataset}</h3>
-            <p>This historical dataset is maintained as a read-only analytical source. Use <strong>Export CSV</strong>, <strong>Export Excel</strong> or <strong>Export PDF</strong> to download the selected year.</p>
+            <p>Manual entry is disabled for this dataset. You can export the selected year, or use Download Template and Import CSV to load validated monthly records.</p>
           </div>
         ) : dataset === "Daily Sales" ? (
           <div className="entryGrid">
