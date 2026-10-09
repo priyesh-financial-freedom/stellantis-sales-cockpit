@@ -164,9 +164,9 @@ export default function Home() {
 
     const years = selectedYears;
 
-    if (periodValue === "All" && breakdownOptions.length > 0) {
+    if (breakdownOptions.length > 0 && (allPeriodValuesSelected || selectedPeriodBreakdowns.length > 0)) {
       return years.flatMap((selectedYear) =>
-        breakdownOptions.map((option) => ({
+        selectedPeriodBreakdowns.map((option) => ({
           label: option.label,
           yearLabel: selectedYear,
           view: buildSalesView(rows, {
@@ -180,9 +180,9 @@ export default function Home() {
       );
     }
 
-    if (year === "All") {
+    if (allYearsSelected) {
       return years.map((selectedYear) => ({
-        label: periodDisplay(period, periodValue, customFrom, customTo),
+        label: periodDisplay(period, periodValue.length === 1 ? periodValue[0] : `${periodValue.length} selected`, customFrom, customTo),
         yearLabel: selectedYear,
         view: buildSalesView(rows, {
           period,
@@ -357,17 +357,15 @@ export default function Home() {
               <input type="date" value={customFrom} onChange={(e) => setCustomFrom(e.target.value)} />
               <input type="date" value={customTo} onChange={(e) => setCustomTo(e.target.value)} />
             </div>
+          ) : period === "Annual" ? (
+            <div className="periodStaticValue">All</div>
           ) : (
-            {period === "Annual" ? (
-              <div className="periodStaticValue">All</div>
-            ) : (
-              <MultiSelect
-                label=""
-                options={periodOptions.filter(item => item !== "All")}
-                value={periodValue}
-                onChange={(next) => setPeriodValue(next.length ? next : ["All"])}
-              />
-            )}
+            <MultiSelect
+              label=""
+              options={periodOptions.filter(item => item !== "All")}
+              value={periodValue}
+              onChange={(next) => setPeriodValue(next.length ? next : ["All"])}
+            />
           )}
         </div>
 
