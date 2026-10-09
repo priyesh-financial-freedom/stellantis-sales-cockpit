@@ -50,7 +50,7 @@ function periodMonths(period, value, year, customFrom, customTo) {
   const values = Array.isArray(value) ? value : [value];
   if (period === "Custom Period") return customMonthsForYear(year, customFrom, customTo);
   if (values.length === 0 || values.includes("All")) return Array.from({ length: 12 }, (_, i) => i + 1);
-  if (period === "Monthly") return [...new Set(values.map(Number))];
+  if (period === "Monthly") return [...new Set(values.map(item => Number(item) || MONTH_OPTIONS.indexOf(item)))].filter(month => month >= 1 && month <= 12);
   if (period === "Quarterly") return [...new Set(values.flatMap(item => {
     const q = Number(String(item).slice(1));
     return [(q - 1) * 3 + 1, (q - 1) * 3 + 2, (q - 1) * 3 + 3];
@@ -166,6 +166,7 @@ export default function ModelWiseClient({ brand }) {
   const [customFrom, setCustomFrom] = useState("2026-01-01");
   const [customTo, setCustomTo] = useState("2026-12-31");
   const [rows, setRows] = useState([]);
+  const [legacyBookings, setLegacyBookings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState("");
@@ -205,6 +206,30 @@ export default function ModelWiseClient({ brand }) {
     fetchData();
     return () => { active = false; };
   }, []);
+
+  useEffect(() => {
+    let active = true;
+    async function loadLegacyBookings() {
+      try {
+        const { data, error } = await (await import("../../lib/supabase")).supabase
+          .from("sales_cockpit_daily")
+          .select("brand,sales_date,bookings")
+          .eq("brand", brand)
+          .gte("sales_date", "2024-01-01")
+          .lte("sales_date", "2026-12-31")
+          .order("sales_date", { ascending: true });
+        if (error) throw error;
+        if (active) setLegacyBookings((data || []).map((row) => {
+          const [sales_year, sales_month] = row.sales_date.split("-").map(Number);
+          return { sales_year, sales_month, units: Number(row.bookings) || 0 };
+        }));
+      } catch {
+        if (active) setLegacyBookings([]);
+      }
+    }
+    loadLegacyBookings();
+    return () => { active = false; };
+  }, [brand]);
 
   const periodOptions = useMemo(() => {
     if (period === "Monthly") return MONTH_OPTIONS;
@@ -274,6 +299,15 @@ export default function ModelWiseClient({ brand }) {
   }, [rows, brand, salesType, detailYears, models, period, periodValue, customFrom, customTo]);
 
   const totalGrand = Object.values(totalValue).reduce((sum, value) => sum + value, 0);
+
+  const legacyBookingRows = useMemo(() => {
+    if (!salesType.includes("Bookings")) return [];
+    const selectedYearValues = year.length === 0 || year.includes("All") ? MODEL_YEARS.map(String) : year.map(String);
+    return legacyBookings
+      .filter(row => selectedYearValues.includes(String(row.sales_year)))
+      .filter(row => periodMonths(period, periodValue, row.sales_year, customFrom, customTo).includes(row.sales_month))
+      .sort((a, b) => a.sales_year - b.sales_year || a.sales_month - b.sales_month);
+  }, [legacyBookings, salesType, year, period, periodValue, customFrom, customTo]);
 
   const summary = useMemo(() => {
     if (showBreakdown) return null;
@@ -475,6 +509,33 @@ export default function ModelWiseClient({ brand }) {
           )}
         </div>
       </section>
+
+      {salesType.includes("Bookings") && legacyBookingRows.length > 0 && (
+        <section className="summary">
+          <div className="sectionHeading">
+            <div>
+              <div className="eyebrow">HISTORICAL BOOKINGS</div>
+              <h2>{brand} · Brand-level monthly bookings</h2>
+              <p className="subtitle">Rolled up from the existing daily records. These are brand totals, not model-level allocations.</p>
+            </div>
+          </div>
+          <div className="tableCard">
+            <div className="modelBreakdownHeader" style={{ gridTemplateColumns: "1fr 1fr 1fr" }}>
+              <div>Year</div><div>Month</div><div>Bookings</div>
+            </div>
+            {legacyBookingRows.map((row) => (
+              <div className="modelBreakdownRow" key={row.sales_year + "-" + row.sales_month} style={{ gridTemplateColumns: "1fr 1fr 1fr" }}>
+                <div>{row.sales_year}</div>
+                <div>{MONTH_OPTIONS[row.sales_month]}</div>
+                <div>{formatNumber(row.units)}</div>
+              </div>
+            ))}
+            <div className="modelBreakdownRow modelTotalRow" style={{ gridTemplateColumns: "1fr 1fr 1fr" }}>
+              <div className="scopeName">TOTAL</div><div>Selected periods</div><div>{formatNumber(legacyBookingRows.reduce((sum, row) => sum + row.units, 0))}</div>
+            </div>
+          </div>
+        </section>
+      )}
 
       <footer>
         <span>Stellantis Sales Cockpit</span><span>•</span><span>Model data: 2021–2026 · monthly source records</span>
