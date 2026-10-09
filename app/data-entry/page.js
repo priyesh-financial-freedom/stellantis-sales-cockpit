@@ -5,7 +5,6 @@ import Link from "next/link";
 import { supabase } from "../../lib/supabase";
 import { MODEL_NAMES, MODEL_YEARS, MODEL_PERIODS } from "../../lib/modelData";
 import { clearClientCache } from "../../lib/clientCache";
-import { SALES_CACHE_KEY } from "../../lib/salesData";
 import { MODEL_CACHE_KEY } from "../../lib/modelData";
 import MultiSelect from "../../components/MultiSelect";
 
