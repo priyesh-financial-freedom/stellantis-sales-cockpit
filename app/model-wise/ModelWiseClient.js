@@ -5,7 +5,6 @@ import Link from "next/link";
 import { MODEL_NAMES, MODEL_YEARS, MODEL_CACHE_KEY, buildModelSummary, loadModelMonthlyData } from "../../lib/modelData";
 import { readClientCache } from "../../lib/clientCache";
 import MultiSelect from "../../components/MultiSelect";
-import { supabase } from "../../lib/supabase";
 
 const PERIODS = ["Monthly", "Quarterly", "Half-Yearly", "Annual", "Custom Period"];
 const SALES_TYPES = ["Bookings", "Retail", "Wholesale"];
@@ -275,6 +274,16 @@ export default function ModelWiseClient({ brand }) {
   }, [rows, brand, salesType, detailYears, models, period, periodValue, customFrom, customTo]);
 
   const totalGrand = Object.values(totalValue).reduce((sum, value) => sum + value, 0);
+  const selectedYearSet = new Set(year.length === 0 || year.includes("All") ? MODEL_YEARS.map(Number) : year.map(Number));
+  const selectedSalesTypeSet = new Set(salesType.length === 0 || salesType.includes("All") ? SALES_TYPES : salesType);
+  const hasSelectedModelData = rows.some((row) =>
+    row.brand === brand &&
+    selectedSalesTypeSet.has(row.sales_type) &&
+    selectedYearSet.has(Number(row.sales_year)) &&
+    models.includes(row.model_name) &&
+    periodMonths(period, periodValue, Number(row.sales_year), customFrom, customTo).includes(Number(row.sales_month))
+  );
+  const bookingsDataMissing = selectedSalesTypeSet.has("Bookings") && !hasSelectedModelData;
 
   const summary = useMemo(() => {
     if (showBreakdown) return null;
@@ -419,6 +428,12 @@ export default function ModelWiseClient({ brand }) {
         </div>
 
         {error && <div className="errorBanner">{error}</div>}
+        {bookingsDataMissing && (
+          <div className="infoBanner">
+            <strong>No model-level bookings data is loaded for this selection.</strong>
+            The previous daily records contain brand-level bookings only, so they cannot be used as model bookings. Upload monthly bookings by model in Data Entry to populate this table. Annual totals below are calendar-year totals (January–December), not an April–March financial year.
+          </div>
+        )}
 
         <div className="tableCard modelTableCard">
           {showBreakdown ? (
