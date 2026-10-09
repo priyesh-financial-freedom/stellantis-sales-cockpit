@@ -58,12 +58,24 @@ export default function ManufacturerHistoryPage() {
   const total=grouped.reduce((s,r)=>s+r.units,0);
   function rowStatus(row) {
     const now = new Date();
-    const date = String(row.sales_period).slice(0, 10);
-    const y = Number(date.slice(0,4)), m = Number(date.slice(5,7));
-    if (!y || !m) return "COMPLETED";
-    const start = new Date(y, m - 1, 1);
-    const end = new Date(y, m, 0);
-    return end >= new Date(now.getFullYear(), now.getMonth(), now.getDate()) || start > now ? "FORECAST" : "COMPLETED";
+    const yearNumber = Number(row.year);
+    let startMonth = 1;
+    let endMonth = 12;
+    if (period === "Monthly") {
+      const monthIndex = MONTHS.indexOf(row.label);
+      if (monthIndex >= 0) startMonth = endMonth = monthIndex + 1;
+    } else if (period === "Quarterly" && /^Q[1-4]$/.test(row.label)) {
+      startMonth = (Number(row.label.slice(1)) - 1) * 3 + 1;
+      endMonth = startMonth + 2;
+    } else if (period === "Half-Yearly" && /^H[12]$/.test(row.label)) {
+      startMonth = row.label === "H1" ? 1 : 7;
+      endMonth = row.label === "H1" ? 6 : 12;
+    } else if (period === "Custom Period") {
+      if (!customFrom || !customTo) return "FORECAST";
+      return customTo < now.toISOString().slice(0,10) ? "COMPLETED" : "FORECAST";
+    }
+    const periodEnd = new Date(yearNumber, endMonth, 0);
+    return periodEnd < new Date(now.getFullYear(), now.getMonth(), now.getDate()) ? "COMPLETED" : "FORECAST";
   }
 
   const breakdownRows=useMemo(()=>{
@@ -141,7 +153,7 @@ export default function ManufacturerHistoryPage() {
     <section><div className="sectionHeading"><div><h2>Manufacturer movement</h2><p className="subtitle">Source: comp.xlsx · Master-Sep26</p></div><button type="button" className="secondaryButton" onClick={exportManufacturer} disabled={loading || !filtered.length}>Export CSV</button></div><div className="tableCard">
       {breakdownRows.length ? <>
         <div className="industryBreakdownHeader"><div>Year</div><div>Period</div><div>{manufacturerSelection.length===0?"Industry":"Manufacturer"}</div><div>Units</div><div>Share</div><div>Status</div></div>
-        {breakdownRows.map(r=>{ const status=rowStatus({sales_period: r.key}); const forecast=status==="FORECAST"; return <div className={"industryBreakdownRow " + (forecast ? "industryIncompleteRow" : "industryCompletedRow")} key={r.key}>
+        {breakdownRows.map(r=>{ const status=rowStatus(r); const forecast=status==="FORECAST"; return <div className={"industryBreakdownRow " + (forecast ? "industryIncompleteRow" : "industryCompletedRow")} key={r.key}>
           <div>{r.year}</div><div>{r.label}</div><div className="scopeName">{manufacturerSelection.length===0?"Industry":manufacturerLabel}</div><div>{fmt(r.units)}</div><div>{r.total?((r.units/r.total)*100).toFixed(1)+"%":"—"}</div><div className={forecast?"industryStatusBadge":"industryCompletedBadge"}>{forecast?"Forecast":"Completed"}</div>
         </div>})}
       </> : <div className="industryEmpty">{loading?"Loading...":"No manufacturer data is available for the selected filters."}</div>}
