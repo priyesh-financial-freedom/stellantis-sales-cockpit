@@ -2817,3 +2817,231 @@ h2 {
   letter-spacing: .45px;
   text-transform: uppercase;
 }
+
+
+/* Global dark mode: preserve the existing layout and brand accents while
+   changing surfaces, borders, typography and form controls. */
+.themeToggle {
+  position: fixed;
+  right: 18px;
+  bottom: 18px;
+  z-index: 1000;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  min-height: 42px;
+  padding: 0 15px;
+  border: 1px solid #d7dde5;
+  border-radius: 999px;
+  background: #ffffff;
+  color: #243244;
+  box-shadow: 0 5px 22px rgba(15, 23, 42, 0.16);
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background-color .18s ease, color .18s ease, border-color .18s ease, box-shadow .18s ease;
+}
+.themeToggle:hover {
+  box-shadow: 0 7px 26px rgba(15, 23, 42, 0.22);
+}
+.themeToggleIcon {
+  font-size: 18px;
+  line-height: 1;
+}
+.themeToggle:focus-visible {
+  outline: 3px solid #60a5fa;
+  outline-offset: 3px;
+}
+
+html[data-theme="dark"] body {
+  background: #10151d;
+  color: #e7edf5;
+  color-scheme: dark;
+}
+html[data-theme="dark"] .cockpit,
+html[data-theme="dark"] main,
+html[data-theme="dark"] section,
+html[data-theme="dark"] .page,
+html[data-theme="dark"] .pageShell {
+  color: #e7edf5;
+}
+html[data-theme="dark"] h1,
+html[data-theme="dark"] h2,
+html[data-theme="dark"] h3,
+html[data-theme="dark"] h4,
+html[data-theme="dark"] strong,
+html[data-theme="dark"] .scopeName,
+html[data-theme="dark"] .modelTableRow,
+html[data-theme="dark"] .modelBreakdownRow {
+  color: #edf3fb;
+}
+html[data-theme="dark"] .subtitle,
+html[data-theme="dark"] .eyebrow,
+html[data-theme="dark"] .dataFreshness,
+html[data-theme="dark"] .comparisonItems span,
+html[data-theme="dark"] .queryCard p,
+html[data-theme="dark"] .comparisonCard p,
+html[data-theme="dark"] footer {
+  color: #aab7c8;
+}
+html[data-theme="dark"] .filters,
+html[data-theme="dark"] .filterPanel,
+html[data-theme="dark"] .summary,
+html[data-theme="dark"] .card,
+html[data-theme="dark"] .statCard,
+html[data-theme="dark"] .tableCard,
+html[data-theme="dark"] .queryCard,
+html[data-theme="dark"] .comparisonCard,
+html[data-theme="dark"] .managementGrid > *,
+html[data-theme="dark"] .industryMonthSheet,
+html[data-theme="dark"] .industryMonthModels,
+html[data-theme="dark"] .dataEntryCard,
+html[data-theme="dark"] .uploadCard,
+html[data-theme="dark"] .multiSelectMenu,
+html[data-theme="dark"] .modalContent {
+  background: #19222e;
+  color: #e7edf5;
+  border-color: #303c4b;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, .14);
+}
+html[data-theme="dark"] .headerStatus,
+html[data-theme="dark"] .multiSelectButton,
+html[data-theme="dark"] .filter select,
+html[data-theme="dark"] .filter input,
+html[data-theme="dark"] .queryInput input,
+html[data-theme="dark"] input,
+html[data-theme="dark"] select,
+html[data-theme="dark"] textarea {
+  background: #111923;
+  color: #e7edf5;
+  border-color: #3a4656;
+}
+html[data-theme="dark"] input::placeholder,
+html[data-theme="dark"] textarea::placeholder {
+  color: #8f9caf;
+}
+html[data-theme="dark"] .tableHeader,
+html[data-theme="dark"] .modelTableHeader,
+html[data-theme="dark"] .modelBreakdownHeader,
+html[data-theme="dark"] .industryBreakdownHeader,
+html[data-theme="dark"] .industryMonthModelHeader,
+html[data-theme="dark"] .multiSelectQuickActions,
+html[data-theme="dark"] .multiSelectFooter {
+  background: #202c3a;
+  color: #aebbd0;
+  border-color: #344253;
+}
+html[data-theme="dark"] .tableRow,
+html[data-theme="dark"] .modelTableRow,
+html[data-theme="dark"] .modelBreakdownRow,
+html[data-theme="dark"] .industryBreakdownRow,
+html[data-theme="dark"] .industryMonthModelRow,
+html[data-theme="dark"] .comparisonItems > div,
+html[data-theme="dark"] .comparisonBlock,
+html[data-theme="dark"] .multiSelectOption {
+  border-color: #2d3948;
+}
+html[data-theme="dark"] .modelTotalRow,
+html[data-theme="dark"] .industryTotalRow,
+html[data-theme="dark"] .totalRow {
+  background: #1b3550;
+}
+html[data-theme="dark"] .nav a,
+html[data-theme="dark"] .nav button,
+html[data-theme="dark"] .tabs a,
+html[data-theme="dark"] .tabs button {
+  border-color: #344253;
+}
+html[data-theme="dark"] .nav a:not(.active),
+html[data-theme="dark"] .nav button:not(.active),
+html[data-theme="dark"] .tabs a:not(.active),
+html[data-theme="dark"] .tabs button:not(.active) {
+  background: #19222e;
+  color: #c6d5e8;
+}
+html[data-theme="dark"] .quickQueries button,
+html[data-theme="dark"] .secondaryButton,
+html[data-theme="dark"] .industryMonthClose,
+html[data-theme="dark"] .multiSelectQuickActions button {
+  background: #202c3a;
+  color: #d9e5f4;
+  border-color: #3a4656;
+}
+html[data-theme="dark"] .multiSelectOption:hover,
+html[data-theme="dark"] .quickQueries button:hover {
+  background: #26364a;
+}
+html[data-theme="dark"] .industryIncompleteRow,
+html[data-theme="dark"] .industryIncompleteRow > div {
+  background: #3a2028;
+  color: #ff9da8;
+}
+html[data-theme="dark"] .industryCompletedRow,
+html[data-theme="dark"] .industryCompletedRow > div {
+  background: #18352d;
+  color: #8ee0b4;
+}
+html[data-theme="dark"] .futureValue,
+html[data-theme="dark"] .incompleteStatus,
+html[data-theme="dark"] .industryStatusBadge {
+  color: #ff929d !important;
+}
+html[data-theme="dark"] .completedValue,
+html[data-theme="dark"] .completeStatus,
+html[data-theme="dark"] .industryCompletedBadge {
+  color: #86dfad !important;
+}
+html[data-theme="dark"] .infoBanner {
+  background: #1c3047;
+  color: #cfe4ff;
+  border-color: #345473;
+}
+html[data-theme="dark"] .errorBanner {
+  background: #3a2028;
+  color: #ffb4bd;
+  border-color: #743541;
+}
+html[data-theme="dark"] .themeToggle {
+  background: #1b2634;
+  color: #e7edf5;
+  border-color: #3a485b;
+  box-shadow: 0 5px 22px rgba(0, 0, 0, .42);
+}
+html[data-theme="dark"] .statusDot:not(.loadingDot) {
+  background: #d6e3f3;
+}
+html[data-theme="dark"] .tableCard,
+html[data-theme="dark"] .industryMonthSheet {
+  overflow: hidden;
+}
+html[data-theme="dark"] .industryMonthRow,
+html[data-theme="dark"] .industryMonthSegmentButton {
+  color: #e7edf5;
+  border-color: #303c4b;
+}
+html[data-theme="dark"] .industryMonthSegmentButton:hover {
+  background: #26364a;
+}
+html[data-theme="dark"] .industryMonthRow button,
+html[data-theme="dark"] .industryMonthSegmentButton button {
+  color: #e7edf5;
+}
+html[data-theme="dark"] .multiSelectButton .multiSelectSummary {
+  color: #e7edf5;
+}
+html[data-theme="dark"] .multiSelectQuickActions button.selected {
+  color: #93c5fd;
+}
+@media (max-width: 650px) {
+  .themeToggle {
+    right: 12px;
+    bottom: 12px;
+    min-height: 40px;
+    padding: 0 13px;
+    box-shadow: 0 4px 16px rgba(15, 23, 42, .2);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .themeToggle { transition: none; }
+}
