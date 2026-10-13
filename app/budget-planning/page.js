@@ -255,7 +255,7 @@ export default function BudgetPlanningPage() {
     }
   }
   function downloadBudgetTemplate(filename = "budget-planning-template.csv") {
-    const csv = [templateHeaders.map(csvEscape).join(","), ...templateRows.map(row => templateHeaders.map(header => csvEscape(row[header] ?? "")).join(","))].join("\r\n");
+    const csv = [templateHeaders.map(csvEscape).join(","), ...templateRows.map((row, index) => templateHeaders.map(header => header === "TTL" ? csvEscape("=SUM(E" + (index + 2) + ":P" + (index + 2) + ")") : csvEscape(row[header] ?? "")).join(","))].join("\r\n");
     const url = URL.createObjectURL(new Blob(["\ufeff", csv], { type: "text/csv;charset=utf-8;" }));
     const a = document.createElement("a"); a.href = url; a.download = filename; a.click(); URL.revokeObjectURL(url);
   }
@@ -310,7 +310,7 @@ export default function BudgetPlanningPage() {
       <div className="sectionHeading"><div><h2>Upload or update a budget version</h2><p>Download the monthly budget layout, fill in the figures across Jan–Dec, then upload it. Validation runs before anything is saved.</p></div></div>
       <div className="budgetUploadPanel">
         <div className="budgetUploadActions"><input ref={fileRef} type="file" accept=".csv,text/csv" onChange={e=>inspectFile(e.target.files?.[0] || null)} /><button className="secondaryButton" type="button" onClick={()=>downloadBudgetTemplate()}>Download budget template</button></div>
-        <p className="mutedText">Use the familiar monthly layout: Year, Version, Brand, Sales Type, Jan–Dec and TTL. Enter monthly units in the relevant month columns; leave unused months blank. TTL is for reference and is not imported. The older six-column CSV format is also supported.</p>
+        <p className="mutedText">Use the familiar monthly layout: Year, Version, Brand, Sales Type, Jan–Dec and TTL. Enter monthly units in the relevant month columns; leave unused months blank. TTL auto-calculates in Excel for checking and is not imported; the app calculates totals from monthly figures. The older six-column CSV format is also supported.</p>
         {file && <p className="mutedText">Selected file: <strong>{file.name}</strong></p>}
         {validation && <div className="validationSummary"><strong>{validation.valid.length} valid rows</strong><span>{validation.errors.length} validation errors</span></div>}
         {validation?.errors?.length > 0 && <div className="errorBanner validationErrors">{validation.errors.slice(0,12).map((error,i)=><div key={i}>{error}</div>)}{validation.errors.length>12 && <div>…and {validation.errors.length-12} more errors. Correct the file and upload again.</div>}</div>}
