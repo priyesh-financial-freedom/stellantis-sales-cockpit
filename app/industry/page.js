@@ -266,7 +266,7 @@ export default function IndustryPage() {
     </header>
     <nav className="cockpitNav">
       <Link href="/model-wise/jeep">Jeep Model Wise</Link><Link href="/model-wise/citroen">Citroën Model Wise</Link>
-      <Link className="active" href="/industry">Industry</Link><Link href="/industry/manufacturers">Manufacturer History</Link><Link href="/budget-planning">Budget Planning</Link><Link href="/data-entry">Data Entry</Link>
+      <Link className="active" href="/industry">Industry</Link><Link href="/industry/manufacturers">Manufacturer History</Link><Link href="/budget-planning">Budget Planning</Link><Link href="/data-entry">Data Entry</Link><Link href="/stellantis-network">Stellantis Network</Link>
     </nav>
 
     <section className="filters">
