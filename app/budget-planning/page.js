@@ -266,7 +266,7 @@ export default function BudgetPlanningPage() {
       <div className="headerStatus"><span className="statusDot" />{loading ? "Loading budget data" : "Budget data connected"}</div>
     </header>
     <nav className="cockpitNav">
-      <Link href="/model-wise/jeep">Jeep Model Wise</Link><Link href="/model-wise/citroen">Citroën Model Wise</Link><Link href="/industry">Industry</Link><Link href="/industry/manufacturers">Manufacturer History</Link><Link className="active" href="/budget-planning">Budget Planning</Link><Link href="/data-entry">Data Entry</Link>
+      <Link href="/model-wise/jeep">Jeep Model Wise</Link><Link href="/model-wise/citroen">Citroën Model Wise</Link><Link href="/industry">Industry</Link><Link href="/industry/manufacturers">Manufacturer History</Link><Link className="active" href="/budget-planning">Budget Planning</Link><Link href="/data-entry">Data Entry</Link><Link href="/stellantis-network">Stellantis Network</Link>
     </nav>
 
     <section className="filters budgetFilters budgetFiltersExpanded">
