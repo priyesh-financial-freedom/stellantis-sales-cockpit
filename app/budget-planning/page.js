@@ -28,6 +28,15 @@ function periodOptions(period) {
   if (period === "Half-Yearly") return HALVES;
   return ["All"];
 }
+function periodBucketFor(period, row) {
+  const month = Number(row.sales_month);
+  if (period === "Quarterly") return { key: `Q${Math.floor((month - 1) / 3) + 1}`, label: `Q${Math.floor((month - 1) / 3) + 1}`, order: Math.floor((month - 1) / 3) + 1 };
+  if (period === "Half-Yearly") return { key: month <= 6 ? "H1" : "H2", label: month <= 6 ? "H1" : "H2", order: month <= 6 ? 1 : 2 };
+  if (period === "Annual") return { key: "FY", label: "Full year", order: 1 };
+  if (period === "Custom Period") return { key: "CUSTOM", label: "Custom period", order: 1 };
+  return { key: String(month), label: MONTHS[month - 1], order: month };
+}
+
 const COLUMNS = [
   { key: "budget_year", label: "budget_year" },
   { key: "budget_version", label: "budget_version" },
@@ -144,18 +153,10 @@ export default function BudgetPlanningPage() {
   }), [periodRows]);
   const total = filtered.reduce((sum, r) => sum + Number(r.units || 0), 0);
   const presentMonths = new Set(filtered.map(r => `${r.budget_year}-${r.sales_month}`)).size;
-  function periodBucket(row) {
-    const month = Number(row.sales_month);
-    if (period === "Quarterly") return { key: `Q${Math.floor((month - 1) / 3) + 1}`, label: `Q${Math.floor((month - 1) / 3) + 1}`, order: Math.floor((month - 1) / 3) + 1 };
-    if (period === "Half-Yearly") return { key: month <= 6 ? "H1" : "H2", label: month <= 6 ? "H1" : "H2", order: month <= 6 ? 1 : 2 };
-    if (period === "Annual") return { key: "FY", label: "Full year", order: 1 };
-    if (period === "Custom Period") return { key: "CUSTOM", label: "Custom period", order: 1 };
-    return { key: String(month), label: MONTHS[month - 1], order: month };
-  }
   const aggregateRows = useMemo(() => {
     const groups = new Map();
     filtered.forEach(r => {
-      const bucket = periodBucket(r);
+      const bucket = periodBucketFor(period, r);
       const key = [r.budget_year, bucket.key, r.brand, r.sales_type].join("|");
       if (!groups.has(key)) groups.set(key, { budget_year: r.budget_year, period_key: bucket.key, period_label: bucket.label, period_order: bucket.order, brand: r.brand, sales_type: r.sales_type, units: 0, month_count: 0, version: r.budget_version });
       const item = groups.get(key);
