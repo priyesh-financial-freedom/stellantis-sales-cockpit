@@ -691,6 +691,7 @@ export default function DataEntryPage() {
       <nav className="cockpitNav">
         <Link href="/model-wise/jeep">Jeep Model Wise</Link>
         <Link href="/model-wise/citroen">Citroën Model Wise</Link>
+        <Link href="/budget-planning">Budget Planning</Link>
         <Link className="active" href="/data-entry">Data Entry</Link>
       </nav>
 
