@@ -144,15 +144,37 @@ export default function BudgetPlanningPage() {
   }), [periodRows]);
   const total = filtered.reduce((sum, r) => sum + Number(r.units || 0), 0);
   const presentMonths = new Set(filtered.map(r => `${r.budget_year}-${r.sales_month}`)).size;
+  function periodBucket(row) {
+    const month = Number(row.sales_month);
+    if (period === "Quarterly") return { key: `Q${Math.floor((month - 1) / 3) + 1}`, label: `Q${Math.floor((month - 1) / 3) + 1}`, order: Math.floor((month - 1) / 3) + 1 };
+    if (period === "Half-Yearly") return { key: month <= 6 ? "H1" : "H2", label: month <= 6 ? "H1" : "H2", order: month <= 6 ? 1 : 2 };
+    if (period === "Annual") return { key: "FY", label: "Full year", order: 1 };
+    if (period === "Custom Period") return { key: "CUSTOM", label: "Custom period", order: 1 };
+    return { key: String(month), label: MONTHS[month - 1], order: month };
+  }
+  const aggregateRows = useMemo(() => {
+    const groups = new Map();
+    filtered.forEach(r => {
+      const bucket = periodBucket(r);
+      const key = [r.budget_year, bucket.key, r.brand, r.sales_type].join("|");
+      if (!groups.has(key)) groups.set(key, { budget_year: r.budget_year, period_key: bucket.key, period_label: bucket.label, period_order: bucket.order, brand: r.brand, sales_type: r.sales_type, units: 0, month_count: 0, version: r.budget_version });
+      const item = groups.get(key);
+      item.units += Number(r.units || 0);
+      item.month_count += 1;
+    });
+    return [...groups.values()].sort((a,b) => a.budget_year-b.budget_year || a.period_order-b.period_order || a.brand.localeCompare(b.brand) || a.sales_type.localeCompare(b.sales_type));
+  }, [filtered, period]);
   const comparisonRows = useMemo(() => {
     const groups = new Map();
     periodRows.forEach(r => {
-      const key = [r.budget_year, r.sales_month, r.brand, r.sales_type].join("|");
-      if (!groups.has(key)) groups.set(key, { budget_year:r.budget_year, sales_month:r.sales_month, brand:r.brand, sales_type:r.sales_type, F0:null, F1:null, F2:null });
-      groups.get(key)[r.budget_version] = Number(r.units);
+      const bucket = periodBucket(r);
+      const key = [r.budget_year, bucket.key, r.brand, r.sales_type].join("|");
+      if (!groups.has(key)) groups.set(key, { budget_year:r.budget_year, period_key:bucket.key, period_label:bucket.label, period_order:bucket.order, brand:r.brand, sales_type:r.sales_type, F0:null, F1:null, F2:null });
+      const item = groups.get(key);
+      item[r.budget_version] = (item[r.budget_version] ?? 0) + Number(r.units);
     });
-    return [...groups.values()].sort((a,b) => a.budget_year-b.budget_year || a.sales_month-b.sales_month || a.brand.localeCompare(b.brand) || a.sales_type.localeCompare(b.sales_type));
-  }, [periodRows]);
+    return [...groups.values()].sort((a,b) => a.budget_year-b.budget_year || a.period_order-b.period_order || a.brand.localeCompare(b.brand) || a.sales_type.localeCompare(b.sales_type));
+  }, [periodRows, period]);
 
   async function inspectFile(nextFile) {
     setFile(nextFile); setMessage(""); setValidation(null);
@@ -214,15 +236,15 @@ export default function BudgetPlanningPage() {
       {loadError && <div className="errorBanner">Could not load budget data: {loadError}</div>}
       {message && <div className={message.startsWith("Import failed") ? "errorBanner" : "infoBanner"}>{message}</div>}
       <div className="tableCard budgetTable">
-        <div className="budgetTableHeader"><span>Month</span><span>Brand</span><span>Sales type</span><span>Units</span><span>Version</span></div>
-        {loading ? <div className="emptyState">Loading budget data…</div> : filtered.length ? filtered.map(r=><div className="budgetTableRow" key={r.id}><span>{MONTHS[r.sales_month-1]} {r.budget_year}</span><span>{r.brand}</span><span>{r.sales_type}</span><strong>{number(r.units)}</strong><span>{r.budget_version}</span></div>) : <div className="emptyState">No budget rows uploaded for the selected year, period and filters ({version}).</div>}
-        <div className="budgetTableTotal"><strong>TOTAL</strong><span>{filtered.length} rows</span><span></span><strong>{number(total)}</strong><span>{version}</span></div>
+        <div className="budgetTableHeader"><span>{period === "Monthly" ? "Month" : period === "Quarterly" ? "Quarter" : period === "Half-Yearly" ? "Half-year" : period === "Annual" ? "Year" : "Period"}</span><span>Brand</span><span>Sales type</span><span>Units</span><span>Version</span></div>
+        {loading ? <div className="emptyState">Loading budget data…</div> : aggregateRows.length ? aggregateRows.map((r,i)=><div className="budgetTableRow" key={`${r.budget_year}-${r.period_key}-${r.brand}-${r.sales_type}-${i}`}><span>{period === "Monthly" ? `${r.period_label} ${r.budget_year}` : period === "Annual" ? `FY ${r.budget_year}` : `${r.period_label} ${r.budget_year}`}</span><span>{r.brand}</span><span>{r.sales_type}</span><strong>{number(r.units)}</strong><span>{r.version}</span></div>) : <div className="emptyState">No budget rows uploaded for the selected year, period and filters ({version}).</div>}
+        <div className="budgetTableTotal"><strong>TOTAL</strong><span>{aggregateRows.length} rows</span><span></span><strong>{number(total)}</strong><span>{version}</span></div>
       </div>
     </section> : <section className="budgetSection">
       <div className="sectionHeading"><div><h2>Compare budget versions</h2><p>Compare F0, F1 and F2 month-by-month for the selected time frame. Missing versions remain blank rather than being treated as zero.</p></div><button className="secondaryButton" type="button" onClick={()=>downloadCsv("budget-version-comparison.csv", comparisonRows.map(r=>({budget_year:r.budget_year, sales_month:r.sales_month, brand:r.brand, sales_type:r.sales_type, F0:r.F0 ?? "", F1:r.F1 ?? "", F2:r.F2 ?? "", F1_vs_F0:r.F0 == null || r.F1 == null ? "" : r.F1-r.F0, F2_vs_F1:r.F1 == null || r.F2 == null ? "" : r.F2-r.F1})))}>Export comparison CSV</button></div>
       <div className="tableCard budgetTable budgetCompareTable">
-        <div className="budgetCompareHeader"><span>Month</span><span>Brand</span><span>Sales type</span><span>F0</span><span>F1</span><span>F2</span><span>F1 vs F0</span><span>F2 vs F1</span></div>
-        {loading ? <div className="emptyState">Loading budget data…</div> : comparisonRows.length ? comparisonRows.map(r=><div className="budgetCompareRow" key={`${r.budget_year}-${r.sales_month}-${r.brand}-${r.sales_type}`}><span>{MONTHS[r.sales_month-1]} {r.budget_year}</span><span>{r.brand}</span><span>{r.sales_type}</span><strong>{r.F0 == null ? "—" : number(r.F0)}</strong><strong>{r.F1 == null ? "—" : number(r.F1)}</strong><strong>{r.F2 == null ? "—" : number(r.F2)}</strong><span>{r.F0 == null || r.F1 == null ? "—" : number(r.F1-r.F0)}</span><span>{r.F1 == null || r.F2 == null ? "—" : number(r.F2-r.F1)}</span></div>) : <div className="emptyState">No budget versions match the selected filters.</div>}
+        <div className="budgetCompareHeader"><span>{period === "Monthly" ? "Month" : period === "Quarterly" ? "Quarter" : period === "Half-Yearly" ? "Half-year" : period === "Annual" ? "Year" : "Period"}</span><span>Brand</span><span>Sales type</span><span>F0</span><span>F1</span><span>F2</span><span>F1 vs F0</span><span>F2 vs F1</span></div>
+        {loading ? <div className="emptyState">Loading budget data…</div> : comparisonRows.length ? comparisonRows.map(r=><div className="budgetCompareRow" key={`${r.budget_year}-${r.sales_month}-${r.brand}-${r.sales_type}`}><span>{period === "Monthly" ? `${r.period_label} ${r.budget_year}` : period === "Annual" ? `FY ${r.budget_year}` : `${r.period_label} ${r.budget_year}`}</span><span>{r.brand}</span><span>{r.sales_type}</span><strong>{r.F0 == null ? "—" : number(r.F0)}</strong><strong>{r.F1 == null ? "—" : number(r.F1)}</strong><strong>{r.F2 == null ? "—" : number(r.F2)}</strong><span>{r.F0 == null || r.F1 == null ? "—" : number(r.F1-r.F0)}</span><span>{r.F1 == null || r.F2 == null ? "—" : number(r.F2-r.F1)}</span></div>) : <div className="emptyState">No budget versions match the selected filters.</div>}
       </div>
       <div className="budgetCompareTotals"><strong>Selected-period totals</strong>{VERSIONS.map(v=><span key={v}><b>{v}</b> {number(versionTotals.find(x=>x.version===v)?.total || 0)}</span>)}</div>
     </section>}
