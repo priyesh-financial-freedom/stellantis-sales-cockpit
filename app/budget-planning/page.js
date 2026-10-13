@@ -51,6 +51,7 @@ function validateRows(csvRows) {
   const valid = [], errors = [], seen = new Set();
   csvRows.slice(1).forEach((cells, i) => {
     const line = i + 2;
+    if (cells.every(value => !String(value ?? "").trim())) return;
     const raw = Object.fromEntries(required.map(key => [key, (cells[index[key]] ?? "").trim()]));
     const year = Number(raw.budget_year), month = Number(raw.sales_month), units = Number(raw.units);
     const version = raw.budget_version.toUpperCase(), brand = raw.brand, salesType = raw.sales_type;
@@ -129,7 +130,7 @@ export default function BudgetPlanningPage() {
     templateRows.push({ budget_year:y, budget_version:v, brand:b, sales_type:t, sales_month:m, units:"" });
   }
 
-  return <main className="appShell">
+  return <main className="cockpit">
     <header className="pageHeader">
       <div><div className="eyebrow">STELLANTIS INDIA · PLANNING</div><h1>Budget Planning</h1><p className="subtitle">Monthly Retail and Wholesale budgets · Jeep, Citroën and SAARC</p><div className="dataFreshness">F0 · Original plan &nbsp; / &nbsp; F1 · Mid-course correction &nbsp; / &nbsp; F2 · Final corrected budget</div></div>
       <div className="headerStatus"><span className="statusDot" />{loading ? "Loading budget data" : "Budget data connected"}</div>
