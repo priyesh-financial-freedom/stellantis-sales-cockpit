@@ -255,8 +255,8 @@ export default function BudgetPlanningPage() {
     }
   }
   function downloadBudgetTemplate(filename = "budget-planning-template.csv") {
-    const csv = [templateHeaders.map(csvEscape).join(","), ...templateRows.map(row => templateHeaders.map(header => csvEscape(row[header] ?? "")).join(","))].join("\\r\\n");
-    const url = URL.createObjectURL(new Blob(["\\ufeff", csv], { type: "text/csv;charset=utf-8;" }));
+    const csv = [templateHeaders.map(csvEscape).join(","), ...templateRows.map(row => templateHeaders.map(header => csvEscape(row[header] ?? "")).join(","))].join("\r\n");
+    const url = URL.createObjectURL(new Blob(["\ufeff", csv], { type: "text/csv;charset=utf-8;" }));
     const a = document.createElement("a"); a.href = url; a.download = filename; a.click(); URL.revokeObjectURL(url);
   }
 
