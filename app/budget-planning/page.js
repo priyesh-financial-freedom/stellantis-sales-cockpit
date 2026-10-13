@@ -53,6 +53,8 @@ function validateRows(csvRows) {
     const line = i + 2;
     if (cells.every(value => !String(value ?? "").trim())) return;
     const raw = Object.fromEntries(required.map(key => [key, (cells[index[key]] ?? "").trim()]));
+    // Blank units indicate an unused row in the pre-filled template.
+    if (raw.units === "") return;
     const year = Number(raw.budget_year), month = Number(raw.sales_month), units = Number(raw.units);
     const version = raw.budget_version.toUpperCase(), brand = raw.brand, salesType = raw.sales_type;
     const problems = [];
