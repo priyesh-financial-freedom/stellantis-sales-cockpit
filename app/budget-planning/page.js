@@ -126,8 +126,9 @@ export default function BudgetPlanningPage() {
   const selectedBrands = selectedAll(brands) ? BRANDS : brands;
   const selectedSalesTypes = selectedAll(salesTypes) ? SALES_TYPES : salesTypes;
   const selectedMonths = monthsForPeriod(period, periodValue);
-  const matchesPeriod = r => {
+  const periodRows = useMemo(() => rows.filter(r => {
     if (!selectedYears.includes(String(r.budget_year))) return false;
+    if (!selectedBrands.includes(r.brand) || !selectedSalesTypes.includes(r.sales_type)) return false;
     if (period === "Custom Period") {
       const key = `${r.budget_year}-${String(r.sales_month).padStart(2, "0")}`;
       if (customFrom && key < customFrom) return false;
@@ -135,8 +136,7 @@ export default function BudgetPlanningPage() {
       return true;
     }
     return selectedMonths.includes(Number(r.sales_month));
-  };
-  const periodRows = useMemo(() => rows.filter(r => matchesPeriod(r) && selectedBrands.includes(r.brand) && selectedSalesTypes.includes(r.sales_type)), [rows, years, brands, salesTypes, period, periodValue, customFrom, customTo]);
+  }), [rows, selectedYears, selectedBrands, selectedSalesTypes, period, selectedMonths, customFrom, customTo]);
   const filtered = useMemo(() => periodRows.filter(r => r.budget_version === version).sort((a,b) => a.budget_year-b.budget_year || a.sales_month-b.sales_month || a.brand.localeCompare(b.brand) || a.sales_type.localeCompare(b.sales_type)), [periodRows, version]);
   const versionTotals = useMemo(() => VERSIONS.map(v => {
     const matching = periodRows.filter(r => r.budget_version === v);
@@ -194,7 +194,7 @@ export default function BudgetPlanningPage() {
       <div className="filter"><label>Period</label><select value={period} onChange={e=>{setPeriod(e.target.value);setPeriodValue(["All"]);}}>{PERIODS.map(p=><option key={p}>{p}</option>)}</select></div>
       <div className="filter"><label>Period detail</label>{period === "Annual" ? <div className="budgetFilterStatic">Full year</div> : period === "Custom Period" ? <div className="budgetCustomRange"><input aria-label="Custom period start month" type="month" value={customFrom} onChange={e=>setCustomFrom(e.target.value)} /><input aria-label="Custom period end month" type="month" value={customTo} min={customFrom || undefined} onChange={e=>setCustomTo(e.target.value)} /></div> : <MultiSelect label="" options={periodOptions(period)} value={periodValue} onChange={setPeriodValue} />}</div>
       <div className="filter"><MultiSelect label="Budget year" options={["All", ...YEARS]} value={years} onChange={setYears} /></div>
-      <div className="filter"><label>Budget version</label><select value={version} onChange={e=>setVersion(e.target.value)}>{VERSIONS.map(v=><option key={v}>{v}</option>)}</select></div>
+      <div className="filter">{activeView === "detail" ? <><label>Budget version</label><select value={version} onChange={e=>setVersion(e.target.value)}>{VERSIONS.map(v=><option key={v}>{v}</option>)}</select></> : <><label>Budget version</label><div className="budgetFilterStatic">F0 vs F1 vs F2</div></>}</div>
       <div className="filter"><MultiSelect label="Brand / scope" options={["All", ...BRANDS]} value={brands} onChange={setBrands} /></div>
       <div className="filter"><MultiSelect label="Sales type" options={["All", ...SALES_TYPES]} value={salesTypes} onChange={setSalesTypes} /></div>
     </section>
@@ -204,7 +204,7 @@ export default function BudgetPlanningPage() {
     </div>
 
     <section className="summaryGrid budgetSummary">
-      <article className="statCard"><div className="eyebrow">SELECTED BUDGET</div><h2>{version} · {selectedYears.join(", ")}</h2><div className="statValue">{number(total)}</div><p>Units across selected brands, sales types and the selected period</p></article>
+      <article className="statCard"><div className="eyebrow">SELECTED BUDGET</div><h2>{activeView === "compare" ? `F0 / F1 / F2 · ${selectedYears.join(", ")}` : `${version} · ${selectedYears.join(", ")}`}</h2><div className="statValue">{number(activeView === "compare" ? versionTotals.reduce((sum, item) => sum + item.total, 0) : total)}</div><p>Units across selected brands, sales types and the selected period</p></article>
       <article className="statCard"><div className="eyebrow">MONTHS COVERED</div><div className="statValue">{presentMonths} / 12</div><p>Distinct year-month periods covered by the current filters</p></article>
       <article className="statCard"><div className="eyebrow">VERSION COMPARISON</div><div className="versionTotals">{versionTotals.map(item=><div key={item.version}><span>{item.version}</span><strong>{number(item.total)}</strong><small>{item.count ? "Uploaded" : "Not uploaded"}</small></div>)}</div></article>
     </section>
@@ -215,7 +215,7 @@ export default function BudgetPlanningPage() {
       {message && <div className={message.startsWith("Import failed") ? "errorBanner" : "infoBanner"}>{message}</div>}
       <div className="tableCard budgetTable">
         <div className="budgetTableHeader"><span>Month</span><span>Brand</span><span>Sales type</span><span>Units</span><span>Version</span></div>
-        {loading ? <div className="emptyState">Loading budget data…</div> : filtered.length ? filtered.map(r=><div className="budgetTableRow" key={r.id}><span>{MONTHS[r.sales_month-1]} {r.budget_year}</span><span>{r.brand}</span><span>{r.sales_type}</span><strong>{number(r.units)}</strong><span>{r.budget_version}</span></div>) : <div className="emptyState">No budget rows uploaded for {year} {version} with these filters.</div>}
+        {loading ? <div className="emptyState">Loading budget data…</div> : filtered.length ? filtered.map(r=><div className="budgetTableRow" key={r.id}><span>{MONTHS[r.sales_month-1]} {r.budget_year}</span><span>{r.brand}</span><span>{r.sales_type}</span><strong>{number(r.units)}</strong><span>{r.budget_version}</span></div>) : <div className="emptyState">No budget rows uploaded for the selected year, period and filters ({version}).</div>}
         <div className="budgetTableTotal"><strong>TOTAL</strong><span>{filtered.length} rows</span><span></span><strong>{number(total)}</strong><span>{version}</span></div>
       </div>
     </section> : <section className="budgetSection">
