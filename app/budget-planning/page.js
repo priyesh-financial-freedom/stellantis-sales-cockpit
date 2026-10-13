@@ -204,7 +204,7 @@ export default function BudgetPlanningPage() {
     </div>
 
     <section className="summaryGrid budgetSummary">
-      <article className="statCard"><div className="eyebrow">SELECTED BUDGET</div><h2>{activeView === "compare" ? `F0 / F1 / F2 · ${selectedYears.join(", ")}` : `${version} · ${selectedYears.join(", ")}`}</h2><div className="statValue">{number(activeView === "compare" ? versionTotals.reduce((sum, item) => sum + item.total, 0) : total)}</div><p>Units across selected brands, sales types and the selected period</p></article>
+      <article className="statCard"><div className="eyebrow">SELECTED BUDGET</div><h2>{activeView === "compare" ? `F0 / F1 / F2 · ${selectedYears.join(", ")}` : `${version} · ${selectedYears.join(", ")}`}</h2><div className="statValue">{activeView === "compare" ? "3 versions" : number(total)}</div><p>Units across selected brands, sales types and the selected period</p></article>
       <article className="statCard"><div className="eyebrow">MONTHS COVERED</div><div className="statValue">{presentMonths} / 12</div><p>Distinct year-month periods covered by the current filters</p></article>
       <article className="statCard"><div className="eyebrow">VERSION COMPARISON</div><div className="versionTotals">{versionTotals.map(item=><div key={item.version}><span>{item.version}</span><strong>{number(item.total)}</strong><small>{item.count ? "Uploaded" : "Not uploaded"}</small></div>)}</div></article>
     </section>
