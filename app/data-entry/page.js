@@ -693,6 +693,9 @@ export default function DataEntryPage() {
         <Link href="/model-wise/citroen">Citroën Model Wise</Link>
         <Link href="/budget-planning">Budget Planning</Link>
         <Link className="active" href="/data-entry">Data Entry</Link>
+        <Link href="/industry">Industry</Link>
+        <Link href="/industry/manufacturers">Manufacturer History</Link>
+        <Link href="/stellantis-network">Stellantis Network</Link>
       </nav>
 
       <section className="filters modelFilters">
