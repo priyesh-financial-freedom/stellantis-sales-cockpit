@@ -4,7 +4,7 @@ import { useMemo, useState } from "react";
 import Link from "next/link";
 
 const PAGE_SIZES = [25, 50, 100, 228];
-const formatNumber = value => value === null || value === undefined || value === "" ? "—" : Number.isFinite(Number(value)) ? new Intl.NumberFormat("en-IN", { maximumFractionDigits: 0 }).format(Number(value)) : String(value);
+const formatNumber = value => value === null || value === undefined || value === "" ? "—" : Number.isFinite(Number(value)) ? new Intl.NumberFormat("en-IN", { maximumFractionDigits: 0 }).format(Number(value)) : String(value);\nconst normalize = value => String(value ?? "").normalize("NFKC").trim().replace(/\\s+/g, " ").toLocaleLowerCase("en");
 
 export default function StellantisNetworkTable({ columns, records, sourceTotals, sourceFile }) {
   const [search, setSearch] = useState("");
@@ -17,7 +17,7 @@ export default function StellantisNetworkTable({ columns, records, sourceTotals,
   const [pageSize, setPageSize] = useState(25);
   const [page, setPage] = useState(1);
 
-  const brandOptions = useMemo(() => [...new Set(records.map(row => String(row[1] ?? "").trim()).filter(Boolean))].sort(), [records]);
+  // These are reconciliation indicators, not a certified physical-outlet count.\n  const networkAudit = useMemo(() => {\n    const cities = new Set(records.map(row => normalize(row[5])).filter(Boolean));\n    const locationKeys = records.map(row => `${normalize(row[4])}|${normalize(row[5])}`);\n    const uniqueDealerCityPairs = new Set(locationKeys.filter(key => key !== "|"));\n    const duplicateRowsBeyondPairs = records.length - uniqueDealerCityPairs.size;\n    const sbhRows = records.filter(row => normalize(row[8]) === "sbh").length;\n    const sbhDealerCityPairs = new Set(records.filter(row => normalize(row[8]) === "sbh").map(row => `${normalize(row[4])}|${normalize(row[5])}`).filter(key => key !== "|"));\n    return { cities: cities.size, uniqueDealerCityPairs: uniqueDealerCityPairs.size, duplicateRowsBeyondPairs, sbhRows, sbhDealerCityPairs: sbhDealerCityPairs.size };\n  }, [records]);\n\n  const brandOptions = useMemo(() => [...new Set(records.map(row => String(row[1] ?? "").trim()).filter(Boolean))].sort(), [records]);
   const formatOptions = useMemo(() => [...new Set(records.map(row => String(row[8] ?? "").trim()).filter(Boolean))].sort(), [records]);
   const cityOptions = useMemo(() => [...new Set(records.map(row => String(row[5] ?? "").trim()).filter(Boolean))].sort(), [records]);
   const facilityOptions = useMemo(() => [...new Set(records.flatMap(row => [row[6], row[7]]).map(value => String(value ?? "").trim()).filter(Boolean))].sort(), [records]);
@@ -89,9 +89,17 @@ export default function StellantisNetworkTable({ columns, records, sourceTotals,
     </nav>
 
     <section style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(185px, 1fr))", gap: 12, marginBottom: 20 }}>
-      <article style={panel}><div className="eyebrow">NETWORK ROWS</div><div style={{ fontSize: 28, fontWeight: 750, marginTop: 7 }}>{records.length.toLocaleString("en-IN")}</div><div className="subtitle" style={{ marginTop: 5, marginBottom: 0 }}>Dealer/location records, excluding the source totals row</div></article>
-      <article style={panel}><div className="eyebrow">CITROËN TOUCHPOINT TOTAL</div><div style={{ fontSize: 28, fontWeight: 750, marginTop: 7 }}>{formatNumber(sourceTotals?.[10])}</div><div className="subtitle" style={{ marginTop: 5, marginBottom: 0 }}>Value shown in the workbook totals row</div></article>
-      <article style={panel}><div className="eyebrow">JEEP TOUCHPOINT TOTAL</div><div style={{ fontSize: 28, fontWeight: 750, marginTop: 7 }}>{formatNumber(sourceTotals?.[11])}</div><div className="subtitle" style={{ marginTop: 5, marginBottom: 0 }}>Value shown in the workbook totals row</div></article>
+      <article style={panel}><div className="eyebrow">SOURCE ROWS</div><div style={{ fontSize: 28, fontWeight: 750, marginTop: 7 }}>{records.length.toLocaleString("en-IN")}</div><div className="subtitle" style={{ marginTop: 5, marginBottom: 0 }}>All original records retained</div></article>
+      <article style={panel}><div className="eyebrow">NORMALIZED CITIES</div><div style={{ fontSize: 28, fontWeight: 750, marginTop: 7 }}>{networkAudit.cities.toLocaleString("en-IN")}</div><div className="subtitle" style={{ marginTop: 5, marginBottom: 0 }}>Whitespace and case normalized</div></article>
+      <article style={panel}><div className="eyebrow">DISTINCT DEALER–CITY PAIRS</div><div style={{ fontSize: 28, fontWeight: 750, marginTop: 7 }}>{networkAudit.uniqueDealerCityPairs.toLocaleString("en-IN")}</div><div className="subtitle" style={{ marginTop: 5, marginBottom: 0 }}>Candidate locations, not yet certified outlets</div></article>
+      <article style={panel}><div className="eyebrow">REPEATED DEALER–CITY ROWS</div><div style={{ fontSize: 28, fontWeight: 750, marginTop: 7 }}>{networkAudit.duplicateRowsBeyondPairs.toLocaleString("en-IN")}</div><div className="subtitle" style={{ marginTop: 5, marginBottom: 0 }}>Require review; not auto-deleted</div></article>
+      <article style={panel}><div className="eyebrow">SBH SOURCE ROWS</div><div style={{ fontSize: 28, fontWeight: 750, marginTop: 7 }}>{networkAudit.sbhRows.toLocaleString("en-IN")}</div><div className="subtitle" style={{ marginTop: 5, marginBottom: 0 }}>{networkAudit.sbhDealerCityPairs.toLocaleString("en-IN")} distinct dealer–city pairs</div></article>
+      <article style={panel}><div className="eyebrow">CITROËN TOUCHPOINT TOTAL</div><div style={{ fontSize: 28, fontWeight: 750, marginTop: 7 }}>{formatNumber(sourceTotals?.[10])}</div><div className="subtitle" style={{ marginTop: 5, marginBottom: 0 }}>Workbook total; not a physical-location count</div></article>
+      <article style={panel}><div className="eyebrow">JEEP TOUCHPOINT TOTAL</div><div style={{ fontSize: 28, fontWeight: 750, marginTop: 7 }}>{formatNumber(sourceTotals?.[11])}</div><div className="subtitle" style={{ marginTop: 5, marginBottom: 0 }}>Workbook total; not a physical-location count</div></article>
+    </section>
+    <section style={{ ...panel, marginBottom: 18, borderColor: "#d97706" }}>
+      <h2 style={{ marginTop: 0 }}>Reconciliation note</h2>
+      <p className="subtitle" style={{ marginBottom: 0 }}>The workbook contains separate brand/facility rows for some shared SBH dealer-city combinations. This summary normalizes city and dealer-name whitespace/case and reports distinct dealer–city pairs as candidates only. It does not silently delete rows or claim that every pair represents exactly one physical outlet; facility types and dealer codes must be reviewed before certifying the final outlet count.</p>
     </section>
 
     <section style={{ ...panel, marginBottom: 18 }}>
@@ -124,6 +132,6 @@ export default function StellantisNetworkTable({ columns, records, sourceTotals,
         <button className="secondaryButton" type="button" disabled={currentPage >= pageCount} onClick={() => setPage(value => Math.min(pageCount, value + 1))}>Next</button>
       </div>
     </section>
-    <p className="subtitle">Data source is a point-in-time workbook snapshot. No records have been deduplicated, reclassified or inferred. Touchpoint totals are reproduced from the workbook, not interpreted as verified sales-only locations.</p>
+    <p className="subtitle">Data source is a point-in-time workbook snapshot. All original records remain available in the register. Reconciliation indicators are based on normalized dealer name + city and are not a substitute for confirming physical locations. Touchpoint totals are reproduced from the workbook, not interpreted as unique outlets.</p>
   </main>;
 }
