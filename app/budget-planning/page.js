@@ -73,30 +73,77 @@ function parseCsv(text) {
 function validateRows(csvRows) {
   if (!csvRows.length) return { valid: [], errors: ["The file is empty."] };
   const headers = csvRows[0].map(v => v.trim().toLowerCase());
-  const required = COLUMNS.map(c => c.key);
-  const missing = required.filter(key => !headers.includes(key));
-  if (missing.length) return { valid: [], errors: ["Missing required columns: " + missing.join(", ")] };
-  const index = Object.fromEntries(required.map(key => [key, headers.indexOf(key)]));
   const valid = [], errors = [], seen = new Set();
-  csvRows.slice(1).forEach((cells, i) => {
-    const line = i + 2;
-    if (cells.every(value => !String(value ?? "").trim())) return;
-    const raw = Object.fromEntries(required.map(key => [key, (cells[index[key]] ?? "").trim()]));
-    // Blank units indicate an unused row in the pre-filled template.
-    if (raw.units === "") return;
-    const year = Number(raw.budget_year), month = Number(raw.sales_month), units = Number(raw.units);
-    const version = raw.budget_version.toUpperCase(), brand = raw.brand, salesType = raw.sales_type;
+  const addRecord = (raw, line, month, unitsText) => {
+    const year = Number(raw.year), version = String(raw.version || "").toUpperCase();
+    const brand = String(raw.brand || "").trim();
+    const salesType = String(raw.salesType || "").trim();
+    const units = Number(unitsText);
     const problems = [];
-    if (!Number.isInteger(year) || year < 2024 || year > 2040) problems.push("budget_year must be 2024–2040");
-    if (!VERSIONS.includes(version)) problems.push("budget_version must be F0, F1 or F2");
-    if (!BRANDS.includes(brand)) problems.push("brand must be Jeep, Citroën or SAARC");
-    if (!SALES_TYPES.includes(salesType)) problems.push("sales_type must be Retail or Wholesale");
-    if (!Number.isInteger(month) || month < 1 || month > 12) problems.push("sales_month must be 1–12");
-    if (!Number.isFinite(units) || !Number.isInteger(units) || units < 0) problems.push("units must be a non-negative whole number");
+    if (!Number.isInteger(year) || year < 2024 || year > 2040) problems.push("Year must be 2024–2040");
+    if (!VERSIONS.includes(version)) problems.push("Version must be F0, F1 or F2");
+    if (!BRANDS.includes(brand)) problems.push("Brand must be Jeep, Citroën or SAARC");
+    if (!SALES_TYPES.includes(salesType)) problems.push("Sales Type must be Retail or Wholesale");
+    if (!Number.isInteger(month) || month < 1 || month > 12) problems.push("Month must be Jan–Dec (or 1–12 in the legacy format)");
+    if (!Number.isFinite(units) || !Number.isInteger(units) || units < 0) problems.push("Monthly units must be a non-negative whole number");
     const key = [year, version, brand, salesType, month].join("|");
-    if (seen.has(key)) problems.push("duplicate budget row in this file");
+    if (seen.has(key)) problems.push("Duplicate budget row for this year, version, brand, sales type and month");
     if (problems.length) errors.push("Row " + line + ": " + problems.join("; "));
-    else { seen.add(key); valid.push({ budget_year: year, budget_version: version, brand, sales_type: salesType, sales_month: month, units, source_file: "CSV upload" }); }
+    else {
+      seen.add(key);
+      valid.push({ budget_year: year, budget_version: version, brand, sales_type: salesType, sales_month: month, units, source_file: "Budget CSV upload" });
+    }
+  };
+
+  // Continue accepting the original six-column long format for backwards compatibility.
+  const legacyRequired = ["budget_year", "budget_version", "brand", "sales_type", "sales_month", "units"];
+  if (legacyRequired.every(key => headers.includes(key))) {
+    const index = Object.fromEntries(legacyRequired.map(key => [key, headers.indexOf(key)]));
+    csvRows.slice(1).forEach((cells, i) => {
+      if (cells.every(value => !String(value ?? "").trim())) return;
+      const units = (cells[index.units] ?? "").trim();
+      if (units === "") return;
+      const month = Number((cells[index.sales_month] ?? "").trim());
+      addRecord({
+        year: (cells[index.budget_year] ?? "").trim(),
+        version: (cells[index.budget_version] ?? "").trim(),
+        brand: (cells[index.brand] ?? "").trim(),
+        salesType: (cells[index.sales_type] ?? "").trim(),
+      }, i + 2, month, units);
+    });
+    return { valid, errors };
+  }
+
+  // Preferred wide layout: one row per Year / Version / Brand / Sales Type, with Jan–Dec across columns.
+  const yearIndex = headers.indexOf("year");
+  const versionIndex = headers.indexOf("version");
+  const brandIndex = headers.indexOf("brand");
+  const salesTypeIndex = headers.indexOf("sales type");
+  const monthIndexes = MONTHS.map((month, i) => ({ month, index: headers.indexOf(month.toLowerCase()), number: i + 1 }));
+  const missing = [];
+  if (yearIndex < 0) missing.push("Year");
+  if (versionIndex < 0) missing.push("Version");
+  if (brandIndex < 0) missing.push("Brand");
+  if (salesTypeIndex < 0) missing.push("Sales Type");
+  if (monthIndexes.every(item => item.index < 0)) missing.push("at least one month column (Jan–Dec)");
+  if (missing.length) return { valid: [], errors: ["Unrecognized template. Expected columns Year, Version, Brand, Sales Type, Jan–Dec and optional TTL."] };
+
+  csvRows.slice(1).forEach((cells, i) => {
+    if (cells.every(value => !String(value ?? "").trim())) return;
+    const raw = {
+      year: (cells[yearIndex] ?? "").trim(),
+      version: (cells[versionIndex] ?? "").trim(),
+      brand: (cells[brandIndex] ?? "").trim(),
+      salesType: (cells[salesTypeIndex] ?? "").trim(),
+    };
+    const hasAnyMonth = monthIndexes.some(item => item.index >= 0 && String(cells[item.index] ?? "").trim() !== "");
+    if (!hasAnyMonth) return; // Blank template rows can be left unused.
+    monthIndexes.forEach(item => {
+      if (item.index < 0) return;
+      const units = (cells[item.index] ?? "").trim();
+      if (units === "") return; // A blank month means no budget entered for that month.
+      addRecord(raw, i + 2, item.number, units);
+    });
   });
   return { valid, errors };
 }
@@ -199,9 +246,18 @@ export default function BudgetPlanningPage() {
     setUploading(false);
   }
 
+  const templateHeaders = ["Year", "Version", "Brand", "Sales Type", ...MONTHS, "TTL"];
   const templateRows = [];
-  for (const y of [2026, 2027]) for (const v of VERSIONS) for (const b of BRANDS) for (const t of SALES_TYPES) for (let m=1;m<=12;m++) {
-    templateRows.push({ budget_year:y, budget_version:v, brand:b, sales_type:t, sales_month:m, units:"" });
+  for (const y of [2026, 2027]) {
+    const versionsForYear = y === 2026 ? VERSIONS : ["F0"];
+    for (const v of versionsForYear) for (const b of BRANDS) for (const t of SALES_TYPES) {
+      templateRows.push({ Year:y, Version:v, Brand:b, "Sales Type":t, ...Object.fromEntries(MONTHS.map(m => [m, ""])), TTL:"" });
+    }
+  }
+  function downloadBudgetTemplate(filename = "budget-planning-template.csv") {
+    const csv = [templateHeaders.map(csvEscape).join(","), ...templateRows.map(row => templateHeaders.map(header => csvEscape(row[header] ?? "")).join(","))].join("\\r\\n");
+    const url = URL.createObjectURL(new Blob(["\\ufeff", csv], { type: "text/csv;charset=utf-8;" }));
+    const a = document.createElement("a"); a.href = url; a.download = filename; a.click(); URL.revokeObjectURL(url);
   }
 
   return <main className="cockpit">
@@ -233,7 +289,7 @@ export default function BudgetPlanningPage() {
     </section>
 
     {activeView === "detail" ? <section className="budgetSection">
-      <div className="sectionHeading"><div><h2>Budget detail</h2><p>Month-wise values for the selected period, brands and sales types.</p></div><button className="secondaryButton" type="button" onClick={()=>downloadCsv("budget-template.csv",templateRows)}>Download CSV template</button></div>
+      <div className="sectionHeading"><div><h2>Budget detail</h2><p>Month-wise values for the selected period, brands and sales types.</p></div><button className="secondaryButton" type="button" onClick={()=>downloadBudgetTemplate()}>Download budget template</button></div>
       {loadError && <div className="errorBanner">Could not load budget data: {loadError}</div>}
       {message && <div className={message.startsWith("Import failed") ? "errorBanner" : "infoBanner"}>{message}</div>}
       <div className="tableCard budgetTable">
@@ -251,15 +307,15 @@ export default function BudgetPlanningPage() {
     </section>}
     
     <section className="budgetSection">
-      <div className="sectionHeading"><div><h2>Upload or update a budget version</h2><p>Upload a completed CSV template. Validation runs before anything is saved.</p></div></div>
+      <div className="sectionHeading"><div><h2>Upload or update a budget version</h2><p>Download the monthly budget layout, fill in the figures across Jan–Dec, then upload it. Validation runs before anything is saved.</p></div></div>
       <div className="budgetUploadPanel">
-        <div className="budgetUploadActions"><input ref={fileRef} type="file" accept=".csv,text/csv" onChange={e=>inspectFile(e.target.files?.[0] || null)} /><button className="secondaryButton" type="button" onClick={()=>downloadCsv("budget-empty-template.csv",[])}>Download empty template</button></div>
-        <p className="mutedText">Required columns: budget_year, budget_version, brand, sales_type, sales_month, units. Month must be 1–12; units must be a non-negative whole number.</p>
+        <div className="budgetUploadActions"><input ref={fileRef} type="file" accept=".csv,text/csv" onChange={e=>inspectFile(e.target.files?.[0] || null)} /><button className="secondaryButton" type="button" onClick={()=>downloadBudgetTemplate()}>Download budget template</button></div>
+        <p className="mutedText">Use the familiar monthly layout: Year, Version, Brand, Sales Type, Jan–Dec and TTL. Enter monthly units in the relevant month columns; leave unused months blank. TTL is for reference and is not imported. The older six-column CSV format is also supported.</p>
         {file && <p className="mutedText">Selected file: <strong>{file.name}</strong></p>}
         {validation && <div className="validationSummary"><strong>{validation.valid.length} valid rows</strong><span>{validation.errors.length} validation errors</span></div>}
         {validation?.errors?.length > 0 && <div className="errorBanner validationErrors">{validation.errors.slice(0,12).map((error,i)=><div key={i}>{error}</div>)}{validation.errors.length>12 && <div>…and {validation.errors.length-12} more errors. Correct the file and upload again.</div>}</div>}
         {validation && validation.errors.length===0 && <div className="infoBanner">Validation passed. Import will update matching rows and preserve other versions.</div>}
-        <div className="budgetUploadFooter"><span className="mutedText">2026 supports F0/F1/F2. 2027 starts with F0; F1/F2 can be uploaded later.</span><button className="primaryButton" type="button" disabled={!validation?.valid?.length || validation.errors.length>0 || uploading} onClick={importFile}>{uploading ? "Importing…" : "Validate and import"}</button></div>
+        <div className="budgetUploadFooter"><span className="mutedText">2026: F0, F1 and F2 rows. 2027: F0 rows only; add F1/F2 later when available.</span><button className="primaryButton" type="button" disabled={!validation?.valid?.length || validation.errors.length>0 || uploading} onClick={importFile}>{uploading ? "Importing…" : "Validate and import"}</button></div>
       </div>
     </section>
     <footer className="appFooter">Stellantis Sales Cockpit · Budget versions are stored independently; no Retail or Wholesale actuals are overwritten.</footer>
