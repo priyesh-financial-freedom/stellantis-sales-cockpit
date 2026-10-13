@@ -412,6 +412,8 @@ export default function ModelWiseClient({ brand }) {
         <Link href="/industry">Industry</Link>
         <Link href="/budget-planning">Budget Planning</Link>
         <Link href="/data-entry">Data Entry</Link>
+        <Link href="/industry/manufacturers">Manufacturer History</Link>
+        <Link href="/stellantis-network">Stellantis Network</Link>
       </nav>
 
       <section className="filters modelFilters">
