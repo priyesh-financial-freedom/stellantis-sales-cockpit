@@ -3,11 +3,31 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { supabase } from "../../lib/supabase";
+import MultiSelect from "../../components/MultiSelect";
 
 const BRANDS = ["Jeep", "Citroën", "SAARC"];
 const SALES_TYPES = ["Retail", "Wholesale"];
 const VERSIONS = ["F0", "F1", "F2"];
 const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+const PERIODS = ["Monthly", "Quarterly", "Half-Yearly", "Annual", "Custom Period"];
+const QUARTERS = ["All", "Q1", "Q2", "Q3", "Q4"];
+const HALVES = ["All", "H1", "H2"];
+const YEARS = ["2026", "2027"];
+function selectedAll(values) { return !Array.isArray(values) || values.length === 0 || values.includes("All"); }
+function monthsForPeriod(period, values) {
+  if (period === "Annual" || period === "Custom Period" || selectedAll(values)) return MONTHS.map((_, i) => i + 1);
+  const picked = values.filter(v => v !== "All");
+  if (period === "Monthly") return picked.map(v => MONTHS.indexOf(v) + 1).filter(n => n > 0);
+  if (period === "Quarterly") return picked.flatMap(q => { const start = (Number(q.slice(1)) - 1) * 3 + 1; return [start, start + 1, start + 2]; });
+  if (period === "Half-Yearly") return picked.flatMap(h => h === "H1" ? [1,2,3,4,5,6] : [7,8,9,10,11,12]);
+  return MONTHS.map((_, i) => i + 1);
+}
+function periodOptions(period) {
+  if (period === "Monthly") return ["All", ...MONTHS];
+  if (period === "Quarterly") return QUARTERS;
+  if (period === "Half-Yearly") return HALVES;
+  return ["All"];
+}
 const COLUMNS = [
   { key: "budget_year", label: "budget_year" },
   { key: "budget_version", label: "budget_version" },
@@ -76,10 +96,15 @@ export default function BudgetPlanningPage() {
   const [rows, setRows] = useState([]);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState("");
-  const [year, setYear] = useState("2026");
+  const [years, setYears] = useState(["2026"]);
   const [version, setVersion] = useState("F0");
-  const [brand, setBrand] = useState("All");
-  const [salesType, setSalesType] = useState("All");
+  const [brands, setBrands] = useState([]);
+  const [salesTypes, setSalesTypes] = useState([]);
+  const [period, setPeriod] = useState("Monthly");
+  const [periodValue, setPeriodValue] = useState(["All"]);
+  const [customFrom, setCustomFrom] = useState("2026-01");
+  const [customTo, setCustomTo] = useState("2026-12");
+  const [activeView, setActiveView] = useState("detail");
   const [file, setFile] = useState(null);
   const [validation, setValidation] = useState(null);
   const [uploading, setUploading] = useState(false);
@@ -97,13 +122,37 @@ export default function BudgetPlanningPage() {
   }, []);
   useEffect(() => { load(); }, [load]);
 
-  const filtered = useMemo(() => rows.filter(r => String(r.budget_year) === year && r.budget_version === version && (brand === "All" || r.brand === brand) && (salesType === "All" || r.sales_type === salesType)).sort((a,b) => a.sales_month-b.sales_month || a.brand.localeCompare(b.brand) || a.sales_type.localeCompare(b.sales_type)), [rows, year, version, brand, salesType]);
+  const selectedYears = selectedAll(years) ? YEARS : years;
+  const selectedBrands = selectedAll(brands) ? BRANDS : brands;
+  const selectedSalesTypes = selectedAll(salesTypes) ? SALES_TYPES : salesTypes;
+  const selectedMonths = monthsForPeriod(period, periodValue);
+  const matchesPeriod = r => {
+    if (!selectedYears.includes(String(r.budget_year))) return false;
+    if (period === "Custom Period") {
+      const key = `${r.budget_year}-${String(r.sales_month).padStart(2, "0")}`;
+      if (customFrom && key < customFrom) return false;
+      if (customTo && key > customTo) return false;
+      return true;
+    }
+    return selectedMonths.includes(Number(r.sales_month));
+  };
+  const periodRows = useMemo(() => rows.filter(r => matchesPeriod(r) && selectedBrands.includes(r.brand) && selectedSalesTypes.includes(r.sales_type)), [rows, years, brands, salesTypes, period, periodValue, customFrom, customTo]);
+  const filtered = useMemo(() => periodRows.filter(r => r.budget_version === version).sort((a,b) => a.budget_year-b.budget_year || a.sales_month-b.sales_month || a.brand.localeCompare(b.brand) || a.sales_type.localeCompare(b.sales_type)), [periodRows, version]);
   const versionTotals = useMemo(() => VERSIONS.map(v => {
-    const matching = rows.filter(r => String(r.budget_year) === year && r.budget_version === v && (brand === "All" || r.brand === brand) && (salesType === "All" || r.sales_type === salesType));
+    const matching = periodRows.filter(r => r.budget_version === v);
     return { version: v, total: matching.reduce((sum, r) => sum + Number(r.units || 0), 0), count: matching.length };
-  }), [rows, year, brand, salesType]);
+  }), [periodRows]);
   const total = filtered.reduce((sum, r) => sum + Number(r.units || 0), 0);
-  const presentMonths = new Set(filtered.map(r => r.sales_month)).size;
+  const presentMonths = new Set(filtered.map(r => `${r.budget_year}-${r.sales_month}`)).size;
+  const comparisonRows = useMemo(() => {
+    const groups = new Map();
+    periodRows.forEach(r => {
+      const key = [r.budget_year, r.sales_month, r.brand, r.sales_type].join("|");
+      if (!groups.has(key)) groups.set(key, { budget_year:r.budget_year, sales_month:r.sales_month, brand:r.brand, sales_type:r.sales_type, F0:null, F1:null, F2:null });
+      groups.get(key)[r.budget_version] = Number(r.units);
+    });
+    return [...groups.values()].sort((a,b) => a.budget_year-b.budget_year || a.sales_month-b.sales_month || a.brand.localeCompare(b.brand) || a.sales_type.localeCompare(b.sales_type));
+  }, [periodRows]);
 
   async function inspectFile(nextFile) {
     setFile(nextFile); setMessage(""); setValidation(null);
@@ -141,21 +190,27 @@ export default function BudgetPlanningPage() {
       <Link href="/model-wise/jeep">Jeep Model Wise</Link><Link href="/model-wise/citroen">Citroën Model Wise</Link><Link href="/industry">Industry</Link><Link href="/industry/manufacturers">Manufacturer History</Link><Link className="active" href="/budget-planning">Budget Planning</Link><Link href="/data-entry">Data Entry</Link>
     </nav>
 
-    <section className="filters budgetFilters">
-      <div className="filter"><label>Budget year</label><select value={year} onChange={e=>setYear(e.target.value)}><option>2026</option><option>2027</option></select></div>
+    <section className="filters budgetFilters budgetFiltersExpanded">
+      <div className="filter"><label>Period</label><select value={period} onChange={e=>{setPeriod(e.target.value);setPeriodValue(["All"]);}}>{PERIODS.map(p=><option key={p}>{p}</option>)}</select></div>
+      <div className="filter"><label>Period detail</label>{period === "Annual" ? <div className="budgetFilterStatic">Full year</div> : period === "Custom Period" ? <div className="budgetCustomRange"><input aria-label="Custom period start month" type="month" value={customFrom} onChange={e=>setCustomFrom(e.target.value)} /><input aria-label="Custom period end month" type="month" value={customTo} min={customFrom || undefined} onChange={e=>setCustomTo(e.target.value)} /></div> : <MultiSelect label="" options={periodOptions(period)} value={periodValue} onChange={setPeriodValue} />}</div>
+      <div className="filter"><MultiSelect label="Budget year" options={["All", ...YEARS]} value={years} onChange={setYears} /></div>
       <div className="filter"><label>Budget version</label><select value={version} onChange={e=>setVersion(e.target.value)}>{VERSIONS.map(v=><option key={v}>{v}</option>)}</select></div>
-      <div className="filter"><label>Brand / scope</label><select value={brand} onChange={e=>setBrand(e.target.value)}><option>All</option>{BRANDS.map(b=><option key={b}>{b}</option>)}</select></div>
-      <div className="filter"><label>Sales type</label><select value={salesType} onChange={e=>setSalesType(e.target.value)}><option>All</option>{SALES_TYPES.map(t=><option key={t}>{t}</option>)}</select></div>
+      <div className="filter"><MultiSelect label="Brand / scope" options={["All", ...BRANDS]} value={brands} onChange={setBrands} /></div>
+      <div className="filter"><MultiSelect label="Sales type" options={["All", ...SALES_TYPES]} value={salesTypes} onChange={setSalesTypes} /></div>
     </section>
+    <div className="budgetViewTabs" role="tablist" aria-label="Budget views">
+      <button type="button" role="tab" aria-selected={activeView==="detail"} className={activeView==="detail" ? "active" : ""} onClick={()=>setActiveView("detail")}>Budget detail</button>
+      <button type="button" role="tab" aria-selected={activeView==="compare"} className={activeView==="compare" ? "active" : ""} onClick={()=>setActiveView("compare")}>Compare F0 / F1 / F2</button>
+    </div>
 
     <section className="summaryGrid budgetSummary">
-      <article className="statCard"><div className="eyebrow">SELECTED BUDGET</div><h2>{version} · {year}</h2><div className="statValue">{number(total)}</div><p>Units across selected brands, sales types and uploaded months</p></article>
-      <article className="statCard"><div className="eyebrow">MONTHS COVERED</div><div className="statValue">{presentMonths} / 12</div><p>Distinct months with uploaded records for the current filters</p></article>
+      <article className="statCard"><div className="eyebrow">SELECTED BUDGET</div><h2>{version} · {selectedYears.join(", ")}</h2><div className="statValue">{number(total)}</div><p>Units across selected brands, sales types and the selected period</p></article>
+      <article className="statCard"><div className="eyebrow">MONTHS COVERED</div><div className="statValue">{presentMonths} / 12</div><p>Distinct year-month periods covered by the current filters</p></article>
       <article className="statCard"><div className="eyebrow">VERSION COMPARISON</div><div className="versionTotals">{versionTotals.map(item=><div key={item.version}><span>{item.version}</span><strong>{number(item.total)}</strong><small>{item.count ? "Uploaded" : "Not uploaded"}</small></div>)}</div></article>
     </section>
 
-    <section className="budgetSection">
-      <div className="sectionHeading"><div><h2>Monthly budget detail</h2><p>One row per month, brand and sales type. Budget versions remain separate.</p></div><button className="secondaryButton" type="button" onClick={()=>downloadCsv("budget-template.csv",templateRows)}>Download CSV template</button></div>
+    {activeView === "detail" ? <section className="budgetSection">
+      <div className="sectionHeading"><div><h2>Budget detail</h2><p>Month-wise values for the selected period, brands and sales types.</p></div><button className="secondaryButton" type="button" onClick={()=>downloadCsv("budget-template.csv",templateRows)}>Download CSV template</button></div>
       {loadError && <div className="errorBanner">Could not load budget data: {loadError}</div>}
       {message && <div className={message.startsWith("Import failed") ? "errorBanner" : "infoBanner"}>{message}</div>}
       <div className="tableCard budgetTable">
@@ -163,8 +218,15 @@ export default function BudgetPlanningPage() {
         {loading ? <div className="emptyState">Loading budget data…</div> : filtered.length ? filtered.map(r=><div className="budgetTableRow" key={r.id}><span>{MONTHS[r.sales_month-1]} {r.budget_year}</span><span>{r.brand}</span><span>{r.sales_type}</span><strong>{number(r.units)}</strong><span>{r.budget_version}</span></div>) : <div className="emptyState">No budget rows uploaded for {year} {version} with these filters.</div>}
         <div className="budgetTableTotal"><strong>TOTAL</strong><span>{filtered.length} rows</span><span></span><strong>{number(total)}</strong><span>{version}</span></div>
       </div>
-    </section>
-
+    </section> : <section className="budgetSection">
+      <div className="sectionHeading"><div><h2>Compare budget versions</h2><p>Compare F0, F1 and F2 month-by-month for the selected time frame. Missing versions remain blank rather than being treated as zero.</p></div><button className="secondaryButton" type="button" onClick={()=>downloadCsv("budget-version-comparison.csv", comparisonRows.map(r=>({budget_year:r.budget_year, sales_month:r.sales_month, brand:r.brand, sales_type:r.sales_type, F0:r.F0 ?? "", F1:r.F1 ?? "", F2:r.F2 ?? "", F1_vs_F0:r.F0 == null || r.F1 == null ? "" : r.F1-r.F0, F2_vs_F1:r.F1 == null || r.F2 == null ? "" : r.F2-r.F1})))}>Export comparison CSV</button></div>
+      <div className="tableCard budgetTable budgetCompareTable">
+        <div className="budgetCompareHeader"><span>Month</span><span>Brand</span><span>Sales type</span><span>F0</span><span>F1</span><span>F2</span><span>F1 vs F0</span><span>F2 vs F1</span></div>
+        {loading ? <div className="emptyState">Loading budget data…</div> : comparisonRows.length ? comparisonRows.map(r=><div className="budgetCompareRow" key={`${r.budget_year}-${r.sales_month}-${r.brand}-${r.sales_type}`}><span>{MONTHS[r.sales_month-1]} {r.budget_year}</span><span>{r.brand}</span><span>{r.sales_type}</span><strong>{r.F0 == null ? "—" : number(r.F0)}</strong><strong>{r.F1 == null ? "—" : number(r.F1)}</strong><strong>{r.F2 == null ? "—" : number(r.F2)}</strong><span>{r.F0 == null || r.F1 == null ? "—" : number(r.F1-r.F0)}</span><span>{r.F1 == null || r.F2 == null ? "—" : number(r.F2-r.F1)}</span></div>) : <div className="emptyState">No budget versions match the selected filters.</div>}
+      </div>
+      <div className="budgetCompareTotals"><strong>Selected-period totals</strong>{VERSIONS.map(v=><span key={v}><b>{v}</b> {number(versionTotals.find(x=>x.version===v)?.total || 0)}</span>)}</div>
+    </section>}
+    
     <section className="budgetSection">
       <div className="sectionHeading"><div><h2>Upload or update a budget version</h2><p>Upload a completed CSV template. Validation runs before anything is saved.</p></div></div>
       <div className="budgetUploadPanel">
