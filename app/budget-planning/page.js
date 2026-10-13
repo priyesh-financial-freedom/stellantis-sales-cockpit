@@ -168,7 +168,7 @@ export default function BudgetPlanningPage() {
   const comparisonRows = useMemo(() => {
     const groups = new Map();
     periodRows.forEach(r => {
-      const bucket = periodBucket(r);
+      const bucket = periodBucketFor(period, r);
       const key = [r.budget_year, bucket.key, r.brand, r.sales_type].join("|");
       if (!groups.has(key)) groups.set(key, { budget_year:r.budget_year, period_key:bucket.key, period_label:bucket.label, period_order:bucket.order, brand:r.brand, sales_type:r.sales_type, F0:null, F1:null, F2:null });
       const item = groups.get(key);
