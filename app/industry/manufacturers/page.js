@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { readClientCache, writeClientCache } from "../../../lib/clientCache";
+import { readClientCacheAsync, writeClientCache } from "../../../lib/clientCache";
 import { supabase } from "../../../lib/supabase";
 import { INDUSTRY_HALVES, INDUSTRY_PERIODS, INDUSTRY_QUARTERS, MONTHS, filterHistoryRows } from "../../../lib/industryData";
 import MultiSelect from "../../../components/MultiSelect";
@@ -18,7 +18,7 @@ export default function ManufacturerHistoryPage() {
 
   useEffect(()=>{ 
     let active=true;
-    const cached=readClientCache(MANUFACTURER_CACHE_KEY);
+    const cached=await readClientCacheAsync(MANUFACTURER_CACHE_KEY);
     if(cached?.data?.length){
       setRows(cached.data); setCachedAt(cached.cachedAt); setLoading(false); setRefreshing(true);
       const ys=[...new Set(cached.data.map(r=>String(r.sales_period).slice(0,4)))].sort((a,b)=>b.localeCompare(a));
@@ -36,7 +36,7 @@ export default function ManufacturerHistoryPage() {
     }
     loadAll().then(x=>{
       if(!active)return;
-      setRows(x); writeClientCache(MANUFACTURER_CACHE_KEY,x); setCachedAt(Date.now()); setRefreshing(false);
+      setRows(x); await writeClientCache(MANUFACTURER_CACHE_KEY,x); setCachedAt(Date.now()); setRefreshing(false);
       const ys=[...new Set(x.map(r=>String(r.sales_period).slice(0,4)))].sort((a,b)=>b.localeCompare(a));
       if(ys.length)setYear(ys[0]);
     }).catch(e=>{if(active){setRefreshing(false);if(!cached?.data?.length)setError(e.message)}}).finally(()=>active&&setLoading(false));
