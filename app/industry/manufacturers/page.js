@@ -16,32 +16,49 @@ export default function ManufacturerHistoryPage() {
 
   const [refreshing,setRefreshing]=useState(false), [cachedAt,setCachedAt]=useState(null);
 
-  useEffect(()=>{ 
-    let active=true;
-    const cached=await readClientCacheAsync(MANUFACTURER_CACHE_KEY);
-    if(cached?.data?.length){
-      setRows(cached.data); setCachedAt(cached.cachedAt); setLoading(false); setRefreshing(true);
-      const ys=[...new Set(cached.data.map(r=>String(r.sales_period).slice(0,4)))].sort((a,b)=>b.localeCompare(a));
-      if(ys.length)setYear([ys[0]]);
-    }
-    async function loadAll(){
-      const out=[];
-      for(let from=0;;from+=1000){
-        const {data,error}=await supabase.from("industry_manufacturer_history_v2").select("sales_period,manufacturer,units,period_type,record_type").eq("record_type","MANUFACTURER").order("sales_period").order("manufacturer").range(from,from+999);
-        if(error) throw error;
-        out.push(...(data||[]));
-        if(!data||data.length<1000) break;
+  useEffect(() => {
+    let active = true;
+    async function initialize() {
+      const cached = await readClientCacheAsync(MANUFACTURER_CACHE_KEY);
+      if (active && cached?.data?.length) {
+        setRows(cached.data);
+        setCachedAt(cached.cachedAt);
+        setLoading(false);
+        setRefreshing(true);
+        const ys = [...new Set(cached.data.map(r => String(r.sales_period).slice(0, 4)))].sort((a, b) => b.localeCompare(a));
+        if (ys.length) setYear([ys[0]]);
       }
-      return out;
+
+      try {
+        const out = [];
+        for (let from = 0; ; from += 1000) {
+          const { data, error } = await supabase.from("industry_manufacturer_history_v2")
+            .select("sales_period,manufacturer,units,period_type,record_type")
+            .eq("record_type", "MANUFACTURER").order("sales_period").order("manufacturer")
+            .range(from, from + 999);
+          if (error) throw error;
+          out.push(...(data || []));
+          if (!data || data.length < 1000) break;
+        }
+        await writeClientCache(MANUFACTURER_CACHE_KEY, out);
+        if (!active) return;
+        setRows(out);
+        setCachedAt(Date.now());
+        setRefreshing(false);
+        const ys = [...new Set(out.map(r => String(r.sales_period).slice(0, 4)))].sort((a, b) => b.localeCompare(a));
+        if (ys.length) setYear([ys[0]]);
+      } catch (error) {
+        if (active) {
+          setRefreshing(false);
+          if (!cached?.data?.length) setError(error?.message || "Unable to load manufacturer history.");
+        }
+      } finally {
+        if (active) setLoading(false);
+      }
     }
-    loadAll().then(x=>{
-      if(!active)return;
-      setRows(x); await writeClientCache(MANUFACTURER_CACHE_KEY,x); setCachedAt(Date.now()); setRefreshing(false);
-      const ys=[...new Set(x.map(r=>String(r.sales_period).slice(0,4)))].sort((a,b)=>b.localeCompare(a));
-      if(ys.length)setYear(ys[0]);
-    }).catch(e=>{if(active){setRefreshing(false);if(!cached?.data?.length)setError(e.message)}}).finally(()=>active&&setLoading(false));
-    return()=>{active=false};
-  },[]);
+    initialize();
+    return () => { active = false; };
+  }, []);
 
   const years=useMemo(()=>["All",...[...new Set(rows.map(r=>String(r.sales_period).slice(0,4)))].sort((a,b)=>b.localeCompare(a))],[rows]);
   const manufacturers=useMemo(()=>["All",...[...new Set(rows.map(r=>r.manufacturer).filter(Boolean))].sort((a,b)=>a.localeCompare(b))],[rows]);
