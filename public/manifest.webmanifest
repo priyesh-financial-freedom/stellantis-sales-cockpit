@@ -1,0 +1,11 @@
+{
+  "name": "Stellantis Sales Cockpit",
+  "short_name": "Sales Cockpit",
+  "description": "Stellantis India sales and industry analytics",
+  "start_url": "/model-wise/jeep",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#f4f5f7",
+  "theme_color": "#176da8",
+  "orientation": "any"
+}
