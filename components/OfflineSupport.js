@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { loadSalesData } from "../lib/salesData";
 import { loadIndustryData } from "../lib/industryData";
 import { loadModelMonthlyData } from "../lib/modelData";
-import { readClientCache, writeClientCache } from "../lib/clientCache";
+import { readClientCacheAsync, writeClientCache } from "../lib/clientCache";
 import { supabase } from "../lib/supabase";
 
 export default function OfflineSupport() {
@@ -50,13 +50,13 @@ export default function OfflineSupport() {
         manufacturerRows.push(...(data || []));
         if (!data || data.length < 1000) break;
       }
-      writeClientCache("industry-manufacturer-history-v1", manufacturerRows);
+      await writeClientCache("industry-manufacturer-history-v1", manufacturerRows);
 
       const { data: budgets, error: budgetError } = await supabase.from("sales_cockpit_budgets")
         .select("id,budget_year,budget_version,brand,sales_type,sales_month,units,source_file,updated_at")
         .order("budget_year", { ascending: false }).order("sales_month", { ascending: true });
       if (budgetError) throw budgetError;
-      writeClientCache("budget-planning-v1", budgets || []);
+      await writeClientCache("budget-planning-v1", budgets || []);
 
       const required = [
         ["sales-data-v1", sales.length],
@@ -66,7 +66,7 @@ export default function OfflineSupport() {
         ["budget-planning-v1", (budgets || []).length],
       ];
       const failed = required.filter(([key, count]) => {
-        const stored = readClientCache(key);
+        const stored = await readClientCacheAsync(key);
         return count > 0 && (!stored || stored.data.length !== count);
       });
       if (failed.length) {
