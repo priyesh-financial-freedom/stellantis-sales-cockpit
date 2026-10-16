@@ -14,7 +14,7 @@ async function cachePageAndAssets(cache, path, response) {
   await cache.put(path, response.clone());
   try {
     const html = await response.clone().text();
-    const assets = [...html.matchAll(/(?:src|href)="([^"]*\\/_next\\/static\\/[^"]+)"/g)]
+    const assets = [...html.matchAll(/(?:src|href)="([^"]*\/_next\/static\/[^"]+)"/g)]
       .map(match => new URL(match[1], self.location.origin))
       .filter(url => url.origin === self.location.origin);
     await Promise.all([...new Set(assets.map(url => url.href))].map(async href => {
