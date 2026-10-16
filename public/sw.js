@@ -1,4 +1,4 @@
-const VERSION = "stellantis-cockpit-offline-v1";
+const VERSION = "stellantis-cockpit-offline-v2";
 const SHELL = [
   "/offline.html",
   "/model-wise/jeep",
