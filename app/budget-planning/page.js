@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { supabase } from "../../lib/supabase";
 import MultiSelect from "../../components/MultiSelect";
+import { readClientCache, writeClientCache } from "../../lib/clientCache";
 
 const BRANDS = ["Jeep", "Citroën", "SAARC"];
 const SALES_TYPES = ["Retail", "Wholesale"];
@@ -169,12 +170,22 @@ export default function BudgetPlanningPage() {
 
   const load = useCallback(async () => {
     setLoading(true); setLoadError("");
-    const { data, error } = await supabase.from("sales_cockpit_budgets")
-      .select("id,budget_year,budget_version,brand,sales_type,sales_month,units,source_file,updated_at")
-      .order("budget_year", { ascending: false }).order("sales_month", { ascending: true });
-    if (error) setLoadError(error.message);
-    else setRows(data || []);
-    setLoading(false);
+    const cached = readClientCache("budget-planning-v1");
+    if (cached?.data?.length) setRows(cached.data);
+    try {
+      const { data, error } = await supabase.from("sales_cockpit_budgets")
+        .select("id,budget_year,budget_version,brand,sales_type,sales_month,units,source_file,updated_at")
+        .order("budget_year", { ascending: false }).order("sales_month", { ascending: true });
+      if (error) throw error;
+      const freshRows = data || [];
+      setRows(freshRows);
+      writeClientCache("budget-planning-v1", freshRows);
+    } catch (error) {
+      if (!cached?.data?.length) setLoadError(error?.message || "Unable to load budget data. Connect to the internet and retry.");
+      else setLoadError("Offline mode: showing the last cached budget data.");
+    } finally {
+      setLoading(false);
+    }
   }, []);
   useEffect(() => { load(); }, [load]);
 
