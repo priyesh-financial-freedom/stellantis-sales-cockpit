@@ -65,12 +65,13 @@ export default function OfflineSupport() {
         ["industry-manufacturer-history-v1", manufacturerRows.length],
         ["budget-planning-v1", (budgets || []).length],
       ];
-      const failed = required.filter(([key, count]) => {
+      const storedChecks = await Promise.all(required.map(async ([key, count]) => {
         const stored = await readClientCacheAsync(key);
-        return count > 0 && (!stored || stored.data.length !== count);
-      });
+        return { key, count, ok: count === 0 || Boolean(stored && stored.data.length === count) };
+      }));
+      const failed = storedChecks.filter(item => !item.ok);
       if (failed.length) {
-        throw new Error("Some datasets could not fit in this browser's local storage. Clear site storage or use a device with more available storage, then retry.");
+        throw new Error("Some datasets could not be saved by this browser. Check available device storage and retry.");
       }
       setMessage("Offline data refreshed successfully. Cached " + required.map(([key, count]) => count.toLocaleString("en-IN") + " rows").join(" · ") + ". Keep this app installed and open it periodically while online to refresh.");
     } catch (error) {
