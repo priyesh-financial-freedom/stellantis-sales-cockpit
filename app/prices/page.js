@@ -8,7 +8,7 @@ const STORAGE_KEY = "stellantis-jeep-price-changes-v1";
 const money = value => value == null || value === "" ? "—" : "₹" + Number(value).toLocaleString("en-IN", { maximumFractionDigits: 0 });
 const dateLabel = value => value ? new Date(value + "T00:00:00").toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" }) : "—";
 const parseDisplayDate = value => {
-  const match = /^(\\d{2})\\/(\\d{2})\\/(\\d{4})$/.exec(value.trim());
+  const match = /^(\d{2})\/(\\d{2})\\/(\\d{4})$/.exec(value.trim());
   if (!match) return "";
   const [, dd, mm, yyyy] = match;
   const date = new Date(Number(yyyy), Number(mm) - 1, Number(dd));
@@ -21,7 +21,8 @@ export default function PricesPage() {
   const [loaded, setLoaded] = useState(false);
   const [model, setModel] = useState("All");
   const [search, setSearch] = useState("");
-  const [asOf, setAsOf] = useState(PRICE_LIST_EFFECTIVE_FROM);\n  const [asOfText, setAsOfText] = useState("01/10/2026");
+  const [asOf, setAsOf] = useState(PRICE_LIST_EFFECTIVE_FROM);
+  const [asOfText, setAsOfText] = useState("01/10/2026");
   const [showForm, setShowForm] = useState(false);
   const [variantKey, setVariantKey] = useState("");
   const [effectiveDate, setEffectiveDate] = useState("");\n  const [effectiveDateText, setEffectiveDateText] = useState("");
