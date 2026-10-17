@@ -7,16 +7,25 @@ import { JEEP_PRICE_BASELINE, PRICE_LIST_EFFECTIVE_FROM } from "../../lib/jeepPr
 const STORAGE_KEY = "stellantis-jeep-price-changes-v1";
 const money = value => value == null || value === "" ? "—" : "₹" + Number(value).toLocaleString("en-IN", { maximumFractionDigits: 0 });
 const dateLabel = value => value ? new Date(value + "T00:00:00").toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" }) : "—";
+const toDisplayDate = value => value ? value.split("-").reverse().join("/") : "";
+const parseDisplayDate = value => {
+  const match = /^(\\d{2})\\/(\\d{2})\\/(\\d{4})$/.exec(value.trim());
+  if (!match) return "";
+  const [, dd, mm, yyyy] = match;
+  const date = new Date(Number(yyyy), Number(mm) - 1, Number(dd));
+  if (date.getFullYear() !== Number(yyyy) || date.getMonth() !== Number(mm) - 1 || date.getDate() !== Number(dd)) return "";
+  return `${yyyy}-${mm}-${dd}`;
+};
 
 export default function PricesPage() {
   const [changes, setChanges] = useState([]);
   const [loaded, setLoaded] = useState(false);
   const [model, setModel] = useState("All");
   const [search, setSearch] = useState("");
-  const [asOf, setAsOf] = useState(PRICE_LIST_EFFECTIVE_FROM);
+  const [asOf, setAsOf] = useState(PRICE_LIST_EFFECTIVE_FROM);\n  const [asOfText, setAsOfText] = useState("01/10/2026");
   const [showForm, setShowForm] = useState(false);
   const [variantKey, setVariantKey] = useState("");
-  const [effectiveDate, setEffectiveDate] = useState("");
+  const [effectiveDate, setEffectiveDate] = useState("");\n  const [effectiveDateText, setEffectiveDateText] = useState("");
   const [basicPrice, setBasicPrice] = useState("");
   const [gstRate, setGstRate] = useState("");
   const [dealerMargin, setDealerMargin] = useState("");
@@ -141,7 +150,7 @@ export default function PricesPage() {
 
       <section className="pricesFilters">
         <label>Prices as of
-          <input type="date" min={PRICE_LIST_EFFECTIVE_FROM} value={asOf} onChange={event => setAsOf(event.target.value)} />
+          <input type="text" inputMode="numeric" placeholder="DD/MM/YYYY" aria-label="Prices as of (DD/MM/YYYY)" value={asOfText} onChange={event => { setAsOfText(event.target.value); const parsed = parseDisplayDate(event.target.value); if (parsed && parsed >= PRICE_LIST_EFFECTIVE_FROM) setAsOf(parsed); }} />
         </label>
         <label>Model
           <select value={model} onChange={event => setModel(event.target.value)}>
@@ -204,7 +213,7 @@ export default function PricesPage() {
             </label>
             {selectedVariant && <div className="pricesCurrentReference">Current baseline: GST {((selectedVariant.gstRate ?? 0.4)*100).toFixed(0)}% · Dealer Margin {money(selectedVariant.dealerMargin)} · ESP {money(selectedVariant.esp)}</div>}
             <label>Effective from
-              <input required type="date" min={PRICE_LIST_EFFECTIVE_FROM} value={effectiveDate} onChange={event=>setEffectiveDate(event.target.value)} />
+              <input required type="text" inputMode="numeric" placeholder="DD/MM/YYYY" aria-label="Effective from (DD/MM/YYYY)" value={effectiveDateText} onChange={event=>{ setEffectiveDateText(event.target.value); setEffectiveDate(parseDisplayDate(event.target.value)); }} />
             </label>
             <p className="pricesFormHelp">Fill only the fields that are changing. Blank fields retain the previous effective price.</p>
             <div className="pricesFormGrid">
