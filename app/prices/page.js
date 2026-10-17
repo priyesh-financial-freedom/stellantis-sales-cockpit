@@ -168,8 +168,14 @@ export default function PricesPage() {
       </section>
 
       <section className="pricesFilters">
-        <label>Prices as of
-          <input type="text" inputMode="numeric" placeholder="DD/MM/YYYY" aria-label="Prices as of (DD/MM/YYYY)" value={asOfText} onChange={event => { setAsOfText(event.target.value); const parsed = parseDisplayDate(event.target.value); if (parsed && parsed >= PRICE_LIST_EFFECTIVE_FROM) setAsOf(parsed); }} />
+        <label>Prices as of (DD/MM/YYYY)
+          <div className="pricesDateControl">
+            <input type="text" inputMode="numeric" placeholder="DD/MM/YYYY" aria-label="Prices as of (DD/MM/YYYY)" value={asOfText} onChange={event => { setAsOfText(event.target.value); const parsed = parseDisplayDate(event.target.value); if (parsed && parsed >= effectiveFrom) setAsOf(parsed); }} />
+            <span className="pricesCalendarPicker">
+              <span aria-hidden="true">▦</span>
+              <input type="date" min={effectiveFrom} value={asOf} aria-label="Choose prices as of date from calendar" onChange={event => { const value = event.target.value; if (value) { setAsOf(value); setAsOfText(value.split("-").reverse().join("/")); } }} />
+            </span>
+          </div>
         </label>
           <label className="pricesBrandSelect">Brand
             <select value={brand} onChange={event => { setBrand(event.target.value); setModel("All"); setSearch(""); setVariantKey(""); }}>
