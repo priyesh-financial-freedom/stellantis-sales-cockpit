@@ -3633,3 +3633,85 @@ html[data-theme="dark"] .budgetCompareTotals {
   .pricesModalHeading h2 { font-size: 21px; }
   .pricesModalActions { position: sticky; bottom: -16px; background: var(--card,#fff); padding: 12px 0 4px; }
 }
+
+
+/* On phones, render the Jeep price table as stacked variant cards: no horizontal scrolling. */
+@media (max-width: 600px) {
+  .pricesTableScroll {
+    overflow: visible;
+    width: 100%;
+  }
+  .pricesTable {
+    display: block;
+    width: 100%;
+    min-width: 0;
+    table-layout: auto;
+  }
+  .pricesTable thead { display: none; }
+  .pricesTable tbody {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 10px;
+    padding: 10px;
+  }
+  .pricesTable tbody tr {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0 12px;
+    padding: 10px 12px;
+    border: 1px solid var(--border, #e1e6ec);
+    border-radius: 12px;
+    background: var(--card, #fff);
+    min-width: 0;
+  }
+  .pricesTable tbody td {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+    min-width: 0;
+    white-space: normal;
+    overflow-wrap: anywhere;
+    padding: 8px 0;
+    border-top: 0;
+    font-size: 12px;
+    line-height: 1.4;
+  }
+  .pricesTable tbody td::before {
+    content: attr(data-label);
+    display: block;
+    color: var(--muted, #667486);
+    font-size: 9px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: .06em;
+  }
+  .pricesTable tbody td[data-label="Model"],
+  .pricesTable tbody td[data-label="Variant"] {
+    grid-column: 1 / -1;
+  }
+  .pricesTable tbody td[data-label="Model"] {
+    padding-bottom: 2px;
+  }
+  .pricesTable tbody td[data-label="Variant"] {
+    font-size: 13px;
+    font-weight: 700;
+    padding-top: 2px;
+    padding-bottom: 9px;
+    border-bottom: 1px solid var(--border, #e1e6ec);
+    margin-bottom: 3px;
+  }
+  .pricesTable tbody td[data-label="Model"]::before { content: "MODEL"; }
+  .pricesTable tbody td[data-label="Variant"]::before { content: "VARIANT"; }
+  .pricesTable tbody td[data-label="GST"],
+  .pricesTable tbody td[data-label="Dealer Margin"],
+  .pricesTable tbody td[data-label="ESP"],
+  .pricesTable tbody td[data-label="Price status"] {
+    grid-column: auto;
+  }
+  .pricesTable tbody td.pricesEmptyCell {
+    grid-column: 1 / -1;
+    display: block;
+    text-align: center !important;
+  }
+}
