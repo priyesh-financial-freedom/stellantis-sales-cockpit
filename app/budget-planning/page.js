@@ -5,6 +5,7 @@ import Link from "next/link";
 import { supabase } from "../../lib/supabase";
 import MultiSelect from "../../components/MultiSelect";
 import { readClientCacheAsync, writeClientCache } from "../../lib/clientCache";
+import CockpitNavigation from "../../components/CockpitNavigation";
 
 const BRANDS = ["Jeep", "Citroën", "SAARC"];
 const SALES_TYPES = ["Retail", "Wholesale"];
@@ -276,9 +277,7 @@ export default function BudgetPlanningPage() {
       <div><div className="eyebrow">STELLANTIS INDIA · PLANNING</div><h1>Budget Planning</h1><p className="subtitle">Monthly Retail and Wholesale budgets · Jeep, Citroën and SAARC</p><div className="dataFreshness">F0 · Original plan &nbsp; / &nbsp; F1 · Mid-course correction &nbsp; / &nbsp; F2 · Final corrected budget</div></div>
       <div className="headerStatus"><span className="statusDot" />{loading ? "Loading budget data" : "Budget data connected"}</div>
     </header>
-    <nav className="cockpitNav">
-      <Link href="/model-wise/jeep">Jeep Model Wise</Link><Link href="/model-wise/citroen">Citroën Model Wise</Link><Link href="/industry">Industry</Link><Link href="/industry/manufacturers">Manufacturer History</Link><Link className="active" href="/budget-planning">Budget Planning</Link><Link href="/data-entry">Data Entry</Link><Link href="/stellantis-network">Stellantis Network</Link>
-    </nav>
+    <CockpitNavigation active={"/budget-planning"} />
 
     <section className="filters budgetFilters budgetFiltersExpanded">
       <div className="filter"><label>Period</label><select value={period} onChange={e=>{setPeriod(e.target.value);setPeriodValue(["All"]);}}>{PERIODS.map(p=><option key={p}>{p}</option>)}</select></div>
