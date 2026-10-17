@@ -3812,3 +3812,85 @@ html[data-theme="dark"] .budgetCompareTotals {
   }
   .pricesTable tbody td strong { color: #17212b; }
 }
+
+
+/* Prices page: align typography with the main cockpit and keep both themes readable. */
+.pricesPage .pricesNotice { font-size:15px; line-height:1.6; }
+.pricesPage .pricesFilters label { font-size:15px; line-height:1.4; }
+.pricesPage .pricesFilters input,
+.pricesPage .pricesFilters select { min-height:48px; font-size:16px; }
+.pricesPage .pricesSectionHeading h2 { font-size:22px; }
+.pricesPage .pricesSectionHeading > span { font-size:14px; }
+.pricesPage .pricesFieldPickerButton { min-height:52px; font-size:17px; }
+.pricesPage .pricesFieldPickerButton span { font-size:14px; }
+.pricesPage .pricesFieldOption { font-size:15px; }
+@media (max-width:600px) {
+  .pricesPage .pricesNotice { font-size:15px; line-height:1.55; }
+  .pricesPage .pricesFilters label { font-size:16px; }
+  .pricesPage .pricesFilters input,
+  .pricesPage .pricesFilters select { min-height:52px; font-size:17px; }
+  .pricesPage .pricesSectionHeading { padding:16px; }
+  .pricesPage .pricesSectionHeading h2 { font-size:22px; }
+  .pricesPage .pricesSectionHeading > span { font-size:14px; }
+  .pricesPage .pricesTable tbody td { font-size:17px; }
+  .pricesPage .pricesTable tbody td::before { font-size:12px; }
+  .pricesPage .pricesTable tbody td[data-label="Variant"] { font-size:18px; }
+}
+/* The dark-mode toggle sets data-theme on html; explicitly theme the custom price cards too. */
+html[data-theme="dark"] .pricesPage {
+  --price-card-bg: #1c2733;
+  --price-card-text: #f2f5f8;
+  --price-muted: #c0cad5;
+  --price-border: #43505d;
+}
+html:not([data-theme="dark"]) .pricesPage,
+html[data-theme="light"] .pricesPage {
+  --price-card-bg: #ffffff;
+  --price-card-text: #17212b;
+  --price-muted: #586575;
+  --price-border: #d8e0e8;
+}
+html[data-theme="dark"] .pricesPage .pricesFilters,
+html[data-theme="dark"] .pricesPage .pricesTableWrap,
+html[data-theme="dark"] .pricesPage .pricesFieldPickerMenu,
+html[data-theme="dark"] .pricesPage .pricesTable tbody tr,
+html[data-theme="dark"] .pricesPage .pricesCalendarPicker {
+  background: var(--price-card-bg) !important;
+  border-color: var(--price-border);
+  color: var(--price-card-text);
+}
+html[data-theme="dark"] .pricesPage .pricesFilters label,
+html[data-theme="dark"] .pricesPage .pricesSectionHeading h2,
+html[data-theme="dark"] .pricesPage .pricesTable tbody td,
+html[data-theme="dark"] .pricesPage .pricesTable tbody td strong,
+html[data-theme="dark"] .pricesPage .pricesFieldOption {
+  color: var(--price-card-text) !important;
+}
+html[data-theme="dark"] .pricesPage .pricesFilters input,
+html[data-theme="dark"] .pricesPage .pricesFilters select,
+html[data-theme="dark"] .pricesPage .pricesDateControl input[type="text"] {
+  background: #111a24 !important;
+  border-color: var(--price-border);
+  color: var(--price-card-text) !important;
+}
+html[data-theme="dark"] .pricesPage .pricesTable tbody td::before,
+html[data-theme="dark"] .pricesPage .pricesSectionHeading > span,
+html[data-theme="dark"] .pricesPage .pricesFieldPickerButton span {
+  color: var(--price-muted) !important;
+}
+html[data-theme="dark"] .pricesPage .pricesFieldPickerButton {
+  background: #253342;
+  color: var(--price-card-text);
+  border-color: var(--price-border);
+}
+html[data-theme="dark"] .pricesPage .pricesNotice {
+  background: #172d40;
+  border-color: #31516b;
+  color: #e1edf7;
+}
+html[data-theme="dark"] .pricesPage .pricesCalendarPicker { background:#111a24; }
+html:not([data-theme="dark"]) .pricesPage .pricesTable tbody tr,
+html[data-theme="light"] .pricesPage .pricesTable tbody tr {
+  background: var(--price-card-bg);
+  color: var(--price-card-text);
+}
