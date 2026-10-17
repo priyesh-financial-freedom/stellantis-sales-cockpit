@@ -6,6 +6,7 @@ import { readClientCache } from "../../lib/clientCache";
 import { getModelsForSegment } from "../../lib/segmentModelMaster";
 import MultiSelect from "../../components/MultiSelect";
 import {
+import CockpitNavigation from "../../components/CockpitNavigation";
   INDUSTRY_HALVES, INDUSTRY_PERIODS, INDUSTRY_QUARTERS, MONTHS,
   filterHistoryRows, formatIndustryNumber, getIndustryYears, loadIndustryData, INDUSTRY_CACHE_KEY
 } from "../../lib/industryData";
@@ -264,10 +265,7 @@ export default function IndustryPage() {
       <div><div className="eyebrow">STELLANTIS INDIA · INDUSTRY INTELLIGENCE</div><h1>Industry</h1><p className="subtitle">Indian passenger vehicle industry TIV by segment</p>{cachedAt && <div className="dataFreshness">{refreshing ? "Showing cached data · refreshing in background" : "Updated " + new Date(cachedAt).toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" })}</div>}</div>
       <div className="headerStatus"><span className={(loading || refreshing) ? "statusDot loadingDot" : "statusDot"} />{loading ? "Loading industry data" : refreshing ? "Refreshing industry data" : error ? "Data error" : "Industry data connected"}</div>
     </header>
-    <nav className="cockpitNav">
-      <Link href="/model-wise/jeep">Jeep Model Wise</Link><Link href="/model-wise/citroen">Citroën Model Wise</Link>
-      <Link className="active" href="/industry">Industry</Link><Link href="/industry/manufacturers">Manufacturer History</Link><Link href="/budget-planning">Budget Planning</Link><Link href="/data-entry">Data Entry</Link><Link href="/stellantis-network">Stellantis Network</Link>
-    </nav>
+    <CockpitNavigation active={"/industry"} />
 
     <section className="filters">
       <div className="filter"><label>Period</label><select value={period} onChange={e => changePeriod(e.target.value)}>{INDUSTRY_PERIODS.map(x => <option key={x}>{x}</option>)}</select></div>
