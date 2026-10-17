@@ -81,7 +81,15 @@ export default function PricesPage() {
       const totalGst = effectivePrices.totalGst ?? base.totalGst ?? Math.round(gstBeforeNdp + dealerMargin * gstRate + handlingCharges * gstRate);
       return { ...base, ...effectivePrices, gstRate, dealerMargin, handlingCharges, gstBeforeNdp, totalGst, latestChange: latest || null };
     }).filter(row => (model === "All" || row.model === model) &&
-      (row.variant + " " + row.model).toLowerCase().includes(search.toLowerCase()));
+      (row.variant + " " + row.model).toLowerCase().includes(search.toLowerCase()))
+      .sort((a, b) => {
+        const priceA = Number(a.esp);
+        const priceB = Number(b.esp);
+        if (!Number.isFinite(priceA) && !Number.isFinite(priceB)) return a.variant.localeCompare(b.variant);
+        if (!Number.isFinite(priceA)) return 1;
+        if (!Number.isFinite(priceB)) return -1;
+        return priceA - priceB || a.variant.localeCompare(b.variant);
+      });
   }, [variants, changes, asOf, model, search]);
 
   const upcoming = useMemo(() => [...changes]
