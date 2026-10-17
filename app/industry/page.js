@@ -5,8 +5,8 @@ import Link from "next/link";
 import { readClientCache } from "../../lib/clientCache";
 import { getModelsForSegment } from "../../lib/segmentModelMaster";
 import MultiSelect from "../../components/MultiSelect";
-import {
 import CockpitNavigation from "../../components/CockpitNavigation";
+import {
   INDUSTRY_HALVES, INDUSTRY_PERIODS, INDUSTRY_QUARTERS, MONTHS,
   filterHistoryRows, formatIndustryNumber, getIndustryYears, loadIndustryData, INDUSTRY_CACHE_KEY
 } from "../../lib/industryData";
