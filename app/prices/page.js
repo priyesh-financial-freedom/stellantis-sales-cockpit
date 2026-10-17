@@ -47,8 +47,11 @@ export default function PricesPage() {
       const applicable = changes
         .filter(change => change.variantKey === base.key && change.effectiveDate <= asOf)
         .sort((a, b) => a.effectiveDate.localeCompare(b.effectiveDate));
+      const effectivePrices = applicable.reduce((prices, change) => ({ ...prices, ...change.prices }), {
+        basicPrice: base.basicPrice, ndp: base.ndp, esp: base.esp, accessoryKitMrp: base.accessoryKitMrp
+      });
       const latest = applicable[applicable.length - 1];
-      return { ...base, ...(latest ? latest.prices : {}), latestChange: latest || null };
+      return { ...base, ...effectivePrices, latestChange: latest || null };
     }).filter(row => (model === "All" || row.model === model) &&
       (row.variant + " " + row.model).toLowerCase().includes(search.toLowerCase()));
   }, [variants, changes, asOf, model, search]);
