@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import CockpitNavigation from "../../components/CockpitNavigation";
 import { JEEP_PRICE_BASELINE, PRICE_LIST_EFFECTIVE_FROM } from "../../lib/jeepPriceList";
+import { CITROEN_PRICE_BASELINE, CITROEN_PRICE_LIST_EFFECTIVE_FROM } from "../../lib/citroenPriceList";
 
 const STORAGE_KEY = "stellantis-jeep-price-changes-v1";
 const money = value => value == null || value === "" ? "—" : "₹" + Number(value).toLocaleString("en-IN", { maximumFractionDigits: 0 });
@@ -18,6 +19,7 @@ const parseDisplayDate = value => {
 
 export default function PricesPage() {
   const [changes, setChanges] = useState([]);
+  const [brand, setBrand] = useState("Jeep");
   const [loaded, setLoaded] = useState(false);
   const [model, setModel] = useState("All");
   const [search, setSearch] = useState("");
@@ -53,8 +55,14 @@ export default function PricesPage() {
     catch { setError("Unable to save changes in this browser. Export or copy the changes before leaving this page."); }
   }, [changes, loaded]);
 
-  const models = useMemo(() => ["All", ...new Set(JEEP_PRICE_BASELINE.map(row => row.model))], []);
-  const variants = useMemo(() => JEEP_PRICE_BASELINE.map(row => ({ ...row, key: row.model + "||" + row.variant })), []);
+  const baseline = brand === "Jeep" ? JEEP_PRICE_BASELINE : CITROEN_PRICE_BASELINE;
+  const effectiveFrom = brand === "Jeep" ? PRICE_LIST_EFFECTIVE_FROM : CITROEN_PRICE_LIST_EFFECTIVE_FROM;
+  const variants = useMemo(() => baseline.map(row => ({
+    ...row,
+    key: brand === "Jeep" ? row.model + "||" + row.variant : "Citroën||" + row.model + "||" + row.variant + "||" + (row.seating || "") + "||" + (row.option || "") + "||" + (row.vibePack || ""),
+    variant: [row.variant, row.seating, row.option, row.vibePack].filter(Boolean).join(" · ")
+  })), [baseline, brand]);
+  const models = useMemo(() => ["All", ...new Set(baseline.map(row => row.model))], [baseline]);
   const selectedVariant = variants.find(row => row.key === variantKey);
 
   const pricedRows = useMemo(() => {
@@ -70,15 +78,15 @@ export default function PricesPage() {
       const dealerMargin = effectivePrices.dealerMargin ?? 0;
       const handlingCharges = effectivePrices.handlingCharges ?? base.handlingCharges ?? 1000;
       const gstBeforeNdp = Math.round(effectivePrices.basicPrice * gstRate);
-      const totalGst = Math.round(gstBeforeNdp + dealerMargin * gstRate + handlingCharges * gstRate);
+      const totalGst = effectivePrices.totalGst ?? base.totalGst ?? Math.round(gstBeforeNdp + dealerMargin * gstRate + handlingCharges * gstRate);
       return { ...base, ...effectivePrices, gstRate, dealerMargin, handlingCharges, gstBeforeNdp, totalGst, latestChange: latest || null };
     }).filter(row => (model === "All" || row.model === model) &&
       (row.variant + " " + row.model).toLowerCase().includes(search.toLowerCase()));
   }, [variants, changes, asOf, model, search]);
 
   const upcoming = useMemo(() => [...changes]
-    .filter(change => change.effectiveDate > asOf)
-    .sort((a, b) => a.effectiveDate.localeCompare(b.effectiveDate)), [changes, asOf]);
+    .filter(change => variants.some(row => row.key === change.variantKey) && change.effectiveDate > asOf)
+    .sort((a, b) => a.effectiveDate.localeCompare(b.effectiveDate)), [changes, asOf, variants]);
 
   function openForm() {
     setVariantKey("");
@@ -102,7 +110,7 @@ export default function PricesPage() {
       setError("Choose a variant and effective date.");
       return;
     }
-    if (effectiveDate < PRICE_LIST_EFFECTIVE_FROM) {
+    if (effectiveDate < effectiveFrom) {
       setError("The effective date cannot be earlier than 1 October 2026.");
       return;
     }
@@ -143,10 +151,15 @@ export default function PricesPage() {
       <header className="header">
         <div>
           <div className="eyebrow">STELLANTIS INDIA · PRODUCT INTELLIGENCE</div>
-          <h1>Jeep Price List</h1>
-          <p className="subtitle">Price snapshot effective 1 October 2026 · {JEEP_PRICE_BASELINE.length} variants</p>
+          <h1>{brand} Price List</h1>
+          <p className="subtitle">Price snapshot effective 1 October 2026 · {baseline.length} variants</p>
         </div>
         <div className="pricesHeaderActions">
+          <label className="pricesBrandSelect">Brand
+            <select value={brand} onChange={event => { setBrand(event.target.value); setModel("All"); setSearch(""); setVariantKey(""); }}>
+              <option value="Jeep">Jeep</option><option value="Citroën">Citroën</option>
+            </select>
+          </label>
           <span className="pricesEffectiveBadge">Baseline · 01 Oct 2026</span>
           <button type="button" className="primaryButton" onClick={openForm}>Schedule price change</button>
         </div>
@@ -156,7 +169,7 @@ export default function PricesPage() {
 
       <section className="pricesNotice">
         <strong>Effective-dated pricing</strong>
-        <span>Record revised prices with a future effective date. The list below shows the latest change effective on or before the selected “Prices as of” date.</span>
+        <span>Record revised prices with a future effective date. The list below shows the latest change effective on or before the selected “Prices as of” date. Citroën prices are based on the uploaded July 2026 workbook, as confirmed effective 1 October 2026.</span>
       </section>
 
       <section className="pricesFilters">
