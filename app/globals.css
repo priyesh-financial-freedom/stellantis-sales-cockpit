@@ -3894,3 +3894,40 @@ html[data-theme="light"] .pricesPage .pricesTable tbody tr {
   background: var(--price-card-bg);
   color: var(--price-card-text);
 }
+
+
+/* Final mobile type scale: match the larger, high-readability cockpit pages. */
+@media (max-width: 600px) {
+  .pricesPage .pricesHeader h1,
+  .pricesPage header h1 { font-size:32px; line-height:1.15; }
+  .pricesPage .pricesSubtitle,
+  .pricesPage .subtitle { font-size:16px; line-height:1.5; }
+  .pricesPage .pricesFilters { padding:16px; gap:16px; }
+  .pricesPage .pricesFilters label { font-size:18px; line-height:1.35; gap:9px; }
+  .pricesPage .pricesFilters input,
+  .pricesPage .pricesFilters select,
+  .pricesPage .pricesDateControl > input[type="text"] {
+    min-height:60px; font-size:20px; padding:12px 15px;
+  }
+  .pricesPage .pricesCalendarPicker { flex-basis:58px; height:60px; font-size:25px; }
+  .pricesPage .pricesNotice { font-size:16px; line-height:1.6; padding:15px; }
+  .pricesPage .pricesNotice strong { font-size:17px; }
+  .pricesPage .pricesTableWrap { border-radius:18px; }
+  .pricesPage .pricesSectionHeading { padding:18px; gap:10px; }
+  .pricesPage .pricesSectionHeading h2 { font-size:27px; line-height:1.25; }
+  .pricesPage .pricesSectionHeading > span { font-size:16px; }
+  .pricesPage .pricesFieldPickerButton {
+    min-height:66px; padding:17px 18px; font-size:21px; line-height:1.35;
+  }
+  .pricesPage .pricesFieldPickerButton span { font-size:17px; }
+  .pricesPage .pricesFieldPickerMenu { padding:18px; gap:16px; }
+  .pricesPage .pricesFieldOption { font-size:18px; line-height:1.5; }
+  .pricesPage .pricesFieldOption input { width:22px; height:22px; }
+  .pricesPage .pricesTable tbody { gap:14px; padding:14px; }
+  .pricesPage .pricesTable tbody tr { padding:17px 18px; gap:5px 16px; border-radius:18px; }
+  .pricesPage .pricesTable tbody td { font-size:21px; line-height:1.45; padding:10px 0; gap:7px; }
+  .pricesPage .pricesTable tbody td::before { font-size:15px; line-height:1.4; letter-spacing:.045em; }
+  .pricesPage .pricesTable tbody td[data-label="Model"] { font-size:22px; }
+  .pricesPage .pricesTable tbody td[data-label="Variant"] { font-size:22px; line-height:1.4; padding-bottom:14px; }
+  .pricesPage .pricesStorageNote { font-size:14px; line-height:1.6; }
+}
