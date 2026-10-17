@@ -8,7 +8,7 @@ const STORAGE_KEY = "stellantis-jeep-price-changes-v1";
 const money = value => value == null || value === "" ? "—" : "₹" + Number(value).toLocaleString("en-IN", { maximumFractionDigits: 0 });
 const dateLabel = value => value ? new Date(value + "T00:00:00").toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" }) : "—";
 const parseDisplayDate = value => {
-  const match = /^(\d{2})\/(\\d{2})\\/(\\d{4})$/.exec(value.trim());
+  const match = /^(\d{2})\/(\d{2})\/(\d{4})$/.exec(value.trim());
   if (!match) return "";
   const [, dd, mm, yyyy] = match;
   const date = new Date(Number(yyyy), Number(mm) - 1, Number(dd));
