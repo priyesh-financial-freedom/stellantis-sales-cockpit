@@ -3508,3 +3508,73 @@ html[data-theme="dark"] .budgetCompareTotals {
   .cockpitNavGroups { grid-template-columns: 1fr; }
   .cockpitNavGroupHeader { min-height: 60px; }
 }
+
+
+/* Jeep Prices workspace */
+.pricesHeaderActions { display:flex; align-items:center; gap:12px; flex-wrap:wrap; }
+.pricesEffectiveBadge,.priceBaselineTag,.priceChangeTag {
+  display:inline-flex; align-items:center; gap:5px; border-radius:999px;
+  padding:5px 9px; font-size:11px; font-weight:800; white-space:nowrap;
+}
+.pricesEffectiveBadge,.priceBaselineTag { color:#35634a; background:#eaf6ee; }
+.priceChangeTag { color:#875000; background:#fff0d5; margin:3px 4px 3px 0; }
+.primaryButton,.secondaryButton,.textButton {
+  border-radius:9px; padding:10px 14px; font-weight:700; cursor:pointer;
+}
+.primaryButton { border:1px solid #176eae; background:#176eae; color:#fff; }
+.primaryButton:hover { background:#105b92; }
+.secondaryButton { border:1px solid var(--border,#d9e0e8); background:var(--card,#fff); color:inherit; }
+.secondaryButton:disabled { opacity:.45; cursor:not-allowed; }
+.textButton { border:0; background:transparent; color:#176eae; padding:7px 8px; }
+.pricesNotice {
+  display:flex; flex-direction:column; gap:5px; margin:0 0 18px;
+  border:1px solid #cfe2f3; border-radius:12px; padding:14px 17px;
+  background:#f0f7fd; color:#244967; font-size:13px; line-height:1.5;
+}
+.pricesFilters {
+  display:grid; grid-template-columns:minmax(170px,.8fr) minmax(180px,.8fr) minmax(220px,1.4fr);
+  gap:14px; padding:18px; border:1px solid var(--border,#d9e0e8);
+  border-radius:14px; background:var(--card,#fff); margin-bottom:16px;
+}
+.pricesFilters label,.pricesModal label {
+  display:flex; flex-direction:column; gap:7px; color:var(--muted,#596575);
+  font-size:12px; font-weight:800;
+}
+.pricesFilters input,.pricesFilters select,.pricesModal input,.pricesModal select {
+  width:100%; min-height:42px; border:1px solid var(--border,#d9e0e8);
+  border-radius:9px; background:var(--card,#fff); color:inherit; padding:9px 11px;
+}
+.pricesSummary { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:12px; margin-bottom:20px; }
+.pricesSummary>div { display:flex; flex-direction:column; gap:6px; padding:15px 17px; border:1px solid var(--border,#d9e0e8); border-radius:12px; background:var(--card,#fff); }
+.pricesSummary span,.pricesSectionHeading>span { color:var(--muted,#596575); font-size:12px; font-weight:600; }
+.pricesSummary strong { font-size:24px; }
+.pricesTableWrap { border:1px solid var(--border,#d9e0e8); border-radius:14px; background:var(--card,#fff); overflow:hidden; margin:0 0 20px; }
+.pricesSectionHeading { display:flex; align-items:center; justify-content:space-between; gap:12px; padding:17px 18px; }
+.pricesSectionHeading h2 { margin:0; font-size:19px; }
+.pricesTableScroll { overflow:auto; max-width:100%; }
+.pricesTable { width:100%; border-collapse:separate; border-spacing:0; font-size:13px; }
+.pricesTable th,.pricesTable td { padding:12px 14px; border-top:1px solid var(--border,#e5e9ef); text-align:left; vertical-align:middle; }
+.pricesTable th { position:sticky; top:0; background:#f3f6f9; color:#526171; font-size:11px; text-transform:uppercase; letter-spacing:.06em; white-space:nowrap; }
+.pricesTable td { white-space:nowrap; }
+.pricesTable td:nth-child(2) { white-space:normal; min-width:210px; }
+.pricesTable tbody tr:hover { background:#f8fbfe; }
+.pricesEsp { font-weight:800; color:#1265a8; }
+.pricesEmptyCell { text-align:center !important; color:var(--muted,#596575); padding:24px !important; }
+.pricesStorageNote { color:var(--muted,#596575); font-size:12px; line-height:1.6; margin:8px 0 24px; }
+.pricesModalBackdrop { position:fixed; inset:0; z-index:1000; display:flex; align-items:center; justify-content:center; padding:18px; background:rgba(15,25,38,.48); overflow:auto; }
+.pricesModal { width:min(680px,100%); max-height:calc(100vh - 36px); overflow:auto; border-radius:18px; padding:24px; background:var(--card,#fff); box-shadow:0 20px 70px rgba(0,0,0,.22); }
+.pricesModalHeading { display:flex; align-items:flex-start; justify-content:space-between; gap:12px; margin-bottom:22px; }
+.pricesModalHeading h2 { margin:5px 0 0; font-size:24px; }
+.pricesModal form { display:flex; flex-direction:column; gap:16px; }
+.pricesCurrentReference { border-radius:9px; padding:10px 12px; background:#f2f6fa; color:#4c5c6b; font-size:12px; line-height:1.5; }
+.pricesFormHelp { margin:0; color:var(--muted,#596575); font-size:12px; line-height:1.5; }
+.pricesFormGrid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:13px; }
+.pricesFormError { margin:0; color:#b42318; font-size:13px; font-weight:700; }
+.pricesModalActions { display:flex; justify-content:flex-end; gap:10px; padding-top:6px; }
+@media(max-width:760px) {
+  .pricesHeaderActions { align-items:flex-start; }
+  .pricesFilters { grid-template-columns:1fr; }
+  .pricesSummary { grid-template-columns:1fr; }
+  .pricesFormGrid { grid-template-columns:1fr; }
+  .pricesModal { padding:18px; }
+}
