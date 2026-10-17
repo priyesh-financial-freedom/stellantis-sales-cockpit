@@ -7,7 +7,6 @@ import { JEEP_PRICE_BASELINE, PRICE_LIST_EFFECTIVE_FROM } from "../../lib/jeepPr
 const STORAGE_KEY = "stellantis-jeep-price-changes-v1";
 const money = value => value == null || value === "" ? "—" : "₹" + Number(value).toLocaleString("en-IN", { maximumFractionDigits: 0 });
 const dateLabel = value => value ? new Date(value + "T00:00:00").toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" }) : "—";
-const toDisplayDate = value => value ? value.split("-").reverse().join("/") : "";
 const parseDisplayDate = value => {
   const match = /^(\\d{2})\\/(\\d{2})\\/(\\d{4})$/.exec(value.trim());
   if (!match) return "";
