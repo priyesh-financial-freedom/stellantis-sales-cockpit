@@ -6,6 +6,7 @@ import { MODEL_NAMES, MODEL_YEARS, MODEL_CACHE_KEY, buildModelSummary, loadModel
 import { readClientCache } from "../../lib/clientCache";
 import MultiSelect from "../../components/MultiSelect";
 import { supabase } from "../../lib/supabase";
+import CockpitNavigation from "../../components/CockpitNavigation";
 
 const PERIODS = ["Monthly", "Quarterly", "Half-Yearly", "Annual", "Custom Period"];
 const SALES_TYPES = ["Bookings", "Retail", "Wholesale"];
@@ -406,15 +407,7 @@ export default function ModelWiseClient({ brand }) {
         </div>
       </header>
 
-      <nav className="cockpitNav">
-        <Link className={brand === "Jeep" ? "active" : ""} href="/model-wise/jeep">Jeep Model Wise</Link>
-        <Link className={brand === "Citroën" ? "active" : ""} href="/model-wise/citroen">Citroën Model Wise</Link>
-        <Link href="/industry">Industry</Link>
-        <Link href="/budget-planning">Budget Planning</Link>
-        <Link href="/data-entry">Data Entry</Link>
-        <Link href="/industry/manufacturers">Manufacturer History</Link>
-        <Link href="/stellantis-network">Stellantis Network</Link>
-      </nav>
+      <CockpitNavigation active={brand === "Jeep" ? "/model-wise/jeep" : "/model-wise/citroen"} />
 
       <section className="filters modelFilters">
         <div className="filter">
