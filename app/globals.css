@@ -3931,3 +3931,51 @@ html[data-theme="light"] .pricesPage .pricesTable tbody tr {
   .pricesPage .pricesTable tbody td[data-label="Variant"] { font-size:22px; line-height:1.4; padding-bottom:14px; }
   .pricesPage .pricesStorageNote { font-size:14px; line-height:1.6; }
 }
+
+
+/* Prevent mobile price-card field labels and values from colliding. */
+@media (max-width: 600px) {
+  .pricesPage .pricesTable tbody tr {
+    display:grid;
+    grid-template-columns:minmax(0,1fr) minmax(0,1fr);
+    align-items:start;
+    column-gap:18px;
+    row-gap:18px;
+  }
+  .pricesPage .pricesTable tbody td {
+    display:flex;
+    flex-direction:column;
+    align-items:flex-start;
+    justify-content:flex-start;
+    min-width:0;
+    max-width:100%;
+    overflow-wrap:anywhere;
+    word-break:normal;
+    gap:8px;
+    padding:0;
+  }
+  .pricesPage .pricesTable tbody td::before {
+    display:block;
+    width:100%;
+    white-space:normal;
+    overflow-wrap:normal;
+    line-height:1.35;
+  }
+  .pricesPage .pricesTable tbody td[data-label="Description / Variant"] {
+    grid-column:1;
+  }
+  .pricesPage .pricesTable tbody td[data-label="Model"] {
+    grid-column:1 / -1;
+  }
+  .pricesPage .pricesTable tbody td[data-label="GST"] {
+    grid-column:2;
+  }
+  .pricesPage .pricesTable tbody td[data-label="Description / Variant"],
+  .pricesPage .pricesTable tbody td[data-label="GST"] {
+    align-self:start;
+  }
+  .pricesPage .pricesTable tbody td > * {
+    min-width:0;
+    max-width:100%;
+  }
+}
