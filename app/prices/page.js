@@ -130,7 +130,7 @@ export default function PricesPage() {
     if (accessory !== "") prices.accessoryKitMrp = Number(accessory);
     setChanges(previous => [...previous, {
       id: (typeof crypto !== "undefined" && crypto.randomUUID) ? crypto.randomUUID() : String(Date.now()),
-      variantKey, model: selectedVariant.model, variant: selectedVariant.variant,
+      brand, variantKey, model: selectedVariant.model, variant: selectedVariant.variant,
       effectiveDate, prices, note: note.trim(), createdAt: new Date().toISOString()
     }].sort((a, b) => a.effectiveDate.localeCompare(b.effectiveDate)));
     setShowForm(false);
