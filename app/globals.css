@@ -3758,3 +3758,57 @@ html[data-theme="dark"] .budgetCompareTotals {
 }
 .pricesCalendarPicker:focus-within { outline:2px solid #176eae; outline-offset:2px; }
 @media(max-width:600px) { .pricesDateControl { gap:6px; } .pricesCalendarPicker { flex-basis:42px; } }
+
+
+/* Improve Prices page readability on phones: larger type and explicit contrast in light mode. */
+@media (max-width: 600px) {
+  .pricesTableWrap,
+  .pricesTable tbody tr {
+    color: #17212b;
+  }
+  .pricesSectionHeading h2 { font-size: 20px; line-height: 1.3; }
+  .pricesSectionHeading > span { font-size: 13px; }
+  .pricesFieldPickerButton {
+    min-height: 54px;
+    padding: 14px 15px;
+    font-size: 17px;
+    line-height: 1.35;
+  }
+  .pricesFieldPickerButton span { font-size: 14px; }
+  .pricesFieldPickerMenu { padding: 14px; gap: 13px; }
+  .pricesFieldPickerActions strong { font-size: 15px; }
+  .pricesFieldPickerActions button { font-size: 14px; }
+  .pricesFieldOption { font-size: 15px; line-height: 1.45; gap: 10px; }
+  .pricesFieldOption input { width: 18px; height: 18px; }
+  .pricesTable tbody { gap: 12px; padding: 12px; }
+  .pricesTable tbody tr {
+    padding: 13px 14px;
+    gap: 2px 14px;
+    background: #fff;
+    border-color: #d8e0e8;
+  }
+  .pricesTable tbody td {
+    color: #17212b;
+    font-size: 16px;
+    line-height: 1.45;
+    padding: 9px 0;
+    gap: 5px;
+  }
+  .pricesTable tbody td::before {
+    color: #586575;
+    font-size: 12px;
+    line-height: 1.35;
+    letter-spacing: .045em;
+  }
+  .pricesTable tbody td[data-label="Model"] {
+    font-size: 16px;
+    font-weight: 700;
+  }
+  .pricesTable tbody td[data-label="Variant"] {
+    font-size: 17px;
+    line-height: 1.45;
+    font-weight: 700;
+    padding-bottom: 12px;
+  }
+  .pricesTable tbody td strong { color: #17212b; }
+}
