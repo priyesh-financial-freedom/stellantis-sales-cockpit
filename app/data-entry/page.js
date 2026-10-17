@@ -7,6 +7,7 @@ import { MODEL_NAMES, MODEL_YEARS, MODEL_PERIODS } from "../../lib/modelData";
 import { clearClientCache } from "../../lib/clientCache";
 import { MODEL_CACHE_KEY } from "../../lib/modelData";
 import MultiSelect from "../../components/MultiSelect";
+import CockpitNavigation from "../../components/CockpitNavigation";
 
 const BRANDS = ["Jeep", "Citroën", "SAARC"];
 const MODEL_BRANDS = ["Jeep", "Citroën"];
@@ -688,15 +689,7 @@ export default function DataEntryPage() {
         <div className="headerStatus"><span className="statusDot" /> Data connected</div>
       </header>
 
-      <nav className="cockpitNav">
-        <Link href="/model-wise/jeep">Jeep Model Wise</Link>
-        <Link href="/model-wise/citroen">Citroën Model Wise</Link>
-        <Link href="/budget-planning">Budget Planning</Link>
-        <Link className="active" href="/data-entry">Data Entry</Link>
-        <Link href="/industry">Industry</Link>
-        <Link href="/industry/manufacturers">Manufacturer History</Link>
-        <Link href="/stellantis-network">Stellantis Network</Link>
-      </nav>
+      <CockpitNavigation active={"/data-entry"} />
 
       <section className="filters modelFilters">
         <div className="filter"><label>Data Set</label><select value={dataset} onChange={(e) => setDataset(e.target.value)}>{DATASETS.map((item) => <option key={item}>{item}</option>)}</select></div>
