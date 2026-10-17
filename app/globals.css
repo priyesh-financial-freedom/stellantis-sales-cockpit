@@ -3715,3 +3715,23 @@ html[data-theme="dark"] .budgetCompareTotals {
     text-align: center !important;
   }
 }
+
+
+/* Configurable price-list columns */
+.pricesFieldPicker { position:relative; padding:0 18px 14px; }
+.pricesFieldPickerButton { display:flex; width:100%; align-items:center; justify-content:space-between; gap:12px; text-align:left; }
+.pricesFieldPickerButton span { color:var(--muted,#596575); font-size:12px; }
+.pricesFieldPickerMenu {
+  position:relative; z-index:5; margin-top:8px; padding:12px;
+  border:1px solid var(--border,#d9e0e8); border-radius:12px;
+  background:var(--card,#fff); box-shadow:0 8px 24px rgba(18,38,63,.10);
+  display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:9px 16px;
+}
+.pricesFieldPickerActions { grid-column:1/-1; display:flex; align-items:center; flex-wrap:wrap; gap:8px; padding-bottom:7px; border-bottom:1px solid var(--border,#e5e9ef); }
+.pricesFieldPickerActions strong { margin-right:auto; font-size:12px; }
+.pricesFieldOption { display:flex; align-items:flex-start; gap:8px; font-size:12px; line-height:1.4; color:var(--text,#20262d); cursor:pointer; }
+.pricesFieldOption input { margin:2px 0 0; flex:0 0 auto; accent-color:#176eae; }
+@media(max-width:600px) {
+  .pricesFieldPicker { padding:0 12px 12px; }
+  .pricesFieldPickerMenu { grid-template-columns:1fr; }
+}
