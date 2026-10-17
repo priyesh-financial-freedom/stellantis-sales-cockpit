@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
+import CockpitNavigation from "./CockpitNavigation";
 
 const PAGE_SIZES = [25, 50, 100, 228];
 const formatNumber = value => value === null || value === undefined || value === "" ? "—" : Number.isFinite(Number(value)) ? new Intl.NumberFormat("en-IN", { maximumFractionDigits: 0 }).format(Number(value)) : String(value);
@@ -90,15 +91,7 @@ export default function StellantisNetworkTable({ columns, records, sourceTotals,
       <div className="headerStatus"><span className="statusDot" />{records.length.toLocaleString("en-IN")} source records</div>
     </header>
 
-    <nav className="cockpitNav">
-      <Link href="/model-wise/jeep">Jeep Model Wise</Link>
-      <Link href="/model-wise/citroen">Citroën Model Wise</Link>
-      <Link href="/industry">Industry</Link>
-      <Link href="/industry/manufacturers">Manufacturer History</Link>
-      <Link href="/budget-planning">Budget Planning</Link>
-      <Link href="/data-entry">Data Entry</Link>
-      <Link className="active" href="/stellantis-network">Stellantis Network</Link>
-    </nav>
+    <CockpitNavigation active={"/stellantis-network"} />
 
     <section style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(185px, 1fr))", gap: 12, marginBottom: 20 }}>
       <article style={panel}><div className="eyebrow">SOURCE ROWS</div><div style={{ fontSize: 28, fontWeight: 750, marginTop: 7 }}>{records.length.toLocaleString("en-IN")}</div><div className="subtitle" style={{ marginTop: 5, marginBottom: 0 }}>All original records retained</div></article>
