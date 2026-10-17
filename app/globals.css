@@ -3578,3 +3578,58 @@ html[data-theme="dark"] .budgetCompareTotals {
   .pricesFormGrid { grid-template-columns:1fr; }
   .pricesModal { padding:18px; }
 }
+
+
+/* Mobile usability improvements for Jeep Prices */
+.pricesTableScroll {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-inline: contain;
+}
+.pricesTable {
+  width: 100%;
+  min-width: 760px;
+  table-layout: auto;
+}
+.pricesTable th,
+.pricesTable td {
+  padding: 12px 14px;
+}
+.pricesTable td:nth-child(2) { min-width: 220px; }
+.pricesSectionHeading { flex-wrap: wrap; }
+.pricesSectionHeading .secondaryButton { flex-shrink: 0; }
+.pricesHeaderActions { max-width: 100%; }
+@media (max-width: 600px) {
+  .pricesPage .header {
+    gap: 12px;
+    align-items: flex-start;
+  }
+  .pricesPage .header h1 { font-size: clamp(26px, 8vw, 34px); line-height: 1.12; }
+  .pricesPage .subtitle { font-size: 14px; line-height: 1.45; }
+  .pricesHeaderActions {
+    width: 100%;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+  .pricesHeaderActions .primaryButton { width: 100%; }
+  .pricesNotice { font-size: 12px; padding: 12px; }
+  .pricesFilters { padding: 12px; gap: 12px; }
+  .pricesSummary { grid-template-columns: repeat(3, minmax(0,1fr)); gap: 7px; }
+  .pricesSummary > div { padding: 10px; min-width: 0; }
+  .pricesSummary span { font-size: 10px; line-height: 1.35; }
+  .pricesSummary strong { font-size: 20px; }
+  .pricesTableWrap { border-radius: 12px; }
+  .pricesSectionHeading { padding: 13px; }
+  .pricesSectionHeading h2 { font-size: 17px; }
+  .pricesTable { min-width: 760px; font-size: 12px; }
+  .pricesTable th,.pricesTable td { padding: 11px 12px; }
+  .pricesStorageNote { font-size: 11px; }
+  .pricesModalBackdrop { padding: 10px; align-items: flex-end; }
+  .pricesModal { width: 100%; max-height: 92dvh; border-radius: 18px 18px 10px 10px; padding: 16px; }
+  .pricesModalHeading h2 { font-size: 21px; }
+  .pricesModalActions { position: sticky; bottom: -16px; background: var(--card,#fff); padding: 12px 0 4px; }
+}
