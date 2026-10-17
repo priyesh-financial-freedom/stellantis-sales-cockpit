@@ -186,12 +186,6 @@ export default function PricesPage() {
         </label>
       </section>
 
-      <section className="pricesSummary">
-        <div><span>Models</span><strong>{new Set(pricedRows.map(row => row.model)).size}</strong></div>
-        <div><span>Variants shown</span><strong>{pricedRows.length}</strong></div>
-        <div><span>Scheduled changes after selected date</span><strong>{upcoming.length}</strong></div>
-      </section>
-
       <section className="pricesTableWrap">
         <div className="pricesSectionHeading"><h2>Price list</h2><span>All amounts in INR</span></div>
         <div className="pricesFieldPicker">
