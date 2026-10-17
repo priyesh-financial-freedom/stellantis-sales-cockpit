@@ -4,7 +4,8 @@ import { useMemo, useState } from "react";
 import Link from "next/link";
 
 const PAGE_SIZES = [25, 50, 100, 228];
-const formatNumber = value => value === null || value === undefined || value === "" ? "—" : Number.isFinite(Number(value)) ? new Intl.NumberFormat("en-IN", { maximumFractionDigits: 0 }).format(Number(value)) : String(value);\nconst normalize = value => String(value ?? "").normalize("NFKC").trim().replace(/\\s+/g, " ").toLocaleLowerCase("en");
+const formatNumber = value => value === null || value === undefined || value === "" ? "—" : Number.isFinite(Number(value)) ? new Intl.NumberFormat("en-IN", { maximumFractionDigits: 0 }).format(Number(value)) : String(value);
+const normalize = value => String(value ?? "").normalize("NFKC").trim().replace(/\s+/g, " ").toLocaleLowerCase("en");
 
 export default function StellantisNetworkTable({ columns, records, sourceTotals, sourceFile }) {
   const [search, setSearch] = useState("");
@@ -17,7 +18,18 @@ export default function StellantisNetworkTable({ columns, records, sourceTotals,
   const [pageSize, setPageSize] = useState(25);
   const [page, setPage] = useState(1);
 
-  // These are reconciliation indicators, not a certified physical-outlet count.\n  const networkAudit = useMemo(() => {\n    const cities = new Set(records.map(row => normalize(row[5])).filter(Boolean));\n    const locationKeys = records.map(row => `${normalize(row[4])}|${normalize(row[5])}`);\n    const uniqueDealerCityPairs = new Set(locationKeys.filter(key => key !== "|"));\n    const duplicateRowsBeyondPairs = records.length - uniqueDealerCityPairs.size;\n    const sbhRows = records.filter(row => normalize(row[8]) === "sbh").length;\n    const sbhDealerCityPairs = new Set(records.filter(row => normalize(row[8]) === "sbh").map(row => `${normalize(row[4])}|${normalize(row[5])}`).filter(key => key !== "|"));\n    return { cities: cities.size, uniqueDealerCityPairs: uniqueDealerCityPairs.size, duplicateRowsBeyondPairs, sbhRows, sbhDealerCityPairs: sbhDealerCityPairs.size };\n  }, [records]);\n\n  const brandOptions = useMemo(() => [...new Set(records.map(row => String(row[1] ?? "").trim()).filter(Boolean))].sort(), [records]);
+  // These are reconciliation indicators, not a certified physical-outlet count.
+  const networkAudit = useMemo(() => {
+    const cities = new Set(records.map(row => normalize(row[5])).filter(Boolean));
+    const locationKeys = records.map(row => `${normalize(row[4])}|${normalize(row[5])}`);
+    const uniqueDealerCityPairs = new Set(locationKeys.filter(key => key !== "|"));
+    const duplicateRowsBeyondPairs = records.length - uniqueDealerCityPairs.size;
+    const sbhRows = records.filter(row => normalize(row[8]) === "sbh").length;
+    const sbhDealerCityPairs = new Set(records.filter(row => normalize(row[8]) === "sbh").map(row => `${normalize(row[4])}|${normalize(row[5])}`).filter(key => key !== "|"));
+    return { cities: cities.size, uniqueDealerCityPairs: uniqueDealerCityPairs.size, duplicateRowsBeyondPairs, sbhRows, sbhDealerCityPairs: sbhDealerCityPairs.size };
+  }, [records]);
+
+  const brandOptions = useMemo(() => [...new Set(records.map(row => String(row[1] ?? "").trim()).filter(Boolean))].sort(), [records]);
   const formatOptions = useMemo(() => [...new Set(records.map(row => String(row[8] ?? "").trim()).filter(Boolean))].sort(), [records]);
   const cityOptions = useMemo(() => [...new Set(records.map(row => String(row[5] ?? "").trim()).filter(Boolean))].sort(), [records]);
   const facilityOptions = useMemo(() => [...new Set(records.flatMap(row => [row[6], row[7]]).map(value => String(value ?? "").trim()).filter(Boolean))].sort(), [records]);
