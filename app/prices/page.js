@@ -25,7 +25,8 @@ export default function PricesPage() {
   const [asOfText, setAsOfText] = useState("01/10/2026");
   const [showForm, setShowForm] = useState(false);
   const [variantKey, setVariantKey] = useState("");
-  const [effectiveDate, setEffectiveDate] = useState("");\n  const [effectiveDateText, setEffectiveDateText] = useState("");
+  const [effectiveDate, setEffectiveDate] = useState("");
+  const [effectiveDateText, setEffectiveDateText] = useState("");
   const [basicPrice, setBasicPrice] = useState("");
   const [gstRate, setGstRate] = useState("");
   const [dealerMargin, setDealerMargin] = useState("");
