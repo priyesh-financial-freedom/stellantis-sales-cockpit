@@ -19,12 +19,27 @@ export default function OfflineSupport() {
     window.addEventListener("online", update);
     window.addEventListener("offline", update);
 
+    // Next.js client-side links request RSC payloads, which are not interchangeable
+    // with cached HTML. When offline, use a normal document navigation so the
+    // service worker can serve the cached route HTML instead.
+    const forceOfflineDocumentNavigation = (event) => {
+      if (navigator.onLine || event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+      const anchor = event.target instanceof Element ? event.target.closest("a[href]") : null;
+      if (!anchor || anchor.target === "_blank" || anchor.hasAttribute("download")) return;
+      const destination = new URL(anchor.href, window.location.href);
+      if (destination.origin !== window.location.origin) return;
+      event.preventDefault();
+      window.location.assign(destination.href);
+    };
+    document.addEventListener("click", forceOfflineDocumentNavigation, true);
+
     if ("serviceWorker" in navigator) {
       navigator.serviceWorker.register("/sw.js").then(() => setReady(true)).catch(() => setReady(false));
     }
     return () => {
       window.removeEventListener("online", update);
       window.removeEventListener("offline", update);
+      document.removeEventListener("click", forceOfflineDocumentNavigation, true);
     };
   }, []);
 
