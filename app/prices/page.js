@@ -5,7 +5,7 @@ import CockpitNavigation from "../../components/CockpitNavigation";
 import { JEEP_PRICE_BASELINE, PRICE_LIST_EFFECTIVE_FROM } from "../../lib/jeepPriceList";
 import { CITROEN_PRICE_BASELINE, CITROEN_PRICE_LIST_EFFECTIVE_FROM } from "../../lib/citroenPriceList";
 
-const STORAGE_KEY = "stellantis-jeep-price-changes-v1";
+const STORAGE_KEY = "stellantis-price-changes-v2";
 const money = value => value == null || value === "" ? "—" : "₹" + Number(value).toLocaleString("en-IN", { maximumFractionDigits: 0 });
 const dateLabel = value => value ? new Date(value + "T00:00:00").toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" }) : "—";
 const parseDisplayDate = value => {
@@ -151,11 +151,11 @@ export default function PricesPage() {
       <header className="header">
         <div>
           <div className="eyebrow">STELLANTIS INDIA · PRODUCT INTELLIGENCE</div>
-          <h1>{brand} Price List</h1>
-          <p className="subtitle">Price snapshot effective 1 October 2026 · {baseline.length} variants</p>
+          <h1>Vehicle Price List</h1>
+          <p className="subtitle">Jeep and Citroën · Baseline effective 1 October 2026</p>
         </div>
         <div className="pricesHeaderActions">
-          <span className="pricesEffectiveBadge">Baseline · 01 Oct 2026</span>
+          <span className="pricesEffectiveBadge">Effective 01 Oct 2026</span>
           <button type="button" className="primaryButton" onClick={openForm}>Schedule price change</button>
         </div>
       </header>
@@ -164,7 +164,7 @@ export default function PricesPage() {
 
       <section className="pricesNotice">
         <strong>Effective-dated pricing</strong>
-        <span>Record revised prices with a future effective date. The list below shows the latest change effective on or before the selected “Prices as of” date. Citroën prices are based on the uploaded July 2026 workbook, as confirmed effective 1 October 2026.</span>
+        <span>Select a brand, model and date to view prices effective on that date. Schedule future revisions by variant; only selected fields will change.</span>
       </section>
 
       <section className="pricesFilters">
@@ -224,12 +224,12 @@ export default function PricesPage() {
       </section>
 
       <section className="pricesTableWrap pricesChangeRegister">
-        <div className="pricesSectionHeading"><h2>Scheduled price changes</h2><button type="button" className="secondaryButton" onClick={exportChanges} disabled={!changes.length}>Export change register</button></div>
+        <div className="pricesSectionHeading"><h2>Price change register</h2><button type="button" className="secondaryButton" onClick={exportChanges} disabled={!changes.length}>Export change register</button></div>
         {changes.length ? <div className="pricesTableScroll"><table className="pricesTable">
-          <thead><tr><th>Effective from</th><th>Model / Variant</th><th>Revised fields</th><th>Notes</th><th></th></tr></thead>
+          <thead><tr><th>Effective from</th><th>Brand</th><th>Model / Variant</th><th>Revised fields</th><th>Notes</th><th></th></tr></thead>
           <tbody>{[...changes].sort((a,b)=>a.effectiveDate.localeCompare(b.effectiveDate)).map(change => <tr key={change.id}>
             <td>{dateLabel(change.effectiveDate)}{change.effectiveDate > new Date().toISOString().slice(0,10) && <span className="priceChangeTag">Upcoming</span>}</td>
-            <td><strong>{change.model}</strong><br />{change.variant}</td>
+            <td>{change.brand || "Jeep"}</td><td><strong>{change.model}</strong><br />{change.variant}</td>
             <td>{Object.entries(change.prices).map(([key,value]) => <div key={key}>{({basicPrice:"Basic Price",gstRate:"GST",dealerMargin:"Dealer Margin",handlingCharges:"Handling Charges",ndp:"NDP",esp:"ESP",accessoryKitMrp:"Accessory Kit MRP"})[key]}: {money(value)}</div>)}</td>
             <td>{change.note || "—"}</td>
             <td><button type="button" className="textButton" onClick={() => { if (window.confirm("Delete this scheduled change?")) setChanges(previous=>previous.filter(item=>item.id!==change.id)); }}>Delete</button></td>
@@ -237,7 +237,7 @@ export default function PricesPage() {
         </table></div> : <p className="pricesEmptyCell">No price changes scheduled yet.</p>}
       </section>
 
-      <p className="pricesStorageNote">Price-change entries are currently saved in this browser only. Export the change register for backup; shared, multi-user persistence will require the pricing table to be enabled in the connected database.</p>
+      <p className="pricesStorageNote">Price changes are saved in this browser only. Export the register for backup; changes are not yet shared across users or devices.</p>
 
       {showForm && <div className="pricesModalBackdrop" role="presentation" onMouseDown={event=>{if(event.target===event.currentTarget)setShowForm(false);}}>
         <section className="pricesModal" role="dialog" aria-modal="true" aria-labelledby="price-change-title">
