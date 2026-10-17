@@ -18,6 +18,8 @@ export default function PricesPage() {
   const [variantKey, setVariantKey] = useState("");
   const [effectiveDate, setEffectiveDate] = useState("");
   const [basicPrice, setBasicPrice] = useState("");
+  const [gstRate, setGstRate] = useState("");
+  const [dealerMargin, setDealerMargin] = useState("");
   const [ndp, setNdp] = useState("");
   const [esp, setEsp] = useState("");
   const [accessory, setAccessory] = useState("");
@@ -48,7 +50,7 @@ export default function PricesPage() {
         .filter(change => change.variantKey === base.key && change.effectiveDate <= asOf)
         .sort((a, b) => a.effectiveDate.localeCompare(b.effectiveDate));
       const effectivePrices = applicable.reduce((prices, change) => ({ ...prices, ...change.prices }), {
-        basicPrice: base.basicPrice, ndp: base.ndp, esp: base.esp, accessoryKitMrp: base.accessoryKitMrp
+        basicPrice: base.basicPrice, gstRate: base.gstRate ?? 0.4, dealerMargin: base.dealerMargin, ndp: base.ndp, esp: base.esp, accessoryKitMrp: base.accessoryKitMrp
       });
       const latest = applicable[applicable.length - 1];
       return { ...base, ...effectivePrices, latestChange: latest || null };
@@ -64,6 +66,8 @@ export default function PricesPage() {
     setVariantKey("");
     setEffectiveDate("");
     setBasicPrice("");
+    setGstRate("");
+    setDealerMargin("");
     setNdp("");
     setEsp("");
     setAccessory("");
@@ -83,7 +87,7 @@ export default function PricesPage() {
       setError("The effective date cannot be earlier than 1 October 2026.");
       return;
     }
-    if ([basicPrice, ndp, esp, accessory].every(value => value === "")) {
+    if ([basicPrice, gstRate, dealerMargin, ndp, esp, accessory].every(value => value === "")) {
       setError("Enter at least one revised price field.");
       return;
     }
@@ -91,6 +95,8 @@ export default function PricesPage() {
     if (collision && !window.confirm("A price change already exists for this variant and date. Add another entry for the same date?")) return;
     const prices = {};
     if (basicPrice !== "") prices.basicPrice = Number(basicPrice);
+    if (gstRate !== "") prices.gstRate = Number(gstRate) / 100;
+    if (dealerMargin !== "") prices.dealerMargin = Number(dealerMargin);
     if (ndp !== "") prices.ndp = Number(ndp);
     if (esp !== "") prices.esp = Number(esp);
     if (accessory !== "") prices.accessoryKitMrp = Number(accessory);
@@ -157,15 +163,14 @@ export default function PricesPage() {
         <div className="pricesSectionHeading"><h2>Price list</h2><span>All amounts in INR</span></div>
         <div className="pricesTableScroll">
           <table className="pricesTable">
-            <thead><tr><th>Model</th><th>Variant</th><th>Basic Price</th><th>NDP</th><th>ESP</th><th>Accessory Kit MRP</th><th>CARA</th><th>Price status</th></tr></thead>
+            <thead><tr><th>Model</th><th>Variant</th><th>GST</th><th>Dealer Margin</th><th>ESP</th><th>Price status</th></tr></thead>
             <tbody>
               {pricedRows.map(row => <tr key={row.key}>
                 <td><strong>{row.model}</strong></td><td>{row.variant}</td>
-                <td>{money(row.basicPrice)}</td><td>{money(row.ndp)}</td><td className="pricesEsp">{money(row.esp)}</td>
-                <td>{money(row.accessoryKitMrp)}</td><td>{row.caraApplicability || "—"}</td>
+                <td>{((row.gstRate ?? 0.4) * 100).toFixed(0)}%</td><td>{money(row.dealerMargin)}</td><td className="pricesEsp">{money(row.esp)}</td>
                 <td>{row.latestChange ? <span className="priceChangeTag">Revised · {dateLabel(row.latestChange.effectiveDate)}</span> : <span className="priceBaselineTag">Baseline</span>}</td>
               </tr>)}
-              {!pricedRows.length && <tr><td colSpan="8" className="pricesEmptyCell">No variants match these filters.</td></tr>}
+              {!pricedRows.length && <tr><td colSpan="6" className="pricesEmptyCell">No variants match these filters.</td></tr>}
             </tbody>
           </table>
         </div>
@@ -178,7 +183,7 @@ export default function PricesPage() {
           <tbody>{[...changes].sort((a,b)=>a.effectiveDate.localeCompare(b.effectiveDate)).map(change => <tr key={change.id}>
             <td>{dateLabel(change.effectiveDate)}{change.effectiveDate > new Date().toISOString().slice(0,10) && <span className="priceChangeTag">Upcoming</span>}</td>
             <td><strong>{change.model}</strong><br />{change.variant}</td>
-            <td>{Object.entries(change.prices).map(([key,value]) => <div key={key}>{({basicPrice:"Basic Price",ndp:"NDP",esp:"ESP",accessoryKitMrp:"Accessory Kit MRP"})[key]}: {money(value)}</div>)}</td>
+            <td>{Object.entries(change.prices).map(([key,value]) => <div key={key}>{({basicPrice:"Basic Price",gstRate:"GST",dealerMargin:"Dealer Margin",ndp:"NDP",esp:"ESP",accessoryKitMrp:"Accessory Kit MRP"})[key]}: {money(value)}</div>)}</td>
             <td>{change.note || "—"}</td>
             <td><button type="button" className="textButton" onClick={() => { if (window.confirm("Delete this scheduled change?")) setChanges(previous=>previous.filter(item=>item.id!==change.id)); }}>Delete</button></td>
           </tr>)}</tbody>
@@ -197,12 +202,14 @@ export default function PricesPage() {
                 {variants.map(row=><option key={row.key} value={row.key}>{row.model} · {row.variant}</option>)}
               </select>
             </label>
-            {selectedVariant && <div className="pricesCurrentReference">Current baseline: Basic {money(selectedVariant.basicPrice)} · NDP {money(selectedVariant.ndp)} · ESP {money(selectedVariant.esp)}</div>}
+            {selectedVariant && <div className="pricesCurrentReference">Current baseline: GST {((selectedVariant.gstRate ?? 0.4)*100).toFixed(0)}% · Dealer Margin {money(selectedVariant.dealerMargin)} · ESP {money(selectedVariant.esp)}</div>}
             <label>Effective from
               <input required type="date" min={PRICE_LIST_EFFECTIVE_FROM} value={effectiveDate} onChange={event=>setEffectiveDate(event.target.value)} />
             </label>
             <p className="pricesFormHelp">Fill only the fields that are changing. Blank fields retain the previous effective price.</p>
             <div className="pricesFormGrid">
+              <label>GST (%)<input type="number" min="0" max="100" step="0.01" value={gstRate} onChange={event=>setGstRate(event.target.value)} placeholder="No change" /></label>
+              <label>Dealer Margin (₹)<input type="number" min="0" step="1" value={dealerMargin} onChange={event=>setDealerMargin(event.target.value)} placeholder="No change" /></label>
               <label>Basic Price (₹)<input type="number" min="0" step="1" value={basicPrice} onChange={event=>setBasicPrice(event.target.value)} placeholder="No change" /></label>
               <label>NDP (₹)<input type="number" min="0" step="1" value={ndp} onChange={event=>setNdp(event.target.value)} placeholder="No change" /></label>
               <label>ESP (₹)<input type="number" min="0" step="1" value={esp} onChange={event=>setEsp(event.target.value)} placeholder="No change" /></label>
