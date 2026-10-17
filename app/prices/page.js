@@ -32,6 +32,7 @@ export default function PricesPage() {
   const [basicPrice, setBasicPrice] = useState("");
   const [gstRate, setGstRate] = useState("");
   const [dealerMargin, setDealerMargin] = useState("");
+  const [handlingCharges, setHandlingCharges] = useState("");
   const [ndp, setNdp] = useState("");
   const [esp, setEsp] = useState("");
   const [accessory, setAccessory] = useState("");
@@ -85,6 +86,7 @@ export default function PricesPage() {
     setBasicPrice("");
     setGstRate("");
     setDealerMargin("");
+    setHandlingCharges("");
     setNdp("");
     setEsp("");
     setAccessory("");
@@ -104,7 +106,7 @@ export default function PricesPage() {
       setError("The effective date cannot be earlier than 1 October 2026.");
       return;
     }
-    if ([basicPrice, gstRate, dealerMargin, ndp, esp, accessory].every(value => value === "")) {
+    if ([basicPrice, gstRate, dealerMargin, handlingCharges, ndp, esp, accessory].every(value => value === "")) {
       setError("Enter at least one revised price field.");
       return;
     }
@@ -114,6 +116,7 @@ export default function PricesPage() {
     if (basicPrice !== "") prices.basicPrice = Number(basicPrice);
     if (gstRate !== "") prices.gstRate = Number(gstRate) / 100;
     if (dealerMargin !== "") prices.dealerMargin = Number(dealerMargin);
+    if (handlingCharges !== "") prices.handlingCharges = Number(handlingCharges);
     if (ndp !== "") prices.ndp = Number(ndp);
     if (esp !== "") prices.esp = Number(esp);
     if (accessory !== "") prices.accessoryKitMrp = Number(accessory);
@@ -214,7 +217,7 @@ export default function PricesPage() {
           <tbody>{[...changes].sort((a,b)=>a.effectiveDate.localeCompare(b.effectiveDate)).map(change => <tr key={change.id}>
             <td>{dateLabel(change.effectiveDate)}{change.effectiveDate > new Date().toISOString().slice(0,10) && <span className="priceChangeTag">Upcoming</span>}</td>
             <td><strong>{change.model}</strong><br />{change.variant}</td>
-            <td>{Object.entries(change.prices).map(([key,value]) => <div key={key}>{({basicPrice:"Basic Price",gstRate:"GST",dealerMargin:"Dealer Margin",ndp:"NDP",esp:"ESP",accessoryKitMrp:"Accessory Kit MRP"})[key]}: {money(value)}</div>)}</td>
+            <td>{Object.entries(change.prices).map(([key,value]) => <div key={key}>{({basicPrice:"Basic Price",gstRate:"GST",dealerMargin:"Dealer Margin",handlingCharges:"Handling Charges",ndp:"NDP",esp:"ESP",accessoryKitMrp:"Accessory Kit MRP"})[key]}: {money(value)}</div>)}</td>
             <td>{change.note || "—"}</td>
             <td><button type="button" className="textButton" onClick={() => { if (window.confirm("Delete this scheduled change?")) setChanges(previous=>previous.filter(item=>item.id!==change.id)); }}>Delete</button></td>
           </tr>)}</tbody>
@@ -241,6 +244,7 @@ export default function PricesPage() {
             <div className="pricesFormGrid">
               <label>GST (%)<input type="number" min="0" max="100" step="0.01" value={gstRate} onChange={event=>setGstRate(event.target.value)} placeholder="No change" /></label>
               <label>Dealer Margin (₹)<input type="number" min="0" step="1" value={dealerMargin} onChange={event=>setDealerMargin(event.target.value)} placeholder="No change" /></label>
+              <label>Handling Charges (₹)<input type="number" min="0" step="1" value={handlingCharges} onChange={event=>setHandlingCharges(event.target.value)} placeholder="No change" /></label>
               <label>Basic Price (₹)<input type="number" min="0" step="1" value={basicPrice} onChange={event=>setBasicPrice(event.target.value)} placeholder="No change" /></label>
               <label>NDP (₹)<input type="number" min="0" step="1" value={ndp} onChange={event=>setNdp(event.target.value)} placeholder="No change" /></label>
               <label>ESP (₹)<input type="number" min="0" step="1" value={esp} onChange={event=>setEsp(event.target.value)} placeholder="No change" /></label>
