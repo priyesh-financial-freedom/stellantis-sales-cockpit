@@ -21,6 +21,8 @@ export default function PricesPage() {
   const [loaded, setLoaded] = useState(false);
   const [model, setModel] = useState("All");
   const [search, setSearch] = useState("");
+  const [showFieldPicker, setShowFieldPicker] = useState(false);
+  const [visibleFields, setVisibleFields] = useState(["gstRate", "dealerMargin", "esp"]);
   const [asOf, setAsOf] = useState(PRICE_LIST_EFFECTIVE_FROM);
   const [asOfText, setAsOfText] = useState("01/10/2026");
   const [showForm, setShowForm] = useState(false);
@@ -63,7 +65,12 @@ export default function PricesPage() {
         basicPrice: base.basicPrice, gstRate: base.gstRate ?? 0.4, dealerMargin: base.dealerMargin, ndp: base.ndp, esp: base.esp, accessoryKitMrp: base.accessoryKitMrp
       });
       const latest = applicable[applicable.length - 1];
-      return { ...base, ...effectivePrices, latestChange: latest || null };
+      const gstRate = effectivePrices.gstRate ?? 0.4;
+      const dealerMargin = effectivePrices.dealerMargin ?? 0;
+      const handlingCharges = effectivePrices.handlingCharges ?? base.handlingCharges ?? 1000;
+      const gstBeforeNdp = Math.round(effectivePrices.basicPrice * gstRate);
+      const totalGst = Math.round(gstBeforeNdp + dealerMargin * gstRate + handlingCharges * gstRate);
+      return { ...base, ...effectivePrices, gstRate, dealerMargin, handlingCharges, gstBeforeNdp, totalGst, latestChange: latest || null };
     }).filter(row => (model === "All" || row.model === model) &&
       (row.variant + " " + row.model).toLowerCase().includes(search.toLowerCase()));
   }, [variants, changes, asOf, model, search]);
@@ -171,16 +178,30 @@ export default function PricesPage() {
 
       <section className="pricesTableWrap">
         <div className="pricesSectionHeading"><h2>Price list</h2><span>All amounts in INR</span></div>
+        <div className="pricesFieldPicker">
+          <button type="button" className="secondaryButton pricesFieldPickerButton" aria-expanded={showFieldPicker} onClick={() => setShowFieldPicker(open => !open)}>
+            Choose fields to display <span>{visibleFields.length} selected ▾</span>
+          </button>
+          {showFieldPicker && <div className="pricesFieldPickerMenu">
+            <div className="pricesFieldPickerActions"><strong>Displayed fields</strong><button type="button" className="textButton" onClick={() => setVisibleFields(["gstRate","basicPrice","gstBeforeNdp","ndp","dealerMargin","handlingCharges","totalGst","esp","accessoryKitMrp"])}>Select all</button><button type="button" className="textButton" onClick={() => setVisibleFields([])}>Clear</button></div>
+            {[
+              ["gstRate","GST"],["basicPrice","Basic Price"],["gstBeforeNdp","GST before NDP"],["ndp","NDP"],["dealerMargin","Dealer Margin"],["handlingCharges","Handling Charges"],["totalGst","Total GST"],["esp","ESP"],["accessoryKitMrp","Mandatory Primary Accessory Kit MRP (Inclusive GST)"],["priceStatus","Price status"]
+            ].map(([key,label]) => <label className="pricesFieldOption" key={key}><input type="checkbox" checked={visibleFields.includes(key)} onChange={event => setVisibleFields(previous => event.target.checked ? [...previous,key] : previous.filter(field => field !== key))} />{label}</label>)}
+          </div>}
+        </div>
         <div className="pricesTableScroll">
           <table className="pricesTable">
-            <thead><tr><th>Model</th><th>Variant</th><th>GST</th><th>Dealer Margin</th><th>ESP</th><th>Price status</th></tr></thead>
+            <thead><tr><th>Model</th><th>Description / Variant</th>{visibleFields.map(key => <th key={key}>{({gstRate:"GST",basicPrice:"Basic Price",gstBeforeNdp:"GST before NDP",ndp:"NDP",dealerMargin:"Dealer Margin",handlingCharges:"Handling Charges",totalGst:"Total GST",esp:"ESP",accessoryKitMrp:"Mandatory Primary Accessory Kit (MRP Inclusive GST)",priceStatus:"Price status"})[key]}</th>)}</tr></thead>
             <tbody>
               {pricedRows.map(row => <tr key={row.key}>
-                <td data-label="Model"><strong>{row.model}</strong></td><td data-label="Variant" className="priceVariantCell">{row.variant}</td>
-                <td data-label="GST">{((row.gstRate ?? 0.4) * 100).toFixed(0)}%</td><td data-label="Dealer Margin">{money(row.dealerMargin)}</td><td data-label="ESP" className="pricesEsp">{money(row.esp)}</td>
-                <td data-label="Price status">{row.latestChange ? <span className="priceChangeTag">Revised · {dateLabel(row.latestChange.effectiveDate)}</span> : <span className="priceBaselineTag">Baseline</span>}</td>
+                <td data-label="Model"><strong>{row.model}</strong></td><td data-label="Description / Variant" className="priceVariantCell">{row.variant}</td>
+                {visibleFields.map(key => <td key={key} data-label={({gstRate:"GST",basicPrice:"Basic Price",gstBeforeNdp:"GST before NDP",ndp:"NDP",dealerMargin:"Dealer Margin",handlingCharges:"Handling Charges",totalGst:"Total GST",esp:"ESP",accessoryKitMrp:"Primary Accessory Kit MRP",priceStatus:"Price status"})[key]}>
+                  {key==="gstRate" ? ((row.gstRate ?? 0.4)*100).toFixed(0)+"%" :
+                   key==="priceStatus" ? (row.latestChange ? <span className="priceChangeTag">Revised · {dateLabel(row.latestChange.effectiveDate)}</span> : <span className="priceBaselineTag">Baseline</span>) :
+                   money(row[key])}
+                </td>)}
               </tr>)}
-              {!pricedRows.length && <tr><td colSpan="6" className="pricesEmptyCell">No variants match these filters.</td></tr>}
+              {!pricedRows.length && <tr><td colSpan={2+visibleFields.length} className="pricesEmptyCell">No variants match these filters.</td></tr>}
             </tbody>
           </table>
         </div>
