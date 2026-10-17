@@ -7,7 +7,7 @@ const SHELL = [
   "/industry/manufacturers",
   "/budget-planning",
   "/data-entry",
-  "/stellantis-network"
+  "/stellantis-network", "/prices"
 ];
 
 async function cachePageAndAssets(cache, path, response) {
