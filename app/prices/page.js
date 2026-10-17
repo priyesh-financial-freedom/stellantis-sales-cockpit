@@ -166,9 +166,9 @@ export default function PricesPage() {
             <thead><tr><th>Model</th><th>Variant</th><th>GST</th><th>Dealer Margin</th><th>ESP</th><th>Price status</th></tr></thead>
             <tbody>
               {pricedRows.map(row => <tr key={row.key}>
-                <td><strong>{row.model}</strong></td><td>{row.variant}</td>
-                <td>{((row.gstRate ?? 0.4) * 100).toFixed(0)}%</td><td>{money(row.dealerMargin)}</td><td className="pricesEsp">{money(row.esp)}</td>
-                <td>{row.latestChange ? <span className="priceChangeTag">Revised · {dateLabel(row.latestChange.effectiveDate)}</span> : <span className="priceBaselineTag">Baseline</span>}</td>
+                <td data-label="Model"><strong>{row.model}</strong></td><td data-label="Variant" className="priceVariantCell">{row.variant}</td>
+                <td data-label="GST">{((row.gstRate ?? 0.4) * 100).toFixed(0)}%</td><td data-label="Dealer Margin">{money(row.dealerMargin)}</td><td data-label="ESP" className="pricesEsp">{money(row.esp)}</td>
+                <td data-label="Price status">{row.latestChange ? <span className="priceChangeTag">Revised · {dateLabel(row.latestChange.effectiveDate)}</span> : <span className="priceBaselineTag">Baseline</span>}</td>
               </tr>)}
               {!pricedRows.length && <tr><td colSpan="6" className="pricesEmptyCell">No variants match these filters.</td></tr>}
             </tbody>
