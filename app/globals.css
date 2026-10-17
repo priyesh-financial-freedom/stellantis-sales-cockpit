@@ -3735,3 +3735,10 @@ html[data-theme="dark"] .budgetCompareTotals {
   .pricesFieldPicker { padding:0 12px 12px; }
   .pricesFieldPickerMenu { grid-template-columns:1fr; }
 }
+
+
+/* Brand is a first-class filter, immediately before Model. */
+.pricesBrandSelect { display:flex; flex-direction:column; gap:7px; color:var(--muted,#596575); font-size:12px; font-weight:800; }
+.pricesBrandSelect select { width:100%; min-height:42px; border:1px solid var(--border,#d9e0e8); border-radius:9px; background:var(--card,#fff); color:inherit; padding:9px 11px; }
+.pricesFilters { grid-template-columns:minmax(130px,.65fr) minmax(170px,.8fr) minmax(170px,.8fr) minmax(220px,1.4fr); }
+@media(max-width:760px) { .pricesFilters { grid-template-columns:1fr; } }
