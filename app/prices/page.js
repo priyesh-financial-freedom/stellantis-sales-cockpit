@@ -155,11 +155,6 @@ export default function PricesPage() {
           <p className="subtitle">Price snapshot effective 1 October 2026 · {baseline.length} variants</p>
         </div>
         <div className="pricesHeaderActions">
-          <label className="pricesBrandSelect">Brand
-            <select value={brand} onChange={event => { setBrand(event.target.value); setModel("All"); setSearch(""); setVariantKey(""); }}>
-              <option value="Jeep">Jeep</option><option value="Citroën">Citroën</option>
-            </select>
-          </label>
           <span className="pricesEffectiveBadge">Baseline · 01 Oct 2026</span>
           <button type="button" className="primaryButton" onClick={openForm}>Schedule price change</button>
         </div>
@@ -176,6 +171,11 @@ export default function PricesPage() {
         <label>Prices as of
           <input type="text" inputMode="numeric" placeholder="DD/MM/YYYY" aria-label="Prices as of (DD/MM/YYYY)" value={asOfText} onChange={event => { setAsOfText(event.target.value); const parsed = parseDisplayDate(event.target.value); if (parsed && parsed >= PRICE_LIST_EFFECTIVE_FROM) setAsOf(parsed); }} />
         </label>
+          <label className="pricesBrandSelect">Brand
+            <select value={brand} onChange={event => { setBrand(event.target.value); setModel("All"); setSearch(""); setVariantKey(""); }}>
+              <option value="Jeep">Jeep</option><option value="Citroën">Citroën</option>
+            </select>
+          </label>
         <label>Model
           <select value={model} onChange={event => setModel(event.target.value)}>
             {models.map(item => <option key={item} value={item}>{item}</option>)}
