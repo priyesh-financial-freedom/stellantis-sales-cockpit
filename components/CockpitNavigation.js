@@ -12,6 +12,7 @@ const groups = [
       { label: "Budget Planning", href: "/budget-planning" },
       { label: "Stellantis Network", href: "/stellantis-network" },
       { label: "Prices", href: "/prices" },
+      { label: "Variant-wise Retail", href: "/variant-wise-retail" },
     ],
   },
   {
