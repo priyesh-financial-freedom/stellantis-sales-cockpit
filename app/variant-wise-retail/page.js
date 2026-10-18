@@ -111,6 +111,7 @@ export default function VariantWiseRetailPage() {
           return <section className="variantModelGroup" key={group.key}>
             <button type="button" className="variantModelToggle" aria-expanded={expanded} onClick={()=>setExpandedModels(prev=>({...prev,[group.key]:!expanded}))}><span className="variantModelName">{group.model}</span><span className="variantModelMeta">{group.rows.length} variants</span><span className="variantModelChevron">{expanded?"−":"+"}</span></button>
             {expanded&&<div className="variantModelMatrix">
+              <div className="variantMatrixScrollHint">Swipe sideways to see all periods →</div>
               <div className="variantMatrixHeader" style={{gridTemplateColumns:`minmax(118px,1.7fr) repeat(${comparisonPeriods.length},minmax(42px,.6fr)) minmax(64px,.8fr)`}}><span>Variant</span>{comparisonPeriods.map(p=><span key={p.label}>{p.label.replace(/ \([^)]*\)/g,"")}</span>)}<span>Mix</span></div>
               {group.rows.map(r=>{
                 const contribution=contributionFor(r);
