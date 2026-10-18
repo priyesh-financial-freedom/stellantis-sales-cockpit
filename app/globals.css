@@ -4322,3 +4322,9 @@ html[data-theme="dark"] .variantCompareFilters select { background:#111a24; bord
   html[data-theme="dark"] .variantRetailPage .variantExpandedDetail { background:#17212b; border-color:#3c4855; }
   html[data-theme="dark"] .variantRetailPage .mix-high { color:#72d69a !important; }
 }
+
+@media(max-width:760px) {
+  /* Mobile uses the grouped model matrix; avoid showing the duplicate wide matrix. */
+  .variantRetailPage .pricesTableWrap { display:none; }
+  .variantRetailPage .variantRetailSummary { margin-top:0; }
+}
