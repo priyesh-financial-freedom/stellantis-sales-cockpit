@@ -26,19 +26,33 @@ export default function VariantWiseRetailPage() {
     return MONTHS.map((_,i)=>i).filter(i=>i>=start&&i<=end);
   },[period,periodValue,fromMonth,toMonth]);
   const rows = useMemo(()=>RETAIL_VARIANTS.filter(r=>(brand==="All"||r.brand===brand)&&(model==="All"||r.model===model)&&(`${r.variant} ${r.model}`).toLowerCase().includes(variantSearch.toLowerCase())).map(r=>({...r,total:monthIndexes.reduce((sum,i)=>sum+(r.months[i]??0),0)})).filter(r=>r.total>0).sort((a,b)=>a.brand.localeCompare(b.brand)||a.model.localeCompare(b.model)||a.variant.localeCompare(b.variant)),[brand,model,variantSearch,monthIndexes]);
-  const modelContributionTotals = useMemo(()=>{
+  const rollingContribution = useMemo(()=>{
+    const monthsByModel = new Map();
+    RETAIL_VARIANTS.forEach(r=>{
+      const key = r.brand+"|"+r.model;
+      if(!monthsByModel.has(key)) monthsByModel.set(key,Array(12).fill(false));
+      r.months.forEach((value,i)=>{if(value!=null) monthsByModel.get(key)[i]=true;});
+    });
+    const indexesByModel = new Map();
+    monthsByModel.forEach((available,key)=>{
+      indexesByModel.set(key,available.map((hasData,i)=>hasData?i:-1).filter(i=>i>=0).slice(-3));
+    });
     const totals = new Map();
     RETAIL_VARIANTS.forEach(r=>{
       const key = r.brand+"|"+r.model;
-      const value = monthIndexes.reduce((sum,i)=>sum+(r.months[i]??0),0);
+      const indexes = indexesByModel.get(key)||[];
+      const value = indexes.reduce((sum,i)=>sum+(r.months[i]??0),0);
       totals.set(key,(totals.get(key)||0)+value);
     });
-    return totals;
-  },[monthIndexes]);
-  const contributionFor = (r,value) => {
-    const denominator = modelContributionTotals.get(r.brand+"|"+r.model)||0;
+    return {indexesByModel,totals};
+  },[]);
+  const contributionFor = r => {
+    const key = r.brand+"|"+r.model;
+    const indexes = rollingContribution.indexesByModel.get(key)||[];
+    const value = indexes.reduce((sum,i)=>sum+(r.months[i]??0),0);
+    const denominator = rollingContribution.totals.get(key)||0;
     const pct = denominator>0 ? value/denominator*100 : 0;
-    return {pct, tier:pct<10?"low":pct<=25?"mid":"high"};
+    return {pct,tier:pct<10?"low":pct<=25?"mid":"high",months:indexes.map(i=>MONTHS[i])};
   };
   const grandTotal = rows.reduce((sum,r)=>sum+r.total,0);
   const comparisonPeriods = useMemo(() => {
@@ -68,10 +82,10 @@ export default function VariantWiseRetailPage() {
     <div className="contributionLegend"><span className="low"><i/>Red: under 10%</span><span className="mid"><i/>Orange: 10%–25%</span><span className="high"><i/>Deep green: over 25%</span><span>Share of that model’s retail in the selected period</span></div>
     <section className="variantComparePanel">
       <div className="variantCompareHeading"><div><h2>Period comparison</h2><p>Automatically follows the period type selected above and compares all periods using the same brand, model and variant filters.</p></div></div>
-      <div className="variantCompareMobileCards">{comparisonRows.map(r=><article className={"variantCompareMobileCard contribution-"+contributionFor(r,monthIndexes.reduce((sum,i)=>sum+(r.months[i]??0),0)).tier} key={"mobile|"+r.brand+"|"+r.model+"|"+r.variant}><div className="variantCompareMobileIdentity"><span>{r.brand}</span><strong>{r.model}</strong><b>{r.variant}</b><em>{contributionFor(r,r.periodTotals.reduce((sum,v)=>sum+v,0)).pct.toFixed(1)}% of model retail</em></div><div className="variantCompareMobileValues">{comparisonPeriods.map((p,i)=><div key={p.label}><span>{p.label}</span><strong>{fmt(r.periodTotals[i])}</strong></div>)}</div></article>)}{!comparisonRows.length&&<p className="pricesEmptyCell">No variants match these filters.</p>}</div><div className="pricesTableScroll variantCompareDesktopTable"><table className="pricesTable variantCompareTable"><thead><tr><th>Brand</th><th>Model</th><th>Variant</th>{comparisonPeriods.map(p=><th key={p.label}>{p.label}</th>)}</tr></thead><tbody>{comparisonRows.map(r=><tr className={"contribution-"+contributionFor(r,r.periodTotals.reduce((sum,v)=>sum+v,0)).tier} key={"compare|"+r.brand+"|"+r.model+"|"+r.variant}><td>{r.brand}</td><td><strong>{r.model}</strong></td><td className="priceVariantCell">{r.variant}</td>{r.periodTotals.map((value,i)=><td key={comparisonPeriods[i].label}>{fmt(value)}</td>)}</tr>)}{!comparisonRows.length&&<tr><td colSpan={comparisonPeriods.length+3} className="pricesEmptyCell">No variants match these filters.</td></tr>}</tbody></table></div>
+      <div className="variantCompareMobileCards">{comparisonRows.map(r=><article className={"variantCompareMobileCard contribution-"+contributionFor(r).tier} key={"mobile|"+r.brand+"|"+r.model+"|"+r.variant}><div className="variantCompareMobileIdentity"><span>{r.brand}</span><strong>{r.model}</strong><b>{r.variant}</b><em>{contributionFor(r,r.periodTotals.reduce((sum,v)=>sum+v,0)).pct.toFixed(1)}% of model retail</em></div><div className="variantCompareMobileValues">{comparisonPeriods.map((p,i)=><div key={p.label}><span>{p.label}</span><strong>{fmt(r.periodTotals[i])}</strong></div>)}</div></article>)}{!comparisonRows.length&&<p className="pricesEmptyCell">No variants match these filters.</p>}</div><div className="pricesTableScroll variantCompareDesktopTable"><table className="pricesTable variantCompareTable"><thead><tr><th>Brand</th><th>Model</th><th>Variant</th>{comparisonPeriods.map(p=><th key={p.label}>{p.label}</th>)}</tr></thead><tbody>{comparisonRows.map(r=><tr className={"contribution-"+contributionFor(r,r.periodTotals.reduce((sum,v)=>sum+v,0)).tier} key={"compare|"+r.brand+"|"+r.model+"|"+r.variant}><td>{r.brand}</td><td><strong>{r.model}</strong></td><td className="priceVariantCell">{r.variant}</td>{r.periodTotals.map((value,i)=><td key={comparisonPeriods[i].label}>{fmt(value)}</td>)}</tr>)}{!comparisonRows.length&&<tr><td colSpan={comparisonPeriods.length+3} className="pricesEmptyCell">No variants match these filters.</td></tr>}</tbody></table></div>
     </section>
     <section className="variantRetailSummary"><div><span>Period</span><strong>{periodLabel}</strong></div><div><span>Variants shown</span><strong>{rows.length}</strong></div><div><span>Retail in selected period</span><strong>{fmt(grandTotal)}</strong></div></section>
-    <section className="pricesTableWrap"><div className="pricesSectionHeading"><h2>Variant retail matrix</h2><span>Units · {year}</span></div><div className="pricesTableScroll"><table className="pricesTable variantRetailTable"><thead><tr><th>Brand</th><th>Model</th><th>Variant</th>{monthIndexes.map(i=><th key={i}>{MONTHS[i]}</th>)}<th>Total</th></tr></thead><tbody>{rows.map((r,i)=><tr className={"contribution-"+contributionFor(r,r.total).tier} key={r.brand+"|"+r.model+"|"+r.variant}><td data-label="Brand">{r.brand}</td><td data-label="Model"><strong>{r.model}</strong></td><td data-label="Variant" className={"priceVariantCell contributionCell contribution-"+contributionFor(r,r.total).tier}>{r.variant}<small>{contributionFor(r,r.total).pct.toFixed(1)}% of model</small></td>{monthIndexes.map(m=><td key={m} data-label={MONTHS[m]}>{fmt(r.months[m])}</td>)}<td data-label="Total"><strong>{fmt(r.total)}</strong></td></tr>)}{!rows.length&&<tr><td colSpan={monthIndexes.length+4} className="pricesEmptyCell">No variants match these filters.</td></tr>}</tbody></table></div></section>
+    <section className="pricesTableWrap"><div className="pricesSectionHeading"><h2>Variant retail matrix</h2><span>Units · {year}</span></div><div className="pricesTableScroll"><table className="pricesTable variantRetailTable"><thead><tr><th>Brand</th><th>Model</th><th>Variant</th>{monthIndexes.map(i=><th key={i}>{MONTHS[i]}</th>)}<th>Total</th></tr></thead><tbody>{rows.map((r,i)=><tr className={"contribution-"+contributionFor(r).tier} key={r.brand+"|"+r.model+"|"+r.variant}><td data-label="Brand">{r.brand}</td><td data-label="Model"><strong>{r.model}</strong></td><td data-label="Variant" className={"priceVariantCell contributionCell contribution-"+contributionFor(r,r.total).tier}>{r.variant}<small>{contributionFor(r,r.total).pct.toFixed(1)}% of model</small></td>{monthIndexes.map(m=><td key={m} data-label={MONTHS[m]}>{fmt(r.months[m])}</td>)}<td data-label="Total"><strong>{fmt(r.total)}</strong></td></tr>)}{!rows.length&&<tr><td colSpan={monthIndexes.length+4} className="pricesEmptyCell">No variants match these filters.</td></tr>}</tbody></table></div></section>
     <p className="pricesStorageNote">Source: uploaded 2026 variant-wise retail workbooks. Monthly figures are preserved as supplied. Period totals sum available numeric monthly values; blanks are excluded from the sum and displayed as —.</p>
   </main>;
 }
