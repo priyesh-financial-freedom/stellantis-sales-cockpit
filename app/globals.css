@@ -4245,3 +4245,80 @@ html[data-theme="dark"] .variantCompareFilters select { background:#111a24; bord
   .variantRetailPage .variantCompareMobileValues .contributionValue-high { color:#72d69a !important; }
   .variantRetailPage .variantCompareMobileIdentity em { line-height:1.35; }
 }
+
+
+/* Compact mobile-first grouped matrix for Variant-wise Retail */
+.variantRetailPage .variantModelGroups { display:none; }
+.variantRetailPage .variantCompareHelp { margin:0; color:var(--muted,#687382); font-size:13px; }
+.variantRetailPage .variantModelToggle { width:100%; display:flex; align-items:center; gap:10px; padding:12px 14px; border:0; background:transparent; color:inherit; text-align:left; cursor:pointer; }
+.variantRetailPage .variantModelName { font-size:18px; font-weight:800; flex:1; }
+.variantRetailPage .variantModelMeta { color:var(--muted,#687382); font-size:12px; }
+.variantRetailPage .variantModelChevron { font-size:23px; line-height:1; width:24px; text-align:center; }
+.variantRetailPage .variantModelGroup { margin:0 0 10px; border:1px solid var(--border,#d9e0e8); border-radius:12px; overflow:hidden; }
+.variantRetailPage .variantModelMatrix { overflow-x:auto; -webkit-overflow-scrolling:touch; }
+.variantRetailPage .variantMatrixHeader,.variantRetailPage .variantMatrixRow { display:grid; align-items:center; column-gap:8px; min-width:max-content; }
+.variantRetailPage .variantMatrixHeader { padding:8px 12px; background:var(--table-header,#f1f4f7); color:var(--muted,#657181); font-size:11px; font-weight:800; }
+.variantRetailPage .variantMatrixHeader span:not(:first-child) { text-align:right; }
+.variantRetailPage .variantMatrixRow { width:100%; padding:0 12px; min-height:48px; border:0; border-top:1px solid var(--border,#e0e5eb); background:transparent; color:inherit; text-align:left; cursor:pointer; }
+.variantRetailPage .variantMatrixVariant { font-size:14px; font-weight:600; line-height:1.25; white-space:normal; }
+.variantRetailPage .variantMatrixNumber { text-align:right; font-size:14px; font-weight:600; font-variant-numeric:tabular-nums; }
+.variantRetailPage .variantMatrixMix { display:inline-flex; align-items:center; justify-content:flex-end; gap:5px; font-size:12px; font-weight:800; font-variant-numeric:tabular-nums; white-space:nowrap; }
+.variantRetailPage .variantMatrixMix i { display:inline-block; width:8px; height:8px; flex:0 0 8px; border-radius:50%; background:currentColor; }
+.variantRetailPage .mix-low { color:#ef5350 !important; }
+.variantRetailPage .mix-mid { color:#f59e0b !important; }
+.variantRetailPage .mix-high { color:#15803d !important; }
+.variantRetailPage .variantExpandedDetail { padding:10px 12px 12px; background:var(--surface-muted,#f7f8fa); border-top:1px solid var(--border,#d9e0e8); }
+.variantRetailPage .variantExpandedPeriods { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:8px; }
+.variantRetailPage .variantExpandedPeriods span { display:flex; flex-direction:column; gap:4px; }
+.variantRetailPage .variantExpandedPeriods small { color:var(--muted,#687382); font-size:11px; }
+.variantRetailPage .variantExpandedPeriods strong { font-size:16px; }
+.variantRetailPage .variantPeriodChanges { display:grid; grid-template-columns:1fr; gap:5px; margin-top:10px; font-size:12px; color:var(--muted,#687382); }
+.variantRetailPage .variantPeriodChanges strong { color:var(--text,#17212b); }
+.variantRetailPage .variantPeriodChanges .trendUp { color:#16834a; }
+.variantRetailPage .variantPeriodChanges .trendDown { color:#d94a4a; }
+.variantRetailPage .variantMixDetail { margin-top:10px; font-size:12px; color:var(--muted,#687382); }
+.variantRetailPage .variantMixDetail strong { font-size:14px; }
+
+@media(max-width:760px) {
+  .variantRetailPage { padding:12px; }
+  .variantRetailPage .pageHeader { margin-bottom:8px; }
+  .variantRetailPage .pageHeader h1 { font-size:25px; margin-bottom:0; }
+  .variantRetailPage .pageHeader .subtitle { display:none; }
+  .variantRetailPage .cockpitNav { margin-bottom:10px; }
+  .variantRetailPage .pricesNotice { display:none; }
+  .variantRetailPage .variantRetailFilters { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px; padding:10px; margin-bottom:10px; }
+  .variantRetailPage .variantRetailFilters label { min-width:0; font-size:12px; gap:4px; }
+  .variantRetailPage .variantRetailFilters select,.variantRetailPage .variantRetailFilters input { min-width:0; min-height:40px; padding:7px 9px; font-size:14px; }
+  .variantRetailPage .variantRetailFilters label:first-child { grid-column:span 1; }
+  .variantRetailPage .variantRetailFilters label:last-child { grid-column:1/-1; }
+  .variantRetailPage .contributionLegend { gap:6px 10px; margin:0 0 10px; font-size:11px; }
+  .variantRetailPage .contributionLegend span:last-child { display:none; }
+  .variantRetailPage .variantComparePanel { padding:0; border:0; background:transparent; margin-bottom:10px; }
+  .variantRetailPage .variantCompareHeading { margin:0 0 8px; }
+  .variantRetailPage .variantCompareHeading h2 { font-size:17px; }
+  .variantRetailPage .variantCompareHelp { display:none; }
+  .variantRetailPage .variantModelGroups { display:block; }
+  .variantRetailPage .variantCompareDesktopTable { display:none; }
+  .variantRetailPage .variantModelGroup { border-radius:11px; margin-bottom:8px; background:var(--card,#fff); }
+  .variantRetailPage .variantModelToggle { padding:10px 12px; min-height:44px; }
+  .variantRetailPage .variantModelName { font-size:17px; }
+  .variantRetailPage .variantModelMeta { font-size:11px; }
+  .variantRetailPage .variantMatrixHeader,.variantRetailPage .variantMatrixRow { column-gap:7px; }
+  .variantRetailPage .variantMatrixHeader { padding:7px 10px; font-size:10px; }
+  .variantRetailPage .variantMatrixRow { padding:0 10px; min-height:48px; }
+  .variantRetailPage .variantMatrixVariant { font-size:13px; }
+  .variantRetailPage .variantMatrixNumber { font-size:14px; color:var(--text,#17212b); }
+  .variantRetailPage .variantMatrixMix { font-size:12px; }
+  .variantRetailPage .variantRetailSummary { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:6px; margin:8px 0 12px; }
+  .variantRetailPage .variantRetailSummary>div { min-width:0; padding:9px 7px; border-radius:9px; }
+  .variantRetailPage .variantRetailSummary span { font-size:10px; line-height:1.2; }
+  .variantRetailPage .variantRetailSummary strong { font-size:14px; line-height:1.2; overflow-wrap:anywhere; }
+  .variantRetailPage .pricesTableWrap { margin-bottom:12px; }
+  .variantRetailPage .pricesStorageNote { font-size:11px; }
+  html[data-theme="dark"] .variantRetailPage .variantModelGroup { background:#1d2732; border-color:#46515e; }
+  html[data-theme="dark"] .variantRetailPage .variantMatrixHeader { background:#263341; color:#c5d0db; }
+  html[data-theme="dark"] .variantRetailPage .variantMatrixRow { border-color:#3c4855; }
+  html[data-theme="dark"] .variantRetailPage .variantMatrixNumber { color:#f1f5f9; }
+  html[data-theme="dark"] .variantRetailPage .variantExpandedDetail { background:#17212b; border-color:#3c4855; }
+  html[data-theme="dark"] .variantRetailPage .mix-high { color:#72d69a !important; }
+}
