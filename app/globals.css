@@ -4387,3 +4387,33 @@ html[data-theme="dark"] .variantCompareFilters select { background:#111a24; bord
   html[data-theme="dark"] .variantRetailPage .variantExpandedDetail { background:#17212b; border-color:#3c4855; }
   html[data-theme="dark"] .variantRetailPage .mix-high { color:#72d69a !important; }
 }
+
+
+/* Follow-up fixes from iPhone screenshot: dark-mode KPI contrast and matrix navigation */
+.variantRetailPage .variantMatrixScrollHint { display:none; }
+@media(max-width:760px) {
+  .variantRetailPage .variantModelMatrix { overflow-x:auto; overflow-y:hidden; position:relative; }
+  .variantRetailPage .variantMatrixScrollHint {
+    display:block; padding:5px 12px; text-align:right; font-size:11px;
+    color:var(--muted,#647184); background:var(--card,#fff);
+    border-top:1px solid var(--border,#d9e0e8);
+  }
+  .variantRetailPage .variantMatrixHeader,
+  .variantRetailPage .variantMatrixRow { min-width:610px; }
+  .variantRetailPage .variantMatrixHeader > span:first-child,
+  .variantRetailPage .variantMatrixRow > span:first-child {
+    position:sticky; left:0; z-index:2; background:var(--card,#fff);
+    padding-right:8px; box-shadow:5px 0 7px -7px rgba(0,0,0,.65);
+  }
+  .variantRetailPage .variantMatrixHeader > span:first-child { background:var(--table-header,#eaf0f5); }
+  .variantRetailPage .variantRetailSummary>div {
+    background:#202b37 !important; border:1px solid #46515e !important;
+    color:#edf3fb !important;
+  }
+  .variantRetailPage .variantRetailSummary span { color:#c5d0dc !important; }
+  .variantRetailPage .variantRetailSummary strong { color:#ffffff !important; }
+  html[data-theme="dark"] .variantRetailPage .variantMatrixScrollHint { background:#1d2732; color:#bdc8d4; border-color:#3c4855; }
+  html[data-theme="dark"] .variantRetailPage .variantMatrixHeader > span:first-child,
+  html[data-theme="dark"] .variantRetailPage .variantMatrixRow > span:first-child { background:#1d2732; }
+  html[data-theme="dark"] .variantRetailPage .variantMatrixHeader > span:first-child { background:#263341; }
+}
