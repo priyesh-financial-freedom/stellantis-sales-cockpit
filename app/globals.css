@@ -4021,3 +4021,64 @@ html[data-theme="dark"] .variantCompareFilters select { background:#111a24; bord
 .variantCompareTable { min-width: 1000px; }
 .variantCompareTable th:nth-child(n+4), .variantCompareTable td:nth-child(n+4) { text-align:right; font-variant-numeric:tabular-nums; }
 .variantComparePanel .variantCompareHeading p { margin-bottom:14px; }
+
+
+/* Variant-wise Retail: mobile-first layout and touch-friendly tables */
+.variantRetailPage { min-width:0; width:100%; }
+.variantRetailPage .pageHeader { margin-bottom:14px; }
+.variantRetailPage .pageHeader h1 { font-size:clamp(27px,5vw,36px); line-height:1.12; }
+.variantRetailPage .pricesNotice { margin:12px 0 14px; padding:14px 16px; border-radius:12px; line-height:1.55; }
+.variantRetailPage .pricesNotice strong { display:block; margin-bottom:4px; }
+.variantRetailPage .variantRetailFilters { margin-bottom:14px; gap:12px; padding:16px; }
+.variantRetailPage .variantRetailFilters label { display:flex; flex-direction:column; gap:7px; min-width:0; font-size:14px; font-weight:700; color:var(--muted,#596575); }
+.variantRetailPage .variantRetailFilters select,
+.variantRetailPage .variantRetailFilters input { width:100%; min-width:0; min-height:46px; padding:10px 12px; border:1px solid var(--border,#d9e0e8); border-radius:9px; background:var(--card,#fff); color:inherit; font-size:16px; }
+.variantRetailPage .variantComparePanel { min-width:0; padding:16px; }
+.variantRetailPage .pricesTableScroll { width:100%; max-width:100%; overflow-x:auto; overflow-y:hidden; -webkit-overflow-scrolling:touch; overscroll-behavior-inline:contain; }
+.variantRetailPage .variantCompareTable,
+.variantRetailPage .variantRetailTable { width:max-content; max-width:none; }
+.variantRetailPage .variantCompareTable th,
+.variantRetailPage .variantCompareTable td,
+.variantRetailPage .variantRetailTable th,
+.variantRetailPage .variantRetailTable td { white-space:nowrap; }
+.variantRetailPage .variantRetailTable td:nth-child(3),
+.variantRetailPage .variantCompareTable td:nth-child(3) { white-space:normal; min-width:150px; max-width:230px; }
+.variantRetailPage .variantRetailSummary { gap:10px; }
+.variantRetailPage .variantRetailSummary>div { min-width:0; }
+.variantRetailPage .pricesStorageNote { font-size:12px; line-height:1.55; overflow-wrap:anywhere; }
+
+@media(max-width:760px) {
+  .variantRetailPage { padding-left:12px; padding-right:12px; }
+  .variantRetailPage .pageHeader h1 { font-size:29px; }
+  .variantRetailPage .subtitle { font-size:14px; }
+  .variantRetailPage .cockpitNav { margin-bottom:14px; }
+  .variantRetailPage .pricesNotice { padding:12px; font-size:13px; }
+  .variantRetailPage .variantRetailFilters { grid-template-columns:minmax(0,1fr); padding:13px; gap:12px; }
+  .variantRetailPage .variantRetailFilters label { font-size:14px; }
+  .variantRetailPage .variantRetailFilters select,
+  .variantRetailPage .variantRetailFilters input { min-height:48px; font-size:16px; }
+  .variantRetailPage .variantComparePanel { padding:13px; margin-bottom:14px; }
+  .variantRetailPage .variantCompareHeading h2 { font-size:20px; }
+  .variantRetailPage .variantCompareHeading p { font-size:13px; line-height:1.45; }
+  .variantRetailPage .variantRetailSummary { grid-template-columns:repeat(3,minmax(0,1fr)); gap:7px; margin-bottom:14px; }
+  .variantRetailPage .variantRetailSummary>div { padding:11px 9px; gap:5px; border-radius:11px; }
+  .variantRetailPage .variantRetailSummary span { font-size:11px; line-height:1.35; }
+  .variantRetailPage .variantRetailSummary strong { font-size:17px; line-height:1.2; }
+  .variantRetailPage .pricesTableWrap { border-radius:12px; margin-bottom:14px; }
+  .variantRetailPage .pricesSectionHeading { padding:13px; align-items:flex-start; }
+  .variantRetailPage .pricesSectionHeading h2 { font-size:18px; }
+  .variantRetailPage .pricesSectionHeading>span { font-size:12px; }
+  .variantRetailPage .pricesTable { font-size:12px; }
+  .variantRetailPage .pricesTable th,
+  .variantRetailPage .pricesTable td { padding:10px 11px; }
+  .variantRetailPage .variantCompareTable { min-width:720px; }
+  .variantRetailPage .variantRetailTable { min-width:950px; }
+  .variantRetailPage .pricesStorageNote { font-size:12px; }
+}
+@media(max-width:420px) {
+  .variantRetailPage { padding-left:8px; padding-right:8px; }
+  .variantRetailPage .variantRetailSummary>div { padding:10px 7px; }
+  .variantRetailPage .variantRetailSummary span { font-size:10px; }
+  .variantRetailPage .variantRetailSummary strong { font-size:15px; }
+  .variantRetailPage .variantCompareTable { min-width:680px; }
+}
