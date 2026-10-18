@@ -4190,3 +4190,30 @@ html[data-theme="dark"] .variantCompareFilters select { background:#111a24; bord
   html[data-theme="light"] .variantRetailPage .variantCompareMobileIdentity b,
   html[data-theme="light"] .variantRetailPage .variantCompareMobileValues strong { color:#17212b !important; }
 }
+
+
+/* Variant contribution tier indicators */
+.variantRetailPage .contributionCell { font-weight:700; }
+.variantRetailPage .contributionCell small { display:block; margin-top:4px; font-size:11px; font-weight:700; white-space:nowrap; }
+.variantRetailPage .contribution-low .contributionCell,
+.variantRetailPage .contribution-low .variantCompareMobileIdentity em { color:#ef4444 !important; }
+.variantRetailPage .contribution-mid .contributionCell,
+.variantRetailPage .contribution-mid .variantCompareMobileIdentity em { color:#f59e0b !important; }
+.variantRetailPage .contribution-high .contributionCell,
+.variantRetailPage .contribution-high .variantCompareMobileIdentity em { color:#15803d !important; }
+.variantRetailPage .variantCompareMobileIdentity em { display:inline-block; grid-column:1/-1; font-size:13px; font-style:normal; font-weight:800; }
+.variantRetailPage .variantCompareMobileCard.contribution-low { border-left:5px solid #ef4444 !important; }
+.variantRetailPage .variantCompareMobileCard.contribution-mid { border-left:5px solid #f59e0b !important; }
+.variantRetailPage .variantCompareMobileCard.contribution-high { border-left:5px solid #15803d !important; }
+.variantRetailPage .variantCompareDesktopTable tr.contribution-low td:first-child { box-shadow:inset 4px 0 #ef4444; }
+.variantRetailPage .variantCompareDesktopTable tr.contribution-mid td:first-child { box-shadow:inset 4px 0 #f59e0b; }
+.variantRetailPage .variantCompareDesktopTable tr.contribution-high td:first-child { box-shadow:inset 4px 0 #15803d; }
+.variantRetailPage .variantRetailTable tr.contribution-low td:first-child { box-shadow:inset 4px 0 #ef4444; }
+.variantRetailPage .variantRetailTable tr.contribution-mid td:first-child { box-shadow:inset 4px 0 #f59e0b; }
+.variantRetailPage .variantRetailTable tr.contribution-high td:first-child { box-shadow:inset 4px 0 #15803d; }
+.variantRetailPage .contributionLegend { display:flex; flex-wrap:wrap; gap:8px 14px; margin:0 0 12px; color:var(--muted,#596575); font-size:12px; }
+.variantRetailPage .contributionLegend span { display:inline-flex; align-items:center; gap:6px; }
+.variantRetailPage .contributionLegend i { width:10px; height:10px; display:inline-block; border-radius:3px; }
+.variantRetailPage .contributionLegend .low i { background:#ef4444; }
+.variantRetailPage .contributionLegend .mid i { background:#f59e0b; }
+.variantRetailPage .contributionLegend .high i { background:#15803d; }
