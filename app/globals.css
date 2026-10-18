@@ -4230,3 +4230,18 @@ html[data-theme="dark"] .variantCompareFilters select { background:#111a24; bord
 .variantRetailPage .contributionLegend .low { color:#ef4444; font-weight:700; }
 .variantRetailPage .contributionLegend .mid { color:#b77900; font-weight:700; }
 .variantRetailPage .contributionLegend .high { color:#15803d; font-weight:700; }
+
+
+/* Improve mobile contrast for rolling contribution figures and month labels. */
+@media(max-width:760px) {
+  .variantRetailPage .variantCompareMobileValues span {
+    color:#d0d9e2 !important;
+    font-size:16px !important;
+    font-weight:600;
+    letter-spacing:.01em;
+  }
+  .variantRetailPage .variantCompareMobileValues .contributionValue-low { color:#ff7777 !important; }
+  .variantRetailPage .variantCompareMobileValues .contributionValue-mid { color:#ffc04d !important; }
+  .variantRetailPage .variantCompareMobileValues .contributionValue-high { color:#72d69a !important; }
+  .variantRetailPage .variantCompareMobileIdentity em { line-height:1.35; }
+}
