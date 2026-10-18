@@ -4217,3 +4217,16 @@ html[data-theme="dark"] .variantCompareFilters select { background:#111a24; bord
 .variantRetailPage .contributionLegend .low i { background:#ef4444; }
 .variantRetailPage .contributionLegend .mid i { background:#f59e0b; }
 .variantRetailPage .contributionLegend .high i { background:#15803d; }
+
+
+/* Apply rolling-three-month contribution tier to the actual retail figures. */
+.variantRetailPage .contributionValue-low { color:#ef4444 !important; font-weight:800; }
+.variantRetailPage .contributionValue-mid { color:#f59e0b !important; font-weight:800; }
+.variantRetailPage .contributionValue-high { color:#15803d !important; font-weight:800; }
+.variantRetailPage .variantCompareMobileValues .contributionValue-low { color:#ff5555 !important; }
+.variantRetailPage .variantCompareMobileValues .contributionValue-mid { color:#ffb020 !important; }
+.variantRetailPage .variantCompareMobileValues .contributionValue-high { color:#36b36a !important; }
+.variantRetailPage .contributionLegend span:last-child { flex-basis:100%; }
+.variantRetailPage .contributionLegend .low { color:#ef4444; font-weight:700; }
+.variantRetailPage .contributionLegend .mid { color:#b77900; font-weight:700; }
+.variantRetailPage .contributionLegend .high { color:#15803d; font-weight:700; }
