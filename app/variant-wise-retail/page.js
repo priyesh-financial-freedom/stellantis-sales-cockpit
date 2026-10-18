@@ -17,6 +17,7 @@ export default function VariantWiseRetailPage() {
   const [toMonth,setToMonth] = useState("8");
   const [expandedModels,setExpandedModels] = useState({});
   const [expandedVariants,setExpandedVariants] = useState({});
+  const [showMobileFilters,setShowMobileFilters] = useState(false);
   const brands = ["All","Jeep","Citroën"];
   const models = useMemo(()=>["All",...new Set(RETAIL_VARIANTS.filter(r=>brand==="All"||r.brand===brand).map(r=>r.model))],[brand]);
   const activeMonthByBrand = useMemo(()=>{
@@ -88,7 +89,8 @@ export default function VariantWiseRetailPage() {
     <header className="pageHeader"><div><h1>Variant-wise Retail</h1><p className="subtitle">Monthly variant retail performance · Jeep and Citroën · 2026</p></div></header>
     <CockpitNavigation active="Variant-wise Retail" />
     <section className="pricesNotice"><strong>Retail data only</strong><span>Monthly retail volumes by model and variant. Blank source cells are shown as unavailable (—); reported zeroes remain zero. Months after the latest month with positive retail activity for the selected brand are hidden.</span></section>
-    <section className="pricesFilters variantRetailFilters">
+    <button type="button" className="variantFiltersToggle" aria-expanded={showMobileFilters} onClick={()=>setShowMobileFilters(v=>!v)}><span>Filters</span><span>{[period,brand,model].join(" · ")}</span><strong>{showMobileFilters?"Hide −":"Edit +"} </strong></button>
+    <section className={"pricesFilters variantRetailFilters"+(showMobileFilters?" isOpen":"")}>
       <label>Period type<select value={period} onChange={e=>{setPeriod(e.target.value);setPeriodValue(e.target.value==="Monthly"?"All":"0");}}>{periods.map(p=><option key={p}>{p}</option>)}</select></label>
       {period==="Monthly"&&<label>Month<select value={periodValue} onChange={e=>setPeriodValue(e.target.value)}><option value="All">All months</option>{monthOptions.map(m=><option key={m.index} value={m.index}>{m.name}</option>)}</select></label>}
       {period==="Quarterly"&&<label>Quarter<select value={periodValue} onChange={e=>setPeriodValue(e.target.value)}>{["Q1 — Jan–Mar","Q2 — Apr–Jun","Q3 — Jul–Sep","Q4 — Oct–Dec"].map((p,i)=><option key={p} value={i}>{p}</option>)}</select></label>}
