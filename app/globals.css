@@ -4082,3 +4082,31 @@ html[data-theme="dark"] .variantCompareFilters select { background:#111a24; bord
   .variantRetailPage .variantRetailSummary strong { font-size:15px; }
   .variantRetailPage .variantCompareTable { min-width:680px; }
 }
+
+
+/* Mobile comparison cards: avoid clipped table columns on narrow screens. */
+.variantCompareMobileCards { display:none; }
+@media(max-width:760px) {
+  .variantRetailPage .variantCompareDesktopTable { display:none; }
+  .variantRetailPage .variantCompareMobileCards { display:grid; grid-template-columns:minmax(0,1fr); gap:12px; }
+  .variantRetailPage .variantCompareMobileCard { min-width:0; padding:14px; border:1px solid var(--border,#43505d); border-radius:12px; background:var(--card,#1c2733); color:var(--text,#f2f5f8); }
+  .variantRetailPage .variantCompareMobileIdentity { display:grid; grid-template-columns:minmax(0,1fr) auto; gap:5px 10px; padding-bottom:12px; border-bottom:1px solid var(--border,#43505d); }
+  .variantRetailPage .variantCompareMobileIdentity span { font-size:13px; color:var(--muted,#c0cad5); }
+  .variantRetailPage .variantCompareMobileIdentity strong { text-align:right; font-size:15px; overflow-wrap:anywhere; }
+  .variantRetailPage .variantCompareMobileIdentity b { grid-column:1/-1; font-size:17px; line-height:1.35; overflow-wrap:anywhere; }
+  .variantRetailPage .variantCompareMobileValues { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:0 14px; }
+  .variantRetailPage .variantCompareMobileValues>div { display:flex; flex-direction:column; justify-content:space-between; gap:6px; min-width:0; padding:11px 0; border-bottom:1px solid var(--border,#43505d); }
+  .variantRetailPage .variantCompareMobileValues>div:nth-last-child(-n+2) { border-bottom:0; }
+  .variantRetailPage .variantCompareMobileValues span { color:var(--muted,#c0cad5); font-size:12px; line-height:1.35; overflow-wrap:anywhere; }
+  .variantRetailPage .variantCompareMobileValues strong { font-size:19px; line-height:1.2; font-variant-numeric:tabular-nums; }
+  html:not([data-theme="dark"]) .variantRetailPage .variantCompareMobileCard,
+  html[data-theme="light"] .variantRetailPage .variantCompareMobileCard { background:#fff; color:#17212b; border-color:#d8e0e8; }
+  html:not([data-theme="dark"]) .variantRetailPage .variantCompareMobileIdentity,
+  html[data-theme="light"] .variantRetailPage .variantCompareMobileIdentity,
+  html:not([data-theme="dark"]) .variantRetailPage .variantCompareMobileValues>div,
+  html[data-theme="light"] .variantRetailPage .variantCompareMobileValues>div { border-color:#d8e0e8; }
+  html:not([data-theme="dark"]) .variantRetailPage .variantCompareMobileIdentity span,
+  html[data-theme="light"] .variantRetailPage .variantCompareMobileIdentity span,
+  html:not([data-theme="dark"]) .variantRetailPage .variantCompareMobileValues span,
+  html[data-theme="light"] .variantRetailPage .variantCompareMobileValues span { color:#586575; }
+}
