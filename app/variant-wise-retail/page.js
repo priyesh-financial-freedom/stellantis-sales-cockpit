@@ -33,7 +33,7 @@ export default function VariantWiseRetailPage() {
     <CockpitNavigation active="Variant-wise Retail" />
     <section className="pricesNotice"><strong>Retail data only</strong><span>Monthly retail volumes by model and variant. Blank source cells are shown as unavailable (—); reported zeroes remain zero. October–December values are not assumed where the source is blank.</span></section>
     <section className="pricesFilters variantRetailFilters">
-      <label>Period type<select value={period} onChange={e=>{setPeriod(e.target.value);setPeriodValue("All");}}>{periods.map(p=><option key={p}>{p}</option>)}</select></label>
+      <label>Period type<select value={period} onChange={e=>{setPeriod(e.target.value);setPeriodValue(e.target.value==="Monthly"?"All":"0");}}>{periods.map(p=><option key={p}>{p}</option>)}</select></label>
       {period==="Monthly"&&<label>Month<select value={periodValue} onChange={e=>setPeriodValue(e.target.value)}><option value="All">All months</option>{monthOptions.map(m=><option key={m.index} value={m.index}>{m.name}</option>)}</select></label>}
       {period==="Quarterly"&&<label>Quarter<select value={periodValue} onChange={e=>setPeriodValue(e.target.value)}>{["Q1 — Jan–Mar","Q2 — Apr–Jun","Q3 — Jul–Sep","Q4 — Oct–Dec"].map((p,i)=><option key={p} value={i}>{p}</option>)}</select></label>}
       {period==="Half-Yearly"&&<label>Half-year<select value={periodValue} onChange={e=>setPeriodValue(e.target.value)}><option value="0">H1 — Jan–Jun</option><option value="1">H2 — Jul–Dec</option></select></label>}
