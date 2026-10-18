@@ -4001,3 +4001,18 @@ html[data-theme="light"] .pricesPage .pricesTable tbody tr {
  .variantRetailSummary strong { font-size:21px; }
  .variantRetailTable { min-width:950px; }
 }
+
+
+/* Variant-wise Retail period comparison */
+.variantComparePanel { margin:0 0 20px; padding:18px; border:1px solid var(--border,#d9e0e8); border-radius:14px; background:var(--card,#fff); }
+.variantCompareHeading h2 { margin:0 0 5px; font-size:22px; }
+.variantCompareHeading p { margin:0 0 15px; color:var(--muted,#596575); font-size:14px; line-height:1.5; }
+.variantCompareFilters { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:14px; margin-bottom:16px; }
+.variantCompareFilters label { display:flex; flex-direction:column; gap:7px; color:var(--muted,#596575); font-size:15px; font-weight:700; }
+.variantCompareFilters select { width:100%; min-height:48px; padding:9px 11px; border:1px solid var(--border,#d9e0e8); border-radius:9px; background:var(--card,#fff); color:inherit; font-size:16px; }
+.variantCompareTable { min-width:900px; }
+.variantCompareTable td:nth-child(n+4) { text-align:right; font-variant-numeric:tabular-nums; }
+html[data-theme="dark"] .variantComparePanel { background:#1c2733; border-color:#43505d; color:#f2f5f8; }
+html[data-theme="dark"] .variantCompareHeading p, html[data-theme="dark"] .variantCompareFilters label { color:#c0cad5; }
+html[data-theme="dark"] .variantCompareFilters select { background:#111a24; border-color:#43505d; color:#f2f5f8; }
+@media(max-width:760px) { .variantCompareFilters { grid-template-columns:1fr; gap:12px; } .variantComparePanel { padding:14px; } .variantCompareHeading h2 { font-size:20px; } .variantCompareFilters label { font-size:16px; } .variantCompareFilters select { min-height:52px; font-size:17px; } }
