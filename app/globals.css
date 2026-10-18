@@ -3979,3 +3979,25 @@ html[data-theme="light"] .pricesPage .pricesTable tbody tr {
     max-width:100%;
   }
 }
+
+
+/* Variant-wise Retail page */
+.variantRetailPage .variantRetailFilters { grid-template-columns:repeat(3,minmax(0,1fr)); }
+.variantRetailSummary { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:14px; margin:0 0 20px; }
+.variantRetailSummary>div { min-width:0; display:flex; flex-direction:column; gap:7px; padding:17px 18px; border:1px solid var(--border,#d9e0e8); border-radius:13px; background:var(--card,#fff); }
+.variantRetailSummary span { color:var(--muted,#596575); font-size:14px; }
+.variantRetailSummary strong { font-size:23px; overflow-wrap:anywhere; }
+.variantRetailTable { min-width:1000px; }
+.variantRetailTable th:first-child,.variantRetailTable td:first-child { position:sticky; left:0; z-index:2; }
+.variantRetailTable th:first-child { z-index:4; }
+.variantRetailTable td:first-child { background:var(--card,#fff); }
+.variantRetailTable th { text-align:right; }
+.variantRetailTable th:nth-child(-n+3),.variantRetailTable td:nth-child(-n+3) { text-align:left; }
+.variantRetailTable td:not(:nth-child(-n+3)) { text-align:right; font-variant-numeric:tabular-nums; }
+@media(max-width:760px) {
+ .variantRetailPage .variantRetailFilters { grid-template-columns:1fr; }
+ .variantRetailSummary { grid-template-columns:1fr; gap:9px; }
+ .variantRetailSummary>div { padding:13px 15px; }
+ .variantRetailSummary strong { font-size:21px; }
+ .variantRetailTable { min-width:950px; }
+}
