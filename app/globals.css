@@ -4560,3 +4560,33 @@ html[data-theme="light"] .periodMatrixModel.periodMatrixSticky {
  .freshnessStatusDot{display:inline-block;width:8px;height:8px;flex:0 0 8px;border-radius:50%;background:#28b765;box-shadow:0 0 0 3px rgb(40 183 101 / 15%)}
  .freshnessStatusDot.isRefreshing{background:#d99a27;box-shadow:0 0 0 3px rgb(217 154 39 / 15%)}
 }
+
+
+/* Match annual model cards to the more compact typography of the monthly matrix. */
+@media (max-width: 650px) {
+  .modelTableRow {
+    min-height: 0;
+    padding: 16px 16px;
+    gap: 8px 14px;
+  }
+  .modelTableRow .scopeName {
+    font-size: 19px;
+    line-height: 1.2;
+  }
+  .modelTableRow > div:nth-child(2) {
+    font-size: 21px;
+    line-height: 1.2;
+    font-weight: 750;
+  }
+  .modelTableRow > div:nth-child(3) {
+    font-size: 17px;
+    line-height: 1.25;
+  }
+  .modelTableRow .statusText {
+    font-size: 14px;
+    line-height: 1.25;
+  }
+  .modelTotalRow {
+    min-height: 0;
+  }
+}
