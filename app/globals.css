@@ -5056,3 +5056,133 @@ html[data-theme="light"] .periodMatrixModel.periodMatrixSticky {
   html:not([data-theme="dark"]) .pricesPage .pricesMobileDetail span { color:#526b80; }
   html:not([data-theme="dark"]) .pricesPage .pricesMobileDetail strong { color:#172b3a; }
 }
+
+
+/* ============================================================
+   Stellantis Sales Cockpit — Unified Data Typography V1
+   Shared scale: commercial figures 30px, operational data 22–24px,
+   model/variant names 20px, percentages 22px, labels 14px.
+   ============================================================ */
+:root {
+  --type-commercial: 30px;
+  --type-operational: 23px;
+  --type-entity: 20px;
+  --type-percentage: 22px;
+  --type-field-label: 14px;
+  --type-supporting: 15px;
+}
+@media (max-width: 650px) {
+  /* Price List: commercial values are the visual priority. */
+  .pricesPage .pricesMobileDetail strong {
+    font-size: var(--type-commercial) !important;
+    line-height: 1.2;
+    font-weight: 800;
+    letter-spacing: -.02em;
+    overflow-wrap: anywhere;
+  }
+  .pricesPage .pricesMobileDetail span {
+    font-size: var(--type-field-label) !important;
+    line-height: 1.3;
+    font-weight: 750;
+  }
+  .pricesPage .pricesMobileVariantTop h4 {
+    font-size: var(--type-entity) !important;
+    line-height: 1.35;
+    font-weight: 750;
+  }
+  .pricesPage .pricesMobileGst strong {
+    font-size: var(--type-percentage) !important;
+    line-height: 1.2;
+  }
+  .pricesPage .pricesMobileGst span {
+    font-size: var(--type-field-label) !important;
+  }
+  .pricesPage .pricesMobileModelHeading { font-size: 24px !important; }
+  .pricesPage .pricesMobileModelHeading span { font-size: var(--type-supporting) !important; }
+
+  /* Model-wise matrix: month values and annual figures. */
+  .model-wise .periodMatrixValue,
+  .periodMatrix .periodMatrixValue,
+  .periodMatrixValue {
+    font-size: var(--type-operational) !important;
+    line-height: 1.3;
+    font-weight: 700;
+  }
+  .periodMatrixModel,
+  .modelTableRow .scopeName,
+  .modelBreakdownRow .scopeName {
+    font-size: var(--type-entity) !important;
+    line-height: 1.35;
+    font-weight: 750;
+  }
+  .modelTableRow > div:nth-child(2),
+  .modelTableRow > div:nth-child(3) {
+    font-size: var(--type-operational) !important;
+    line-height: 1.3;
+    font-weight: 700;
+  }
+  .modelTableRow .statusText { font-size: var(--type-supporting) !important; }
+
+  /* Industry model and segment tables. */
+  .industryModelDetailRow,
+  .industryTableRow,
+  .industryMonthModelRow,
+  .industryMonthRow {
+    font-size: var(--type-operational) !important;
+    line-height: 1.35;
+  }
+  .industryModelDetailRow strong,
+  .industryTableRow strong,
+  .industryMonthModelRow strong,
+  .industryMonthUnits {
+    font-size: var(--type-operational) !important;
+    font-weight: 750;
+  }
+  .industryModelDetailHeader,
+  .industryTableHeader,
+  .industryMonthModelsHeader,
+  .industryMonthModelHeader {
+    font-size: var(--type-field-label) !important;
+    font-weight: 800;
+  }
+
+  /* Variant-wise retail: model labels, variant labels and values. */
+  .variantModelName { font-size: 22px !important; font-weight: 800; }
+  .variantModelMeta { font-size: var(--type-supporting) !important; }
+  .variantMatrixVariant,
+  .variantMatrixEntry,
+  .variantExpandedDetail,
+  .variantMixDetail {
+    font-size: var(--type-entity) !important;
+    line-height: 1.35;
+  }
+  .variantMatrixNumber {
+    font-size: var(--type-operational) !important;
+    font-weight: 750;
+    line-height: 1.3;
+  }
+  .variantMatrixHeader { font-size: var(--type-field-label) !important; font-weight: 800; }
+
+  /* Data Entry and other data tables. */
+  .recentRow,
+  .recentTable td,
+  .recentTable tbody th {
+    font-size: var(--type-operational) !important;
+    line-height: 1.35;
+  }
+  .recentHeader,
+  .recentTable thead th {
+    font-size: var(--type-field-label) !important;
+    font-weight: 800;
+  }
+
+  /* Shared labels and secondary information, excluding navigation/filter controls. */
+  .pricesPage .priceVariantCell,
+  .variantRetailPage .priceVariantCell {
+    font-size: var(--type-entity) !important;
+    line-height: 1.35;
+  }
+}
+@media (min-width: 651px) {
+  .pricesPage .pricesMobileDetail strong { font-size: var(--type-commercial); }
+}
