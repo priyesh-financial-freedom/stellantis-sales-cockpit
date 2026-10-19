@@ -4746,3 +4746,63 @@ html[data-theme="light"] .periodMatrixModel.periodMatrixSticky {
     background:#1d2833 !important; color:#f2f6fa !important;
   }
 }
+
+
+/* Innovative mobile price comparison: one model heading, compact variant rows. */
+.pricesMobileGroups { display:none; }
+@media (max-width:600px) {
+  .pricesPage .pricesDesktopComparison { display:none !important; }
+  .pricesPage .pricesMobileGroups { display:grid; gap:14px; padding:12px; }
+  .pricesPage .pricesMobileGroup {
+    min-width:0; overflow:hidden; border:1px solid var(--border,#3c4855);
+    border-radius:14px; background:var(--card,#1d2833);
+  }
+  .pricesPage .pricesMobileModelHeading {
+    display:flex; align-items:center; justify-content:space-between; gap:10px;
+    margin:0; padding:14px 15px; font-size:19px; line-height:1.2;
+    font-weight:800; color:var(--text,#f2f6fa);
+    background:var(--table-header,#293543); border-bottom:1px solid var(--border,#3c4855);
+  }
+  .pricesPage .pricesMobileModelHeading span {
+    flex:0 0 auto; font-size:11px; font-weight:650; color:var(--muted,#aab7c5);
+  }
+  .pricesPage .pricesMobileScroll {
+    width:100%; max-width:100%; overflow-x:auto; overflow-y:hidden;
+    -webkit-overflow-scrolling:touch; overscroll-behavior-inline:contain;
+  }
+  .pricesPage .pricesMobileTable {
+    display:table !important; width:max-content; min-width:100%;
+    border-collapse:separate; border-spacing:0; table-layout:auto; font-size:13px;
+  }
+  .pricesPage .pricesMobileTable thead { display:table-header-group !important; }
+  .pricesPage .pricesMobileTable tbody { display:table-row-group !important; padding:0 !important; }
+  .pricesPage .pricesMobileTable tr { display:table-row !important; padding:0 !important; border:0 !important; background:transparent; }
+  .pricesPage .pricesMobileTable th,
+  .pricesPage .pricesMobileTable td {
+    display:table-cell !important; position:static; white-space:nowrap;
+    vertical-align:middle; padding:13px 14px; font-size:13px;
+    border:0; border-bottom:1px solid var(--border,#3c4855);
+  }
+  .pricesPage .pricesMobileTable thead th {
+    position:sticky; top:0; z-index:4; background:var(--table-header,#293543);
+    color:var(--text,#f2f6fa); text-align:left; font-size:11px;
+    text-transform:uppercase; letter-spacing:.035em;
+  }
+  .pricesPage .pricesMobileTable .pricesMobileVariant {
+    position:sticky !important; left:0; z-index:3; width:190px; min-width:190px;
+    max-width:190px; white-space:normal; overflow-wrap:anywhere; text-align:left;
+    background:var(--card,#1d2833); color:var(--text,#f2f6fa);
+    font-weight:700; box-shadow:2px 0 0 var(--border,#3c4855);
+  }
+  .pricesPage .pricesMobileTable thead th:first-child {
+    position:sticky; left:0; z-index:6; min-width:190px; width:190px;
+    background:var(--table-header,#293543); box-shadow:2px 0 0 var(--border,#3c4855);
+  }
+  .pricesPage .pricesMobileTable tbody tr:last-child th,
+  .pricesPage .pricesMobileTable tbody tr:last-child td { border-bottom:0; }
+  .pricesPage .pricesMobileEmpty { padding:22px 14px; color:var(--muted,#aab7c5); }
+  html:not([data-theme="dark"]) .pricesPage .pricesMobileGroup { background:#fff; border-color:#d9e0e8; }
+  html:not([data-theme="dark"]) .pricesPage .pricesMobileModelHeading { background:#eef2f6; color:#17212b; border-color:#d9e0e8; }
+  html:not([data-theme="dark"]) .pricesPage .pricesMobileTable .pricesMobileVariant { background:#fff; color:#17212b; }
+  html:not([data-theme="dark"]) .pricesPage .pricesMobileTable thead th { background:#eef2f6; color:#17212b; }
+}
