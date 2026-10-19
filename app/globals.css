@@ -4888,3 +4888,102 @@ html[data-theme="light"] .periodMatrixModel.periodMatrixSticky {
   html:not([data-theme="dark"]) .pricesPage .pricesMobileGst strong,
   html:not([data-theme="dark"]) .pricesPage .pricesMobileDetail strong { color:#17212b; }
 }
+
+
+/* Subtle colour coding for the two-row mobile price cards. */
+@media (max-width:600px) {
+  .pricesPage .pricesMobileGroup {
+    border-color:#3d6074;
+    box-shadow:0 3px 12px rgb(0 0 0 / 12%);
+  }
+  .pricesPage .pricesMobileModelHeading {
+    background:linear-gradient(105deg,#233f52 0%,#293b4d 55%,#343b55 100%);
+    color:#f5f9ff;
+    border-bottom-color:#486174;
+  }
+  .pricesPage .pricesMobileModelHeading span {
+    color:#c4d8e7;
+    background:rgb(255 255 255 / 8%);
+    border:1px solid rgb(255 255 255 / 12%);
+    border-radius:999px;
+    padding:4px 8px;
+  }
+  .pricesPage .pricesMobileVariantCard:nth-child(odd) {
+    background:rgb(43 105 120 / 10%);
+  }
+  .pricesPage .pricesMobileVariantCard:nth-child(even) {
+    background:rgb(111 89 160 / 9%);
+  }
+  .pricesPage .pricesMobileVariantTop h4 {
+    color:#77d4ce;
+  }
+  .pricesPage .pricesMobileGst {
+    min-width:68px;
+    padding:7px 10px;
+    border:1px solid #4d8b8e;
+    border-radius:10px;
+    background:rgb(39 131 128 / 16%);
+  }
+  .pricesPage .pricesMobileGst span { color:#8fded5; }
+  .pricesPage .pricesMobileGst strong { color:#b8f3e9; }
+  .pricesPage .pricesMobileVariantDetails {
+    border-top:1px solid rgb(120 157 178 / 18%);
+    padding-top:12px;
+  }
+  .pricesPage .pricesMobileDetail {
+    min-height:58px;
+    padding:9px 10px;
+    border-radius:9px;
+    background:rgb(118 145 174 / 10%);
+    border:1px solid rgb(125 157 184 / 14%);
+  }
+  .pricesPage .pricesMobileDetail:nth-child(4n+1),
+  .pricesPage .pricesMobileDetail:nth-child(4n+2) {
+    background:rgb(51 130 145 / 12%);
+  }
+  .pricesPage .pricesMobileDetail span {
+    color:#a9c1d3;
+  }
+  .pricesPage .pricesMobileDetail strong {
+    color:#f0f6fc;
+  }
+  html:not([data-theme="dark"]) .pricesPage .pricesMobileGroup {
+    border-color:#c6dce7;
+    box-shadow:0 3px 12px rgb(31 68 91 / 8%);
+  }
+  html:not([data-theme="dark"]) .pricesPage .pricesMobileModelHeading {
+    background:linear-gradient(105deg,#dceff4 0%,#e6e8f7 100%);
+    color:#173849;
+    border-bottom-color:#c6dce7;
+  }
+  html:not([data-theme="dark"]) .pricesPage .pricesMobileModelHeading span {
+    color:#456778;
+    background:rgb(255 255 255 / 70%);
+    border-color:#c7dce7;
+  }
+  html:not([data-theme="dark"]) .pricesPage .pricesMobileVariantCard:nth-child(odd) {
+    background:#f2fafb;
+  }
+  html:not([data-theme="dark"]) .pricesPage .pricesMobileVariantCard:nth-child(even) {
+    background:#f7f5fc;
+  }
+  html:not([data-theme="dark"]) .pricesPage .pricesMobileVariantTop h4 {
+    color:#176f78;
+  }
+  html:not([data-theme="dark"]) .pricesPage .pricesMobileGst {
+    background:#e0f5ef;
+    border-color:#a5d8cc;
+  }
+  html:not([data-theme="dark"]) .pricesPage .pricesMobileGst span { color:#287b71; }
+  html:not([data-theme="dark"]) .pricesPage .pricesMobileGst strong { color:#145d55; }
+  html:not([data-theme="dark"]) .pricesPage .pricesMobileDetail {
+    background:#edf3f8;
+    border-color:#dce6ef;
+  }
+  html:not([data-theme="dark"]) .pricesPage .pricesMobileDetail:nth-child(4n+1),
+  html:not([data-theme="dark"]) .pricesPage .pricesMobileDetail:nth-child(4n+2) {
+    background:#e8f5f6;
+  }
+  html:not([data-theme="dark"]) .pricesPage .pricesMobileDetail span { color:#5d7488; }
+  html:not([data-theme="dark"]) .pricesPage .pricesMobileDetail strong { color:#1b2d3b; }
+}
