@@ -242,14 +242,24 @@ export default function PricesPage() {
           {groupedPricedRows.map(group => (
             <section className="pricesMobileGroup" key={group.name}>
               <h3 className="pricesMobileModelHeading">{group.name}<span>{group.rows.length} {group.rows.length === 1 ? "variant" : "variants"}</span></h3>
-              <div className="pricesMobileScroll">
-                <table className="pricesMobileTable">
-                  <thead><tr><th>Variant</th>{visibleFields.map(key => <th key={key}>{({gstRate:"GST",basicPrice:"Basic Price",gstBeforeNdp:"GST before NDP",ndp:"NDP",dealerMargin:"Dealer Margin",handlingCharges:"Handling Charges",totalGst:"Total GST",esp:"ESP",accessoryKitMrp:"Accessory Kit MRP",priceStatus:"Price status"})[key]}</th>)}</tr></thead>
-                  <tbody>{group.rows.map(row => <tr key={row.key}>
-                    <th scope="row" className="pricesMobileVariant">{row.variant}</th>
-                    {visibleFields.map(key => <td key={key}>{key==="gstRate" ? ((row.gstRate ?? 0.4)*100).toFixed(0)+"%" : key==="priceStatus" ? (row.latestChange ? <span className="priceChangeTag">Revised · {dateLabel(row.latestChange.effectiveDate)}</span> : <span className="priceBaselineTag">Baseline</span>) : money(row[key])}</td>)}
-                  </tr>)}</tbody>
-                </table>
+              <div className="pricesMobileVariantList">
+                {group.rows.map(row => (
+                  <article className="pricesMobileVariantCard" key={row.key}>
+                    <div className="pricesMobileVariantTop">
+                      <h4>{row.variant}</h4>
+                      {visibleFields.includes("gstRate") && <div className="pricesMobileGst"><span>GST</span><strong>{((row.gstRate ?? 0.4)*100).toFixed(0)}%</strong></div>}
+                    </div>
+                    <div className="pricesMobileVariantDetails">
+                      {visibleFields.filter(key => key !== "gstRate").map(key => (
+                        <div className="pricesMobileDetail" key={key}>
+                          <span>{({basicPrice:"Basic Price",gstBeforeNdp:"GST before NDP",ndp:"NDP",dealerMargin:"Dealer Margin",handlingCharges:"Handling Charges",totalGst:"Total GST",esp:"ESP",accessoryKitMrp:"Accessory Kit MRP",priceStatus:"Price status"})[key] || key}</span>
+                          <strong>{key==="priceStatus" ? (row.latestChange ? "Revised · " + dateLabel(row.latestChange.effectiveDate) : "Baseline") : money(row[key])}</strong>
+                        </div>
+                      ))}
+                      {!visibleFields.some(key => key !== "gstRate") && <span className="pricesMobileNoDetails">No additional fields selected</span>}
+                    </div>
+                  </article>
+                ))}
               </div>
             </section>
           ))}
