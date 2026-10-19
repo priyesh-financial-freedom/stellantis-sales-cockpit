@@ -5227,3 +5227,61 @@ html[data-theme="light"] .periodMatrixModel.periodMatrixSticky {
     font-variant-numeric: tabular-nums;
   }
 }
+
+
+/* Mobile navigation and dropdown controls: match the cockpit's larger data type. */
+@media (max-width: 650px) {
+  .cockpit .menuToggle,
+  .cockpit .menuButton,
+  .cockpit .navMenuToggle,
+  .cockpit button[aria-expanded],
+  .cockpit .navigationMenuButton {
+    font-size:20px !important;
+    font-weight:750;
+    min-height:58px;
+  }
+  .cockpit .navGroupTitle,
+  .cockpit .navAccordionTitle,
+  .cockpit .navSectionTitle,
+  .cockpit .menuSectionTitle {
+    font-size:18px !important;
+    line-height:1.35;
+    font-weight:800;
+    letter-spacing:.06em;
+  }
+  .cockpit .navMenu a,
+  .cockpit .navMenu button,
+  .cockpit .navGroup a,
+  .cockpit .navGroup button,
+  .cockpit .navAccordion a,
+  .cockpit .navAccordion button,
+  .cockpit .menuPanel a,
+  .cockpit .menuPanel button {
+    font-size:19px !important;
+    line-height:1.35;
+    font-weight:700;
+    min-height:56px;
+  }
+  .cockpit .filters select,
+  .cockpit .filters input,
+  .cockpit .filter select,
+  .cockpit .filter input,
+  .cockpit select,
+  .cockpit input:not([type="checkbox"]):not([type="radio"]):not([type="file"]) {
+    font-size:20px !important;
+    min-height:56px;
+  }
+  .cockpit .filters label,
+  .cockpit .filter label {
+    font-size:15px !important;
+    line-height:1.35;
+    font-weight:800;
+  }
+  .cockpit .budgetViewTabs button,
+  .cockpit .periodTabs button,
+  .cockpit .scopeTabs button {
+    font-size:18px !important;
+    font-weight:750;
+    min-height:50px;
+  }
+}
