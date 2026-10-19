@@ -4590,3 +4590,105 @@ html[data-theme="light"] .periodMatrixModel.periodMatrixSticky {
     min-height: 0;
   }
 }
+
+
+/* Price list mobile comparison: keep model and variant pinned while price fields scroll. */
+@media (max-width: 600px) {
+  .pricesPage .pricesPrimaryTableScroll {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-inline: contain;
+    border-radius: 0 0 12px 12px;
+  }
+  .pricesPage .pricesPrimaryTable {
+    display: table;
+    width: max-content;
+    min-width: 100%;
+    table-layout: auto;
+    border-collapse: separate;
+    border-spacing: 0;
+    font-size: 13px;
+  }
+  .pricesPage .pricesPrimaryTable thead { display: table-header-group; }
+  .pricesPage .pricesPrimaryTable tbody { display: table-row-group; padding: 0; }
+  .pricesPage .pricesPrimaryTable tbody tr {
+    display: table-row;
+    min-width: 0;
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+  }
+  .pricesPage .pricesPrimaryTable th,
+  .pricesPage .pricesPrimaryTable td {
+    display: table-cell;
+    white-space: nowrap;
+    overflow-wrap: normal;
+    vertical-align: middle;
+    padding: 13px 14px;
+    border-bottom: 1px solid var(--border, #d7dfe8);
+    font-size: 13px;
+  }
+  .pricesPage .pricesPrimaryTable th {
+    position: sticky;
+    top: 0;
+    z-index: 5;
+    background: var(--table-header, #eaf0f6);
+  }
+  .pricesPage .pricesPrimaryTable th:nth-child(1),
+  .pricesPage .pricesPrimaryTable td[data-label="Model"] {
+    position: sticky;
+    left: 0;
+    width: 112px;
+    min-width: 112px;
+    max-width: 112px;
+    z-index: 4;
+    background: var(--card, #fff);
+    box-shadow: 2px 0 0 var(--border, #d7dfe8);
+  }
+  .pricesPage .pricesPrimaryTable th:nth-child(2),
+  .pricesPage .pricesPrimaryTable td[data-label="Description / Variant"] {
+    position: sticky;
+    left: 112px;
+    width: 190px;
+    min-width: 190px;
+    max-width: 190px;
+    z-index: 3;
+    background: var(--card, #fff);
+    box-shadow: 2px 0 0 var(--border, #d7dfe8);
+  }
+  .pricesPage .pricesPrimaryTable th:nth-child(1),
+  .pricesPage .pricesPrimaryTable th:nth-child(2) {
+    z-index: 7;
+    background: var(--table-header, #eaf0f6);
+  }
+  .pricesPage .pricesPrimaryTable td[data-label="Model"]::before,
+  .pricesPage .pricesPrimaryTable td[data-label="Description / Variant"]::before { content: none; display: none; }
+  .pricesPage .pricesPrimaryTable td[data-label="Model"] strong {
+    font-size: 14px;
+    white-space: normal;
+  }
+  .pricesPage .pricesPrimaryTable td[data-label="Description / Variant"] {
+    white-space: normal;
+    overflow-wrap: anywhere;
+    font-size: 13px;
+    font-weight: 650;
+  }
+  .pricesPage .pricesPrimaryTable td.pricesEmptyCell {
+    position: static;
+    display: table-cell;
+    text-align: center !important;
+  }
+  html[data-theme="dark"] .pricesPage .pricesPrimaryTable th {
+    background: #293543;
+    color: #f2f6fa;
+  }
+  html[data-theme="dark"] .pricesPage .pricesPrimaryTable td[data-label="Model"],
+  html[data-theme="dark"] .pricesPage .pricesPrimaryTable td[data-label="Description / Variant"] {
+    background: #1d2833;
+    color: #f2f6fa;
+  }
+}
