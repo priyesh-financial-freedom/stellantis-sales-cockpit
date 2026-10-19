@@ -5457,3 +5457,12 @@ html[data-theme="light"] .variantRetailPage .variantMatrixHeader > span:first-ch
     overflow-wrap:break-word;
   }
 }
+
+
+/* Global typography preference: no bold text anywhere in the cockpit.
+   Preserve each component's existing font size, colour, spacing and layout. */
+html body *,
+html body *::before,
+html body *::after {
+  font-weight:400 !important;
+}
