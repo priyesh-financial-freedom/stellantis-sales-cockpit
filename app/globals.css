@@ -5399,3 +5399,41 @@ html[data-theme="light"] .variantRetailPage .variantMatrixHeader > span:first-ch
     border-right-width:1.5px;
   }
 }
+
+
+/* Keep long variant names fully inside the frozen first grid column. */
+.variantRetailPage .variantMatrixHeader,
+.variantRetailPage .variantMatrixRow {
+  box-sizing:border-box;
+  min-width:0;
+}
+.variantRetailPage .variantMatrixHeader > span,
+.variantRetailPage .variantMatrixRow > span {
+  box-sizing:border-box;
+  min-width:0;
+}
+.variantRetailPage .variantMatrixVariant {
+  display:block;
+  width:100%;
+  min-width:0;
+  max-width:100%;
+  white-space:normal !important;
+  overflow-wrap:anywhere;
+  word-break:normal;
+  hyphens:auto;
+  line-height:1.28;
+  padding-right:6px;
+}
+@media (max-width:650px) {
+  .variantRetailPage .variantMatrixHeader > span:first-child,
+  .variantRetailPage .variantMatrixRow > span:first-child {
+    min-width:0;
+    max-width:100%;
+    overflow:hidden;
+  }
+  .variantRetailPage .variantMatrixVariant {
+    font-size:17px !important;
+    overflow-wrap:anywhere;
+    line-height:1.28;
+  }
+}
