@@ -4842,3 +4842,49 @@ html[data-theme="light"] .periodMatrixModel.periodMatrixSticky {
     width:210px;
   }
 }
+
+
+/* Two-row mobile price layout: variant + GST first, remaining values below. */
+@media (max-width:600px) {
+  .pricesPage .pricesMobileScroll { display:none !important; }
+  .pricesPage .pricesMobileVariantList { display:grid; }
+  .pricesPage .pricesMobileVariantCard {
+    min-width:0; padding:0; margin:0; border:0;
+    border-bottom:1px solid var(--border,#3c4855);
+    border-radius:0; background:transparent;
+  }
+  .pricesPage .pricesMobileVariantCard:last-child { border-bottom:0; }
+  .pricesPage .pricesMobileVariantTop {
+    display:grid; grid-template-columns:minmax(0,1fr) auto; align-items:center;
+    gap:12px; padding:15px 16px 12px;
+  }
+  .pricesPage .pricesMobileVariantTop h4 {
+    min-width:0; margin:0; font-size:17px; font-weight:750; line-height:1.35;
+    white-space:normal; overflow-wrap:anywhere; color:var(--text,#f2f6fa);
+  }
+  .pricesPage .pricesMobileGst {
+    display:grid; justify-items:end; gap:3px; min-width:58px;
+  }
+  .pricesPage .pricesMobileGst span,
+  .pricesPage .pricesMobileDetail span {
+    color:var(--muted,#aab7c5); font-size:11px; line-height:1.25;
+    font-weight:750; letter-spacing:.045em; text-transform:uppercase;
+  }
+  .pricesPage .pricesMobileGst strong {
+    color:var(--text,#f2f6fa); font-size:16px; line-height:1.2; font-weight:750;
+  }
+  .pricesPage .pricesMobileVariantDetails {
+    display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px 16px;
+    padding:0 16px 15px;
+  }
+  .pricesPage .pricesMobileDetail { display:grid; gap:4px; min-width:0; }
+  .pricesPage .pricesMobileDetail strong {
+    min-width:0; color:var(--text,#f2f6fa); font-size:15px; font-weight:600;
+    line-height:1.35; overflow-wrap:anywhere; white-space:normal;
+  }
+  .pricesPage .pricesMobileNoDetails { grid-column:1/-1; color:var(--muted,#aab7c5); font-size:13px; }
+  .pricesPage .pricesMobileModelHeading { font-size:22px; }
+  html:not([data-theme="dark"]) .pricesPage .pricesMobileVariantTop h4,
+  html:not([data-theme="dark"]) .pricesPage .pricesMobileGst strong,
+  html:not([data-theme="dark"]) .pricesPage .pricesMobileDetail strong { color:#17212b; }
+}
