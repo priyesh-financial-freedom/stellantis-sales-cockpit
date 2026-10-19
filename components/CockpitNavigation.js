@@ -16,6 +16,6 @@ const groupLinks=(group,index)=> <section className="cockpitNavGroup" key={group
 return <nav className="cockpitNavGroups" aria-label="Main navigation">
 <button type="button" className="cockpitMobileMenuButton" aria-expanded={menuOpen} aria-controls="cockpit-mobile-menu" onClick={()=>setMenuOpen(v=>!v)}><span aria-hidden="true">{menuOpen?"×":"☰"}</span><span>Menu</span></button>
 <div className={"cockpitMobileMenu"+(menuOpen?" isOpen":"")} id="cockpit-mobile-menu" hidden={!menuOpen}>{groups.map(groupLinks)}<div className="cockpitMenuTheme"><ThemeToggle/></div></div>
-<div className="cockpitDesktopNav">{groups.map(groupLinks)}</div>
+<div className="cockpitDesktopNav">{groups.map(groupLinks)}<div className="cockpitDesktopTheme"><ThemeToggle /></div></div>
 </nav>;
 }
