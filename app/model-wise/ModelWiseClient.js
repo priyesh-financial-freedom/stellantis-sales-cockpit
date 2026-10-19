@@ -501,26 +501,31 @@ export default function ModelWiseClient({ brand }) {
         <div className="tableCard modelTableCard">
           {showBreakdown ? (
             <>
-              <div className="modelBreakdownHeader" style={{ gridTemplateColumns: "0.8fr 1.1fr repeat(" + models.length + ", 1fr) 1fr 1.2fr" }}>
-                <div>Year</div>
-                <div>Period</div>
-                {models.map((model) => <div key={model}>{model}</div>)}
-                <div>Total</div>
-                <div>Status</div>
-              </div>
-              {breakdownRows.map(renderBreakdownRow)}
-              <div className="modelBreakdownRow modelTotalRow" style={{ gridTemplateColumns: "0.8fr 1.1fr repeat(" + models.length + ", 1fr) 1fr 1.2fr" }}>
-                <div className="scopeName">TOTAL</div>
-                <div className="scopeName">Selected calendar years</div>
-                {models.map((model) => (
-                  <div key={model} className={"scopeName " + valueClass(getStatus(period, periodValue, year, customFrom, customTo), totalValue[model])}>
-                    {formatNumber(totalValue[model])}
-                  </div>
-                ))}
-                <div className={"scopeName " + valueClass(getStatus(period, periodValue, year, customFrom, customTo), totalGrand)}>
-                  {formatNumber(totalGrand)}
+              <div className="periodMatrixScroll" role="region" aria-label={brand + " model sales by period"} tabIndex={0}>
+                <div className="periodMatrix" style={{ gridTemplateColumns: "minmax(150px, 1.5fr) repeat(" + breakdownRows.length + ", minmax(76px, 1fr)) minmax(88px, 1fr)" }}>
+                  <div className="periodMatrixHeader periodMatrixSticky">Model</div>
+                  {breakdownRows.map((row) => <div className="periodMatrixHeader" key={row.year + "-" + row.label}>{row.label}{detailYears.length > 1 ? " '" + String(row.year).slice(-2) : ""}</div>)}
+                  <div className="periodMatrixHeader">Total</div>
+                  {models.map((model) => {
+                    const modelTotal = breakdownRows.reduce((sum, row) => sum + sumPeriod(rows, brand, salesType, row.year, row.months, model), 0);
+                    return (
+                      <div key={model} className="periodMatrixModelGroup" style={{ display: "contents" }}>
+                        <div className="periodMatrixModel periodMatrixSticky">{model}</div>
+                        {breakdownRows.map((row) => {
+                          const value = sumPeriod(rows, brand, salesType, row.year, row.months, model);
+                          return <div key={row.year + "-" + row.label} className={"periodMatrixValue " + valueClass(row.status, value)}>{formatNumber(value)}</div>;
+                        })}
+                        <div className="periodMatrixValue periodMatrixTotal">{formatNumber(modelTotal)}</div>
+                      </div>
+                    );
+                  })}
+                  <div className="periodMatrixModel periodMatrixSticky periodMatrixGrandLabel">TOTAL</div>
+                  {breakdownRows.map((row) => {
+                    const value = models.reduce((sum, model) => sum + sumPeriod(rows, brand, salesType, row.year, row.months, model), 0);
+                    return <div key={row.year + "-" + row.label} className={"periodMatrixValue periodMatrixTotal " + valueClass(row.status, value)}>{formatNumber(value)}</div>;
+                  })}
+                  <div className="periodMatrixValue periodMatrixTotal periodMatrixGrandLabel">{formatNumber(breakdownRows.reduce((sum, row) => sum + models.reduce((inner, model) => inner + sumPeriod(rows, brand, salesType, row.year, row.months, model), 0), 0))}</div>
                 </div>
-                <div className={statusClass(getStatus(period, periodValue, year, customFrom, customTo)) + " statusText"}>{statusLabel(getStatus(period, periodValue, year, customFrom, customTo))}</div>
               </div>
             </>
           ) : (

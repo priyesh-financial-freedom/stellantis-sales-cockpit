@@ -4417,3 +4417,26 @@ html[data-theme="dark"] .variantCompareFilters select { background:#111a24; bord
   html[data-theme="dark"] .variantRetailPage .variantMatrixRow > span:first-child { background:#1d2732; }
   html[data-theme="dark"] .variantRetailPage .variantMatrixHeader > span:first-child { background:#263341; }
 }
+
+/* Period-by-period model matrix: keep model names pinned while period columns scroll. */
+.periodMatrixScroll { width:100%; max-width:100%; overflow-x:auto; overscroll-behavior-x:contain; -webkit-overflow-scrolling:touch; border-radius:12px; scrollbar-width:thin; }
+.periodMatrix { display:grid; width:max-content; min-width:100%; align-items:stretch; color:var(--text,#17212b); }
+.periodMatrixHeader,.periodMatrixModel,.periodMatrixValue { display:flex; align-items:center; min-height:52px; padding:12px 14px; border-bottom:1px solid var(--border,#e0e5eb); font-size:15px; font-variant-numeric:tabular-nums; }
+.periodMatrixHeader { position:sticky; top:0; z-index:2; justify-content:flex-end; background:var(--table-header,#f1f4f7); color:var(--text,#17212b); font-size:13px; font-weight:800; white-space:nowrap; }
+.periodMatrixModel { font-weight:700; white-space:normal; overflow-wrap:anywhere; }
+.periodMatrixValue { justify-content:flex-end; font-weight:650; white-space:nowrap; }
+.periodMatrixSticky { position:sticky; left:0; z-index:3; min-width:150px; background:var(--surface,#fff); box-shadow:2px 0 5px rgb(0 0 0 / 8%); }
+.periodMatrixHeader.periodMatrixSticky { z-index:4; background:var(--table-header,#f1f4f7); justify-content:flex-start; }
+.periodMatrixTotal { font-weight:800; background:var(--table-header,#f1f4f7); }
+.periodMatrixGrandLabel { font-weight:900; }
+html[data-theme="dark"] .periodMatrixSticky { background:#1c2733; }
+html[data-theme="dark"] .periodMatrixHeader,html[data-theme="dark"] .periodMatrixHeader.periodMatrixSticky,html[data-theme="dark"] .periodMatrixTotal { background:#263341; color:#edf3f8; }
+@media (max-width:650px) {
+ .periodMatrixHeader,.periodMatrixModel,.periodMatrixValue { min-height:54px; padding:12px 13px; font-size:16px; }
+ .periodMatrixHeader { font-size:14px; }
+ .periodMatrixSticky { min-width:142px; }
+ .variantRetailPage .variantMatrixHeader { font-size:12px; padding:9px 11px; }
+ .variantRetailPage .variantMatrixVariant { font-size:15px; }
+ .variantRetailPage .variantMatrixNumber { font-size:16px; }
+ .variantRetailPage .variantMatrixMix { font-size:13px; }
+}
