@@ -424,7 +424,7 @@ export default function ModelWiseClient({ brand }) {
           <div className="eyebrow">STELLANTIS INDIA · MODEL ANALYSIS</div>
           <h1>{brand} Model Wise</h1>
           <p className="subtitle">Monthly model-level Bookings, Retail and Wholesale performance</p>
-          {cachedAt && <div className="dataFreshness">{refreshing ? "Showing cached data · refreshing in background" : "Updated " + new Date(cachedAt).toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" })}</div>}
+          {cachedAt && <div className="dataFreshness"><span className={"freshnessStatusDot" + (refreshing ? " isRefreshing" : "")} aria-hidden="true" />{refreshing ? "Showing cached data · refreshing in background" : "Updated " + new Date(cachedAt).toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" })}</div>}
         </div>
         <div className="headerStatus">
           <span className={(loading || refreshing) ? "statusDot loadingDot" : "statusDot"} />
