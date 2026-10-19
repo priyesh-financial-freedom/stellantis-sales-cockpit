@@ -5186,3 +5186,44 @@ html[data-theme="light"] .periodMatrixModel.periodMatrixSticky {
 @media (min-width: 651px) {
   .pricesPage .pricesMobileDetail strong { font-size: var(--type-commercial); }
 }
+
+
+/* Follow-up refinement from iPhone review: budget rows need the same
+   readable data scale, while long price figures must stay on one line. */
+@media (max-width: 650px) {
+  .budgetTable .budgetTableHeader,
+  .budgetTable .budgetTableRow,
+  .budgetTable .budgetTableTotal,
+  .budgetCompareTable .budgetCompareHeader,
+  .budgetCompareTable .budgetCompareRow {
+    font-size: 19px !important;
+    line-height: 1.4;
+  }
+  .budgetTable .budgetTableRow strong,
+  .budgetTable .budgetTableTotal strong,
+  .budgetCompareTable .budgetCompareRow strong {
+    font-size: 20px !important;
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+  }
+  .budgetTable .budgetTableHeader,
+  .budgetCompareTable .budgetCompareHeader {
+    font-size: 14px !important;
+    letter-spacing: .035em;
+  }
+
+  /* ESP / Dealer Margin are headline values, but must not wrap at commas. */
+  .pricesPage .pricesMobileDetail {
+    min-width: 0;
+    overflow: hidden;
+  }
+  .pricesPage .pricesMobileDetail strong {
+    font-size: 22px !important;
+    line-height: 1.25;
+    white-space: nowrap;
+    overflow-wrap: normal;
+    word-break: keep-all;
+    letter-spacing: -.035em;
+    font-variant-numeric: tabular-nums;
+  }
+}
