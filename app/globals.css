@@ -5552,3 +5552,27 @@ html[data-theme="light"] .variantRetailPage .variantModelGroup .variantMatrixRow
 html[data-theme="light"] .variantRetailPage .variantModelGroup .variantMatrixRow:nth-child(4n+2) { border-left:4px solid #a78bfa !important; }
 html[data-theme="light"] .variantRetailPage .variantModelGroup .variantMatrixRow:nth-child(4n+3) { border-left:4px solid #67c58a !important; }
 html[data-theme="light"] .variantRetailPage .variantModelGroup .variantMatrixRow:nth-child(4n) { border-left:4px solid #f0ad65 !important; }
+
+
+/* PRICES PAGE ONLY: neutralize colourful price-card fills.
+   Variant-wise Retail colour styling must remain scoped to its own page. */
+.pricesPage .priceCard,
+.pricesPage .priceVariantCard,
+.pricesPage .priceListCard,
+.pricesPage .variantCard,
+.pricesPage .priceCardHeader,
+.pricesPage .priceCardDetails,
+.pricesPage .priceCardBody {
+  background:#111820 !important;
+  background-image:none !important;
+}
+html[data-theme="light"] .pricesPage .priceCard,
+html[data-theme="light"] .pricesPage .priceVariantCard,
+html[data-theme="light"] .pricesPage .priceListCard,
+html[data-theme="light"] .pricesPage .variantCard,
+html[data-theme="light"] .pricesPage .priceCardHeader,
+html[data-theme="light"] .pricesPage .priceCardDetails,
+html[data-theme="light"] .pricesPage .priceCardBody {
+  background:#ffffff !important;
+  background-image:none !important;
+}
