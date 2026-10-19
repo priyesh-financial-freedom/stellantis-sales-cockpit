@@ -5508,3 +5508,47 @@ html[data-theme="light"] .variantRetailPage .variantModelGroup .variantMatrixRow
 html[data-theme="light"] .variantRetailPage .variantModelGroup .variantMatrixRow > span {
   background-color:#f4f7fa !important;
 }
+
+
+/* Final Variant-wise Retail colour treatment: monochrome surfaces only.
+   Use colour for the variant name and slim left accent, never the card fill. */
+.variantRetailPage .variantModelGroup,
+.variantRetailPage .variantModelGroup .variantModelHeader,
+.variantRetailPage .variantModelGroup .variantMatrixHeader,
+.variantRetailPage .variantModelGroup .variantMatrixRow,
+.variantRetailPage .variantModelGroup .variantMatrixRow > span,
+.variantRetailPage .variantModelGroup .variantMatrixRow:nth-child(4n+1),
+.variantRetailPage .variantModelGroup .variantMatrixRow:nth-child(4n+2),
+.variantRetailPage .variantModelGroup .variantMatrixRow:nth-child(4n+3),
+.variantRetailPage .variantModelGroup .variantMatrixRow:nth-child(4n) {
+  background:#111820 !important;
+  background-image:none !important;
+}
+.variantRetailPage .variantModelGroup .variantMatrixRow:nth-child(4n+1) .variantMatrixVariant { color:#62d4c8 !important; }
+.variantRetailPage .variantModelGroup .variantMatrixRow:nth-child(4n+2) .variantMatrixVariant { color:#b9a3ff !important; }
+.variantRetailPage .variantModelGroup .variantMatrixRow:nth-child(4n+3) .variantMatrixVariant { color:#80dba0 !important; }
+.variantRetailPage .variantModelGroup .variantMatrixRow:nth-child(4n) .variantMatrixVariant { color:#f4bd79 !important; }
+.variantRetailPage .variantModelGroup .variantMatrixRow:nth-child(4n+1) { border-left:4px solid #39b7ae !important; }
+.variantRetailPage .variantModelGroup .variantMatrixRow:nth-child(4n+2) { border-left:4px solid #a78bfa !important; }
+.variantRetailPage .variantModelGroup .variantMatrixRow:nth-child(4n+3) { border-left:4px solid #67c58a !important; }
+.variantRetailPage .variantModelGroup .variantMatrixRow:nth-child(4n) { border-left:4px solid #f0ad65 !important; }
+.variantRetailPage .variantModelGroup .variantMatrixRow .variantMatrixVariant {
+  background:transparent !important;
+}
+html[data-theme="light"] .variantRetailPage .variantModelGroup,
+html[data-theme="light"] .variantRetailPage .variantModelGroup .variantModelHeader,
+html[data-theme="light"] .variantRetailPage .variantModelGroup .variantMatrixHeader,
+html[data-theme="light"] .variantRetailPage .variantModelGroup .variantMatrixRow,
+html[data-theme="light"] .variantRetailPage .variantModelGroup .variantMatrixRow > span,
+html[data-theme="light"] .variantRetailPage .variantModelGroup .variantMatrixRow:nth-child(n) {
+  background:#ffffff !important;
+  background-image:none !important;
+}
+html[data-theme="light"] .variantRetailPage .variantModelGroup .variantMatrixRow:nth-child(4n+1) .variantMatrixVariant { color:#087f78 !important; }
+html[data-theme="light"] .variantRetailPage .variantModelGroup .variantMatrixRow:nth-child(4n+2) .variantMatrixVariant { color:#6841c8 !important; }
+html[data-theme="light"] .variantRetailPage .variantModelGroup .variantMatrixRow:nth-child(4n+3) .variantMatrixVariant { color:#187a3c !important; }
+html[data-theme="light"] .variantRetailPage .variantModelGroup .variantMatrixRow:nth-child(4n) .variantMatrixVariant { color:#a85b00 !important; }
+html[data-theme="light"] .variantRetailPage .variantModelGroup .variantMatrixRow:nth-child(4n+1) { border-left:4px solid #39b7ae !important; }
+html[data-theme="light"] .variantRetailPage .variantModelGroup .variantMatrixRow:nth-child(4n+2) { border-left:4px solid #a78bfa !important; }
+html[data-theme="light"] .variantRetailPage .variantModelGroup .variantMatrixRow:nth-child(4n+3) { border-left:4px solid #67c58a !important; }
+html[data-theme="light"] .variantRetailPage .variantModelGroup .variantMatrixRow:nth-child(4n) { border-left:4px solid #f0ad65 !important; }
