@@ -1,6 +1,5 @@
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import ThemeToggle from "../components/ThemeToggle";
 import OfflineSupport from "../components/OfflineSupport";
 
 const geistSans = Geist({
@@ -23,7 +22,7 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en" className={`${geistSans.variable} ${geistMono.variable}`}>
-      <body><ThemeToggle /><OfflineSupport />{children}</body>
+      <body><OfflineSupport />{children}</body>
     </html>
   );
 }
