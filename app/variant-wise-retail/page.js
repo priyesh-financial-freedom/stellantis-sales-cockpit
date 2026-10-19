@@ -112,13 +112,13 @@ export default function VariantWiseRetailPage() {
             <button type="button" className="variantModelToggle" aria-expanded={expanded} onClick={()=>setExpandedModels(prev=>({...prev,[group.key]:!expanded}))}><span className="variantModelName">{group.model}</span><span className="variantModelMeta">{group.rows.length} variants</span><span className="variantModelChevron">{expanded?"−":"+"}</span></button>
             {expanded&&<div className="variantModelMatrix">
               <div className="variantMatrixScrollHint">Swipe sideways to see all periods →</div>
-              <div className="variantMatrixHeader" style={{gridTemplateColumns:`minmax(118px,1.7fr) repeat(${comparisonPeriods.length},minmax(42px,.6fr)) minmax(64px,.8fr)`}}><span>Variant</span>{comparisonPeriods.map(p=><span key={p.label}>{p.label.replace(/ \([^)]*\)/g,"")}</span>)}<span>Mix</span></div>
+              <div className="variantMatrixHeader" style={{gridTemplateColumns:`minmax(168px,2.2fr) repeat(${comparisonPeriods.length},minmax(42px,.6fr)) minmax(64px,.8fr)`}}><span>Variant</span>{comparisonPeriods.map(p=><span key={p.label}>{p.label.replace(/ \([^)]*\)/g,"")}</span>)}<span>Mix</span></div>
               {group.rows.map(r=>{
                 const contribution=contributionFor(r);
                 const variantKey=group.key+"|"+r.variant;
                 const detailOpen=!!expandedVariants[variantKey];
                 return <div className="variantMatrixEntry" key={variantKey}>
-                  <button type="button" className="variantMatrixRow" style={{gridTemplateColumns:`minmax(118px,1.7fr) repeat(${comparisonPeriods.length},minmax(42px,.6fr)) minmax(64px,.8fr)`}} onClick={()=>setExpandedVariants(prev=>({...prev,[variantKey]:!prev[variantKey]}))} aria-expanded={detailOpen}>
+                  <button type="button" className="variantMatrixRow" style={{gridTemplateColumns:`minmax(168px,2.2fr) repeat(${comparisonPeriods.length},minmax(42px,.6fr)) minmax(64px,.8fr)`}} onClick={()=>setExpandedVariants(prev=>({...prev,[variantKey]:!prev[variantKey]}))} aria-expanded={detailOpen}>
                     <span className="variantMatrixVariant">{r.variant}</span>{r.periodTotals.map((value,i)=><span className="variantMatrixNumber" key={comparisonPeriods[i].label}>{fmt(value)}</span>)}<span className={"variantMatrixMix mix-"+contribution.tier}><i/>{contribution.pct.toFixed(1)}%</span>
                   </button>
                   {detailOpen&&<div className="variantExpandedDetail"><div className="variantExpandedPeriods">{comparisonPeriods.map((p,i)=><span key={p.label}><small>{p.label}</small><strong>{fmt(r.periodTotals[i])}</strong></span>)}</div>
