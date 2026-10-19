@@ -4553,3 +4553,10 @@ html[data-theme="light"] .periodMatrixModel.periodMatrixSticky {
  html[data-theme="dark"] .mobileFilterSummary,html[data-theme="dark"] .cockpitMobileMenuButton{background:#1b2632;color:#edf3f8;border-color:#3c4855}
  html[data-theme="dark"] .cockpitMobileMenu:not([hidden]){background:#1b2632;border-color:#3c4855}
 }
+
+@media(max-width:650px){
+ .header .headerStatus{display:none!important}
+ .header .dataFreshness{display:inline-flex;align-items:center;gap:7px}
+ .freshnessStatusDot{display:inline-block;width:8px;height:8px;flex:0 0 8px;border-radius:50%;background:#28b765;box-shadow:0 0 0 3px rgb(40 183 101 / 15%)}
+ .freshnessStatusDot.isRefreshing{background:#d99a27;box-shadow:0 0 0 3px rgb(217 154 39 / 15%)}
+}
