@@ -2,46 +2,65 @@
 
 import { useEffect, useState } from "react";
 
+const STORAGE_KEY = "stellantis-sales-cockpit-theme";
+const MODES = [
+  { value: "light", label: "Light", icon: "☀" },
+  { value: "dark", label: "Dark", icon: "☾" },
+  { value: "system", label: "System", icon: "◐" },
+];
+
 export default function ThemeToggle() {
-  const [dark, setDark] = useState(false);
+  const [mode, setMode] = useState("system");
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
+    let saved = "system";
     try {
-      const saved = window.localStorage.getItem("stellantis-sales-cockpit-theme");
-      const prefersDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
-      const enabled = saved ? saved === "dark" : prefersDark;
-      setDark(enabled);
-      document.documentElement.dataset.theme = enabled ? "dark" : "light";
-    } catch {
-      document.documentElement.dataset.theme = "light";
-    }
+      const stored = window.localStorage.getItem(STORAGE_KEY);
+      if (stored === "light" || stored === "dark" || stored === "system") saved = stored;
+    } catch { /* Use system preference when browser storage is unavailable. */ }
+    setMode(saved);
     setReady(true);
   }, []);
 
-  function toggleTheme() {
-    const next = !dark;
-    setDark(next);
-    document.documentElement.dataset.theme = next ? "dark" : "light";
-    try {
-      window.localStorage.setItem("stellantis-sales-cockpit-theme", next ? "dark" : "light");
-    } catch {
-      // The current page still changes theme if browser storage is unavailable.
+  useEffect(() => {
+    if (!ready) return;
+    const media = window.matchMedia ? window.matchMedia("(prefers-color-scheme: dark)") : null;
+    const applyTheme = () => {
+      const resolved = mode === "system" ? (media?.matches ? "dark" : "light") : mode;
+      document.documentElement.dataset.theme = resolved;
+    };
+    applyTheme();
+    if (mode === "system" && media) {
+      media.addEventListener?.("change", applyTheme);
+      return () => media.removeEventListener?.("change", applyTheme);
     }
+  }, [mode, ready]);
+
+  function chooseMode(nextMode) {
+    setMode(nextMode);
+    try { window.localStorage.setItem(STORAGE_KEY, nextMode); }
+    catch { /* The current page still changes theme if storage is unavailable. */ }
   }
 
   return (
-    <button
-      type="button"
-      className="themeToggle cockpitMenuThemeToggle"
-      onClick={toggleTheme}
-      aria-label={dark ? "Switch to light mode" : "Switch to dark mode"}
-      title={dark ? "Switch to light mode" : "Switch to dark mode"}
-      aria-pressed={dark}
-      data-ready={ready ? "true" : "false"}
-    >
-      <span className="themeToggleIcon" aria-hidden="true">{dark ? "☀" : "☾"}</span>
-      <span>{dark ? "Light mode" : "Dark mode"}</span>
-    </button>
+    <div className="themeModePicker cockpitMenuThemeToggle" role="group" aria-label="Appearance mode" data-ready={ready ? "true" : "false"}>
+      <span className="themeModeLabel">Appearance</span>
+      <div className="themeModeOptions">
+        {MODES.map(option => (
+          <button
+            key={option.value}
+            type="button"
+            className={"themeModeOption" + (mode === option.value ? " active" : "")}
+            onClick={() => chooseMode(option.value)}
+            aria-pressed={mode === option.value}
+            title={option.label + " mode"}
+          >
+            <span className="themeModeIcon" aria-hidden="true">{option.icon}</span>
+            <span>{option.label}</span>
+          </button>
+        ))}
+      </div>
+    </div>
   );
 }
