@@ -179,11 +179,6 @@ export default function PricesPage() {
 
       <CockpitNavigation active="/prices" />
 
-      <section className="pricesNotice">
-        <strong>Effective-dated pricing</strong>
-        <span>Select a brand, model and date to view prices effective on that date. Schedule future revisions by variant; only selected fields will change.</span>
-      </section>
-
       <section className="pricesFilters">
         <label>Prices as of (DD/MM/YYYY)
           <div className="pricesDateControl">
