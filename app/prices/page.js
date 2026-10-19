@@ -213,8 +213,8 @@ export default function PricesPage() {
             ].map(([key,label]) => <label className="pricesFieldOption" key={key}><input type="checkbox" checked={visibleFields.includes(key)} onChange={event => setVisibleFields(previous => event.target.checked ? [...previous,key] : previous.filter(field => field !== key))} />{label}</label>)}
           </div>}
         </div>
-        <div className="pricesTableScroll">
-          <table className="pricesTable">
+        <div className="pricesTableScroll pricesPrimaryTableScroll">
+          <table className="pricesTable pricesPrimaryTable">
             <thead><tr><th>Model</th><th>Description / Variant</th>{visibleFields.map(key => <th key={key}>{({gstRate:"GST",basicPrice:"Basic Price",gstBeforeNdp:"GST before NDP",ndp:"NDP",dealerMargin:"Dealer Margin",handlingCharges:"Handling Charges",totalGst:"Total GST",esp:"ESP",accessoryKitMrp:"Mandatory Primary Accessory Kit (MRP Inclusive GST)",priceStatus:"Price status"})[key]}</th>)}</tr></thead>
             <tbody>
               {pricedRows.map(row => <tr key={row.key}>
