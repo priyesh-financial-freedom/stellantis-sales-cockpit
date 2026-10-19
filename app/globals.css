@@ -5576,3 +5576,32 @@ html[data-theme="light"] .pricesPage .priceCardBody {
   background:#ffffff !important;
   background-image:none !important;
 }
+
+
+/* Actual mobile Prices page card classes: neutral backgrounds, coloured text only. */
+.pricesPage .pricesMobileVariantCard,
+.pricesPage .pricesMobileVariantTop,
+.pricesPage .pricesMobileVariantDetails,
+.pricesPage .pricesMobileDetail {
+  background:#111820 !important;
+  background-image:none !important;
+}
+.pricesPage .pricesMobileVariantCard:nth-child(4n+1),
+.pricesPage .pricesMobileVariantCard:nth-child(4n+2),
+.pricesPage .pricesMobileVariantCard:nth-child(4n+3),
+.pricesPage .pricesMobileVariantCard:nth-child(4n) {
+  background:#111820 !important;
+  background-image:none !important;
+}
+.pricesPage .pricesMobileVariantTop,
+.pricesPage .pricesMobileVariantDetails,
+.pricesPage .pricesMobileDetail {
+  background:transparent !important;
+}
+html[data-theme="light"] .pricesPage .pricesMobileVariantCard,
+html[data-theme="light"] .pricesPage .pricesMobileVariantTop,
+html[data-theme="light"] .pricesPage .pricesMobileVariantDetails,
+html[data-theme="light"] .pricesPage .pricesMobileDetail {
+  background:#ffffff !important;
+  background-image:none !important;
+}
