@@ -4590,3 +4590,219 @@ html[data-theme="light"] .periodMatrixModel.periodMatrixSticky {
     min-height: 0;
   }
 }
+
+
+/* Price list mobile comparison: keep model and variant pinned while price fields scroll. */
+@media (max-width: 600px) {
+  .pricesPage .pricesPrimaryTableScroll {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-inline: contain;
+    border-radius: 0 0 12px 12px;
+  }
+  .pricesPage .pricesPrimaryTable {
+    display: table;
+    width: max-content;
+    min-width: 100%;
+    table-layout: auto;
+    border-collapse: separate;
+    border-spacing: 0;
+    font-size: 13px;
+  }
+  .pricesPage .pricesPrimaryTable thead { display: table-header-group; }
+  .pricesPage .pricesPrimaryTable tbody { display: table-row-group; padding: 0; }
+  .pricesPage .pricesPrimaryTable tbody tr {
+    display: table-row;
+    min-width: 0;
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+  }
+  .pricesPage .pricesPrimaryTable th,
+  .pricesPage .pricesPrimaryTable td {
+    display: table-cell;
+    white-space: nowrap;
+    overflow-wrap: normal;
+    vertical-align: middle;
+    padding: 13px 14px;
+    border-bottom: 1px solid var(--border, #d7dfe8);
+    font-size: 13px;
+  }
+  .pricesPage .pricesPrimaryTable th {
+    position: sticky;
+    top: 0;
+    z-index: 5;
+    background: var(--table-header, #eaf0f6);
+  }
+  .pricesPage .pricesPrimaryTable th:nth-child(1),
+  .pricesPage .pricesPrimaryTable td[data-label="Model"] {
+    position: sticky;
+    left: 0;
+    width: 112px;
+    min-width: 112px;
+    max-width: 112px;
+    z-index: 4;
+    background: var(--card, #fff);
+    box-shadow: 2px 0 0 var(--border, #d7dfe8);
+  }
+  .pricesPage .pricesPrimaryTable th:nth-child(2),
+  .pricesPage .pricesPrimaryTable td[data-label="Description / Variant"] {
+    position: sticky;
+    left: 112px;
+    width: 190px;
+    min-width: 190px;
+    max-width: 190px;
+    z-index: 3;
+    background: var(--card, #fff);
+    box-shadow: 2px 0 0 var(--border, #d7dfe8);
+  }
+  .pricesPage .pricesPrimaryTable th:nth-child(1),
+  .pricesPage .pricesPrimaryTable th:nth-child(2) {
+    z-index: 7;
+    background: var(--table-header, #eaf0f6);
+  }
+  .pricesPage .pricesPrimaryTable td[data-label="Model"]::before,
+  .pricesPage .pricesPrimaryTable td[data-label="Description / Variant"]::before { content: none; display: none; }
+  .pricesPage .pricesPrimaryTable td[data-label="Model"] strong {
+    font-size: 14px;
+    white-space: normal;
+  }
+  .pricesPage .pricesPrimaryTable td[data-label="Description / Variant"] {
+    white-space: normal;
+    overflow-wrap: anywhere;
+    font-size: 13px;
+    font-weight: 650;
+  }
+  .pricesPage .pricesPrimaryTable td.pricesEmptyCell {
+    position: static;
+    display: table-cell;
+    text-align: center !important;
+  }
+  html[data-theme="dark"] .pricesPage .pricesPrimaryTable th {
+    background: #293543;
+    color: #f2f6fa;
+  }
+  html[data-theme="dark"] .pricesPage .pricesPrimaryTable td[data-label="Model"],
+  html[data-theme="dark"] .pricesPage .pricesPrimaryTable td[data-label="Description / Variant"] {
+    background: #1d2833;
+    color: #f2f6fa;
+  }
+}
+
+
+/* Hard reset the legacy stacked-card display rules for the comparison table. */
+@media (max-width: 600px) {
+  .pricesPage .pricesPrimaryTableScroll { display:block !important; }
+  .pricesPage table.pricesPrimaryTable { display:table !important; width:max-content !important; min-width:100% !important; }
+  .pricesPage table.pricesPrimaryTable thead { display:table-header-group !important; }
+  .pricesPage table.pricesPrimaryTable tbody { display:table-row-group !important; padding:0 !important; }
+  .pricesPage table.pricesPrimaryTable tbody tr {
+    display:table-row !important;
+    grid-template-columns:none !important;
+    gap:0 !important;
+    padding:0 !important;
+    border:0 !important;
+    border-radius:0 !important;
+  }
+  .pricesPage table.pricesPrimaryTable th,
+  .pricesPage table.pricesPrimaryTable td {
+    display:table-cell !important;
+    flex-direction:initial !important;
+    align-items:initial !important;
+    gap:0 !important;
+    max-width:none !important;
+    min-height:0 !important;
+    overflow-wrap:normal !important;
+    padding:13px 14px !important;
+    vertical-align:middle !important;
+    border-top:0 !important;
+    border-bottom:1px solid var(--border,#d7dfe8) !important;
+  }
+  .pricesPage table.pricesPrimaryTable td::before { display:none !important; content:none !important; }
+  .pricesPage table.pricesPrimaryTable td[data-label="Model"] {
+    position:sticky !important; left:0 !important; z-index:4 !important;
+    width:112px !important; min-width:112px !important; max-width:112px !important;
+    background:var(--card,#fff) !important; box-shadow:2px 0 0 var(--border,#d7dfe8) !important;
+  }
+  .pricesPage table.pricesPrimaryTable td[data-label="Description / Variant"] {
+    position:sticky !important; left:112px !important; z-index:3 !important;
+    width:190px !important; min-width:190px !important; max-width:190px !important;
+    white-space:normal !important; overflow-wrap:anywhere !important;
+    background:var(--card,#fff) !important; box-shadow:2px 0 0 var(--border,#d7dfe8) !important;
+  }
+  .pricesPage table.pricesPrimaryTable th:nth-child(1),
+  .pricesPage table.pricesPrimaryTable th:nth-child(2) {
+    position:sticky !important; top:0 !important; z-index:7 !important;
+    background:var(--table-header,#293543) !important;
+  }
+  .pricesPage table.pricesPrimaryTable th:nth-child(1) { left:0 !important; width:112px !important; min-width:112px !important; }
+  .pricesPage table.pricesPrimaryTable th:nth-child(2) { left:112px !important; width:190px !important; min-width:190px !important; }
+  html[data-theme="dark"] .pricesPage table.pricesPrimaryTable td[data-label="Model"],
+  html[data-theme="dark"] .pricesPage table.pricesPrimaryTable td[data-label="Description / Variant"] {
+    background:#1d2833 !important; color:#f2f6fa !important;
+  }
+}
+
+
+/* Innovative mobile price comparison: one model heading, compact variant rows. */
+.pricesMobileGroups { display:none; }
+@media (max-width:600px) {
+  .pricesPage .pricesDesktopComparison { display:none !important; }
+  .pricesPage .pricesMobileGroups { display:grid; gap:14px; padding:12px; }
+  .pricesPage .pricesMobileGroup {
+    min-width:0; overflow:hidden; border:1px solid var(--border,#3c4855);
+    border-radius:14px; background:var(--card,#1d2833);
+  }
+  .pricesPage .pricesMobileModelHeading {
+    display:flex; align-items:center; justify-content:space-between; gap:10px;
+    margin:0; padding:14px 15px; font-size:19px; line-height:1.2;
+    font-weight:800; color:var(--text,#f2f6fa);
+    background:var(--table-header,#293543); border-bottom:1px solid var(--border,#3c4855);
+  }
+  .pricesPage .pricesMobileModelHeading span {
+    flex:0 0 auto; font-size:11px; font-weight:650; color:var(--muted,#aab7c5);
+  }
+  .pricesPage .pricesMobileScroll {
+    width:100%; max-width:100%; overflow-x:auto; overflow-y:hidden;
+    -webkit-overflow-scrolling:touch; overscroll-behavior-inline:contain;
+  }
+  .pricesPage .pricesMobileTable {
+    display:table !important; width:max-content; min-width:100%;
+    border-collapse:separate; border-spacing:0; table-layout:auto; font-size:13px;
+  }
+  .pricesPage .pricesMobileTable thead { display:table-header-group !important; }
+  .pricesPage .pricesMobileTable tbody { display:table-row-group !important; padding:0 !important; }
+  .pricesPage .pricesMobileTable tr { display:table-row !important; padding:0 !important; border:0 !important; background:transparent; }
+  .pricesPage .pricesMobileTable th,
+  .pricesPage .pricesMobileTable td {
+    display:table-cell !important; position:static; white-space:nowrap;
+    vertical-align:middle; padding:13px 14px; font-size:13px;
+    border:0; border-bottom:1px solid var(--border,#3c4855);
+  }
+  .pricesPage .pricesMobileTable thead th {
+    position:sticky; top:0; z-index:4; background:var(--table-header,#293543);
+    color:var(--text,#f2f6fa); text-align:left; font-size:11px;
+    text-transform:uppercase; letter-spacing:.035em;
+  }
+  .pricesPage .pricesMobileTable .pricesMobileVariant {
+    position:sticky !important; left:0; z-index:3; width:190px; min-width:190px;
+    max-width:190px; white-space:normal; overflow-wrap:anywhere; text-align:left;
+    background:var(--card,#1d2833); color:var(--text,#f2f6fa);
+    font-weight:700; box-shadow:2px 0 0 var(--border,#3c4855);
+  }
+  .pricesPage .pricesMobileTable thead th:first-child {
+    position:sticky; left:0; z-index:6; min-width:190px; width:190px;
+    background:var(--table-header,#293543); box-shadow:2px 0 0 var(--border,#3c4855);
+  }
+  .pricesPage .pricesMobileTable tbody tr:last-child th,
+  .pricesPage .pricesMobileTable tbody tr:last-child td { border-bottom:0; }
+  .pricesPage .pricesMobileEmpty { padding:22px 14px; color:var(--muted,#aab7c5); }
+  html:not([data-theme="dark"]) .pricesPage .pricesMobileGroup { background:#fff; border-color:#d9e0e8; }
+  html:not([data-theme="dark"]) .pricesPage .pricesMobileModelHeading { background:#eef2f6; color:#17212b; border-color:#d9e0e8; }
+  html:not([data-theme="dark"]) .pricesPage .pricesMobileTable .pricesMobileVariant { background:#fff; color:#17212b; }
+  html:not([data-theme="dark"]) .pricesPage .pricesMobileTable thead th { background:#eef2f6; color:#17212b; }
+}

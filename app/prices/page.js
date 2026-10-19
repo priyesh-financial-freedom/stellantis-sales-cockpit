@@ -92,6 +92,15 @@ export default function PricesPage() {
       });
   }, [variants, changes, asOf, model, search]);
 
+  const groupedPricedRows = useMemo(() => {
+    const groups = new Map();
+    for (const row of pricedRows) {
+      if (!groups.has(row.model)) groups.set(row.model, []);
+      groups.get(row.model).push(row);
+    }
+    return [...groups.entries()].map(([name, rows]) => ({ name, rows }));
+  }, [pricedRows]);
+
   const upcoming = useMemo(() => [...changes]
     .filter(change => variants.some(row => row.key === change.variantKey) && change.effectiveDate > asOf)
     .sort((a, b) => a.effectiveDate.localeCompare(b.effectiveDate)), [changes, asOf, variants]);
@@ -213,8 +222,8 @@ export default function PricesPage() {
             ].map(([key,label]) => <label className="pricesFieldOption" key={key}><input type="checkbox" checked={visibleFields.includes(key)} onChange={event => setVisibleFields(previous => event.target.checked ? [...previous,key] : previous.filter(field => field !== key))} />{label}</label>)}
           </div>}
         </div>
-        <div className="pricesTableScroll">
-          <table className="pricesTable">
+        <div className="pricesTableScroll pricesPrimaryTableScroll pricesDesktopComparison">
+          <table className="pricesTable pricesPrimaryTable">
             <thead><tr><th>Model</th><th>Description / Variant</th>{visibleFields.map(key => <th key={key}>{({gstRate:"GST",basicPrice:"Basic Price",gstBeforeNdp:"GST before NDP",ndp:"NDP",dealerMargin:"Dealer Margin",handlingCharges:"Handling Charges",totalGst:"Total GST",esp:"ESP",accessoryKitMrp:"Mandatory Primary Accessory Kit (MRP Inclusive GST)",priceStatus:"Price status"})[key]}</th>)}</tr></thead>
             <tbody>
               {pricedRows.map(row => <tr key={row.key}>
@@ -228,6 +237,23 @@ export default function PricesPage() {
               {!pricedRows.length && <tr><td colSpan={2+visibleFields.length} className="pricesEmptyCell">No variants match these filters.</td></tr>}
             </tbody>
           </table>
+        </div>
+        <div className="pricesMobileGroups">
+          {groupedPricedRows.map(group => (
+            <section className="pricesMobileGroup" key={group.name}>
+              <h3 className="pricesMobileModelHeading">{group.name}<span>{group.rows.length} {group.rows.length === 1 ? "variant" : "variants"}</span></h3>
+              <div className="pricesMobileScroll">
+                <table className="pricesMobileTable">
+                  <thead><tr><th>Variant</th>{visibleFields.map(key => <th key={key}>{({gstRate:"GST",basicPrice:"Basic Price",gstBeforeNdp:"GST before NDP",ndp:"NDP",dealerMargin:"Dealer Margin",handlingCharges:"Handling Charges",totalGst:"Total GST",esp:"ESP",accessoryKitMrp:"Accessory Kit MRP",priceStatus:"Price status"})[key]}</th>)}</tr></thead>
+                  <tbody>{group.rows.map(row => <tr key={row.key}>
+                    <th scope="row" className="pricesMobileVariant">{row.variant}</th>
+                    {visibleFields.map(key => <td key={key}>{key==="gstRate" ? ((row.gstRate ?? 0.4)*100).toFixed(0)+"%" : key==="priceStatus" ? (row.latestChange ? <span className="priceChangeTag">Revised · {dateLabel(row.latestChange.effectiveDate)}</span> : <span className="priceBaselineTag">Baseline</span>) : money(row[key])}</td>)}
+                  </tr>)}</tbody>
+                </table>
+              </div>
+            </section>
+          ))}
+          {!groupedPricedRows.length && <div className="pricesMobileEmpty">No variants match these filters.</div>}
         </div>
       </section>
 
