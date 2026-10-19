@@ -4440,3 +4440,66 @@ html[data-theme="dark"] .periodMatrixHeader,html[data-theme="dark"] .periodMatri
  .variantRetailPage .variantMatrixNumber { font-size:16px; }
  .variantRetailPage .variantMatrixMix { font-size:13px; }
 }
+
+
+/* Mobile readability pass: stronger contrast, larger matrix typography, compact heading. */
+.periodMatrixHeader,
+.periodMatrixModel,
+.periodMatrixValue {
+  font-size: 17px;
+}
+.periodMatrixHeader {
+  font-size: 15px;
+  font-weight: 850;
+}
+.periodMatrixModel {
+  font-size: 18px;
+  font-weight: 750;
+  line-height: 1.25;
+}
+.periodMatrixValue {
+  font-size: 18px;
+  font-weight: 700;
+}
+.periodMatrixSticky {
+  min-width: 158px;
+}
+html[data-theme="dark"] .periodMatrixModel.periodMatrixSticky {
+  background: #1c2733;
+  color: #f1f5f9;
+}
+html[data-theme="dark"] .periodMatrixGrandLabel {
+  color: #ffffff;
+}
+html[data-theme="light"] .periodMatrixModel.periodMatrixSticky {
+  color: #17212b;
+}
+.summary .sectionHeading h2 {
+  font-size: clamp(22px, 2.5vw, 30px);
+  line-height: 1.18;
+  overflow-wrap: anywhere;
+}
+@media (max-width: 650px) {
+  .periodMatrixHeader,
+  .periodMatrixModel,
+  .periodMatrixValue {
+    min-height: 60px;
+    padding: 13px 14px;
+  }
+  .periodMatrixHeader { font-size: 16px; }
+  .periodMatrixModel { font-size: 18px; }
+  .periodMatrixValue { font-size: 18px; }
+  .periodMatrixSticky { min-width: 150px; }
+  .summary .sectionHeading h2 {
+    font-size: 25px;
+    line-height: 1.16;
+  }
+  .summary .sectionHeading .eyebrow {
+    font-size: 13px;
+    letter-spacing: 0.12em;
+  }
+  .variantRetailPage .variantMatrixHeader { font-size: 14px; }
+  .variantRetailPage .variantMatrixVariant { font-size: 17px; }
+  .variantRetailPage .variantMatrixNumber { font-size: 18px; }
+  .variantRetailPage .variantMatrixMix { font-size: 14px; }
+}
