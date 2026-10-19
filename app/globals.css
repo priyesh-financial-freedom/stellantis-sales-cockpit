@@ -4806,3 +4806,39 @@ html[data-theme="light"] .periodMatrixModel.periodMatrixSticky {
   html:not([data-theme="dark"]) .pricesPage .pricesMobileTable .pricesMobileVariant { background:#fff; color:#17212b; }
   html:not([data-theme="dark"]) .pricesPage .pricesMobileTable thead th { background:#eef2f6; color:#17212b; }
 }
+
+
+/* Slightly larger, more comfortable mobile price comparison typography. */
+@media (max-width:600px) {
+  .pricesPage .pricesMobileModelHeading {
+    font-size:22px;
+    padding:16px 16px;
+  }
+  .pricesPage .pricesMobileModelHeading span { font-size:12px; }
+  .pricesPage .pricesMobileTable { font-size:15px; }
+  .pricesPage .pricesMobileTable th,
+  .pricesPage .pricesMobileTable td {
+    font-size:15px;
+    padding:15px 16px;
+    line-height:1.35;
+  }
+  .pricesPage .pricesMobileTable thead th {
+    font-size:12px;
+    line-height:1.3;
+    white-space:normal;
+    min-width:104px;
+  }
+  .pricesPage .pricesMobileTable .pricesMobileVariant {
+    font-size:16px;
+    line-height:1.4;
+    width:210px;
+    min-width:210px;
+    max-width:210px;
+    white-space:normal;
+    overflow-wrap:anywhere;
+  }
+  .pricesPage .pricesMobileTable thead th:first-child {
+    min-width:210px;
+    width:210px;
+  }
+}
