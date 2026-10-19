@@ -4590,3 +4590,1018 @@ html[data-theme="light"] .periodMatrixModel.periodMatrixSticky {
     min-height: 0;
   }
 }
+
+
+/* Price list mobile comparison: keep model and variant pinned while price fields scroll. */
+@media (max-width: 600px) {
+  .pricesPage .pricesPrimaryTableScroll {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-inline: contain;
+    border-radius: 0 0 12px 12px;
+  }
+  .pricesPage .pricesPrimaryTable {
+    display: table;
+    width: max-content;
+    min-width: 100%;
+    table-layout: auto;
+    border-collapse: separate;
+    border-spacing: 0;
+    font-size: 13px;
+  }
+  .pricesPage .pricesPrimaryTable thead { display: table-header-group; }
+  .pricesPage .pricesPrimaryTable tbody { display: table-row-group; padding: 0; }
+  .pricesPage .pricesPrimaryTable tbody tr {
+    display: table-row;
+    min-width: 0;
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+  }
+  .pricesPage .pricesPrimaryTable th,
+  .pricesPage .pricesPrimaryTable td {
+    display: table-cell;
+    white-space: nowrap;
+    overflow-wrap: normal;
+    vertical-align: middle;
+    padding: 13px 14px;
+    border-bottom: 1px solid var(--border, #d7dfe8);
+    font-size: 13px;
+  }
+  .pricesPage .pricesPrimaryTable th {
+    position: sticky;
+    top: 0;
+    z-index: 5;
+    background: var(--table-header, #eaf0f6);
+  }
+  .pricesPage .pricesPrimaryTable th:nth-child(1),
+  .pricesPage .pricesPrimaryTable td[data-label="Model"] {
+    position: sticky;
+    left: 0;
+    width: 112px;
+    min-width: 112px;
+    max-width: 112px;
+    z-index: 4;
+    background: var(--card, #fff);
+    box-shadow: 2px 0 0 var(--border, #d7dfe8);
+  }
+  .pricesPage .pricesPrimaryTable th:nth-child(2),
+  .pricesPage .pricesPrimaryTable td[data-label="Description / Variant"] {
+    position: sticky;
+    left: 112px;
+    width: 190px;
+    min-width: 190px;
+    max-width: 190px;
+    z-index: 3;
+    background: var(--card, #fff);
+    box-shadow: 2px 0 0 var(--border, #d7dfe8);
+  }
+  .pricesPage .pricesPrimaryTable th:nth-child(1),
+  .pricesPage .pricesPrimaryTable th:nth-child(2) {
+    z-index: 7;
+    background: var(--table-header, #eaf0f6);
+  }
+  .pricesPage .pricesPrimaryTable td[data-label="Model"]::before,
+  .pricesPage .pricesPrimaryTable td[data-label="Description / Variant"]::before { content: none; display: none; }
+  .pricesPage .pricesPrimaryTable td[data-label="Model"] strong {
+    font-size: 14px;
+    white-space: normal;
+  }
+  .pricesPage .pricesPrimaryTable td[data-label="Description / Variant"] {
+    white-space: normal;
+    overflow-wrap: anywhere;
+    font-size: 13px;
+    font-weight: 650;
+  }
+  .pricesPage .pricesPrimaryTable td.pricesEmptyCell {
+    position: static;
+    display: table-cell;
+    text-align: center !important;
+  }
+  html[data-theme="dark"] .pricesPage .pricesPrimaryTable th {
+    background: #293543;
+    color: #f2f6fa;
+  }
+  html[data-theme="dark"] .pricesPage .pricesPrimaryTable td[data-label="Model"],
+  html[data-theme="dark"] .pricesPage .pricesPrimaryTable td[data-label="Description / Variant"] {
+    background: #1d2833;
+    color: #f2f6fa;
+  }
+}
+
+
+/* Hard reset the legacy stacked-card display rules for the comparison table. */
+@media (max-width: 600px) {
+  .pricesPage .pricesPrimaryTableScroll { display:block !important; }
+  .pricesPage table.pricesPrimaryTable { display:table !important; width:max-content !important; min-width:100% !important; }
+  .pricesPage table.pricesPrimaryTable thead { display:table-header-group !important; }
+  .pricesPage table.pricesPrimaryTable tbody { display:table-row-group !important; padding:0 !important; }
+  .pricesPage table.pricesPrimaryTable tbody tr {
+    display:table-row !important;
+    grid-template-columns:none !important;
+    gap:0 !important;
+    padding:0 !important;
+    border:0 !important;
+    border-radius:0 !important;
+  }
+  .pricesPage table.pricesPrimaryTable th,
+  .pricesPage table.pricesPrimaryTable td {
+    display:table-cell !important;
+    flex-direction:initial !important;
+    align-items:initial !important;
+    gap:0 !important;
+    max-width:none !important;
+    min-height:0 !important;
+    overflow-wrap:normal !important;
+    padding:13px 14px !important;
+    vertical-align:middle !important;
+    border-top:0 !important;
+    border-bottom:1px solid var(--border,#d7dfe8) !important;
+  }
+  .pricesPage table.pricesPrimaryTable td::before { display:none !important; content:none !important; }
+  .pricesPage table.pricesPrimaryTable td[data-label="Model"] {
+    position:sticky !important; left:0 !important; z-index:4 !important;
+    width:112px !important; min-width:112px !important; max-width:112px !important;
+    background:var(--card,#fff) !important; box-shadow:2px 0 0 var(--border,#d7dfe8) !important;
+  }
+  .pricesPage table.pricesPrimaryTable td[data-label="Description / Variant"] {
+    position:sticky !important; left:112px !important; z-index:3 !important;
+    width:190px !important; min-width:190px !important; max-width:190px !important;
+    white-space:normal !important; overflow-wrap:anywhere !important;
+    background:var(--card,#fff) !important; box-shadow:2px 0 0 var(--border,#d7dfe8) !important;
+  }
+  .pricesPage table.pricesPrimaryTable th:nth-child(1),
+  .pricesPage table.pricesPrimaryTable th:nth-child(2) {
+    position:sticky !important; top:0 !important; z-index:7 !important;
+    background:var(--table-header,#293543) !important;
+  }
+  .pricesPage table.pricesPrimaryTable th:nth-child(1) { left:0 !important; width:112px !important; min-width:112px !important; }
+  .pricesPage table.pricesPrimaryTable th:nth-child(2) { left:112px !important; width:190px !important; min-width:190px !important; }
+  html[data-theme="dark"] .pricesPage table.pricesPrimaryTable td[data-label="Model"],
+  html[data-theme="dark"] .pricesPage table.pricesPrimaryTable td[data-label="Description / Variant"] {
+    background:#1d2833 !important; color:#f2f6fa !important;
+  }
+}
+
+
+/* Innovative mobile price comparison: one model heading, compact variant rows. */
+.pricesMobileGroups { display:none; }
+@media (max-width:600px) {
+  .pricesPage .pricesDesktopComparison { display:none !important; }
+  .pricesPage .pricesMobileGroups { display:grid; gap:14px; padding:12px; }
+  .pricesPage .pricesMobileGroup {
+    min-width:0; overflow:hidden; border:1px solid var(--border,#3c4855);
+    border-radius:14px; background:var(--card,#1d2833);
+  }
+  .pricesPage .pricesMobileModelHeading {
+    display:flex; align-items:center; justify-content:space-between; gap:10px;
+    margin:0; padding:14px 15px; font-size:19px; line-height:1.2;
+    font-weight:800; color:var(--text,#f2f6fa);
+    background:var(--table-header,#293543); border-bottom:1px solid var(--border,#3c4855);
+  }
+  .pricesPage .pricesMobileModelHeading span {
+    flex:0 0 auto; font-size:11px; font-weight:650; color:var(--muted,#aab7c5);
+  }
+  .pricesPage .pricesMobileScroll {
+    width:100%; max-width:100%; overflow-x:auto; overflow-y:hidden;
+    -webkit-overflow-scrolling:touch; overscroll-behavior-inline:contain;
+  }
+  .pricesPage .pricesMobileTable {
+    display:table !important; width:max-content; min-width:100%;
+    border-collapse:separate; border-spacing:0; table-layout:auto; font-size:13px;
+  }
+  .pricesPage .pricesMobileTable thead { display:table-header-group !important; }
+  .pricesPage .pricesMobileTable tbody { display:table-row-group !important; padding:0 !important; }
+  .pricesPage .pricesMobileTable tr { display:table-row !important; padding:0 !important; border:0 !important; background:transparent; }
+  .pricesPage .pricesMobileTable th,
+  .pricesPage .pricesMobileTable td {
+    display:table-cell !important; position:static; white-space:nowrap;
+    vertical-align:middle; padding:13px 14px; font-size:13px;
+    border:0; border-bottom:1px solid var(--border,#3c4855);
+  }
+  .pricesPage .pricesMobileTable thead th {
+    position:sticky; top:0; z-index:4; background:var(--table-header,#293543);
+    color:var(--text,#f2f6fa); text-align:left; font-size:11px;
+    text-transform:uppercase; letter-spacing:.035em;
+  }
+  .pricesPage .pricesMobileTable .pricesMobileVariant {
+    position:sticky !important; left:0; z-index:3; width:190px; min-width:190px;
+    max-width:190px; white-space:normal; overflow-wrap:anywhere; text-align:left;
+    background:var(--card,#1d2833); color:var(--text,#f2f6fa);
+    font-weight:700; box-shadow:2px 0 0 var(--border,#3c4855);
+  }
+  .pricesPage .pricesMobileTable thead th:first-child {
+    position:sticky; left:0; z-index:6; min-width:190px; width:190px;
+    background:var(--table-header,#293543); box-shadow:2px 0 0 var(--border,#3c4855);
+  }
+  .pricesPage .pricesMobileTable tbody tr:last-child th,
+  .pricesPage .pricesMobileTable tbody tr:last-child td { border-bottom:0; }
+  .pricesPage .pricesMobileEmpty { padding:22px 14px; color:var(--muted,#aab7c5); }
+  html:not([data-theme="dark"]) .pricesPage .pricesMobileGroup { background:#fff; border-color:#d9e0e8; }
+  html:not([data-theme="dark"]) .pricesPage .pricesMobileModelHeading { background:#eef2f6; color:#17212b; border-color:#d9e0e8; }
+  html:not([data-theme="dark"]) .pricesPage .pricesMobileTable .pricesMobileVariant { background:#fff; color:#17212b; }
+  html:not([data-theme="dark"]) .pricesPage .pricesMobileTable thead th { background:#eef2f6; color:#17212b; }
+}
+
+
+/* Slightly larger, more comfortable mobile price comparison typography. */
+@media (max-width:600px) {
+  .pricesPage .pricesMobileModelHeading {
+    font-size:22px;
+    padding:16px 16px;
+  }
+  .pricesPage .pricesMobileModelHeading span { font-size:12px; }
+  .pricesPage .pricesMobileTable { font-size:15px; }
+  .pricesPage .pricesMobileTable th,
+  .pricesPage .pricesMobileTable td {
+    font-size:15px;
+    padding:15px 16px;
+    line-height:1.35;
+  }
+  .pricesPage .pricesMobileTable thead th {
+    font-size:12px;
+    line-height:1.3;
+    white-space:normal;
+    min-width:104px;
+  }
+  .pricesPage .pricesMobileTable .pricesMobileVariant {
+    font-size:16px;
+    line-height:1.4;
+    width:210px;
+    min-width:210px;
+    max-width:210px;
+    white-space:normal;
+    overflow-wrap:anywhere;
+  }
+  .pricesPage .pricesMobileTable thead th:first-child {
+    min-width:210px;
+    width:210px;
+  }
+}
+
+
+/* Two-row mobile price layout: variant + GST first, remaining values below. */
+@media (max-width:600px) {
+  .pricesPage .pricesMobileScroll { display:none !important; }
+  .pricesPage .pricesMobileVariantList { display:grid; }
+  .pricesPage .pricesMobileVariantCard {
+    min-width:0; padding:0; margin:0; border:0;
+    border-bottom:1px solid var(--border,#3c4855);
+    border-radius:0; background:transparent;
+  }
+  .pricesPage .pricesMobileVariantCard:last-child { border-bottom:0; }
+  .pricesPage .pricesMobileVariantTop {
+    display:grid; grid-template-columns:minmax(0,1fr) auto; align-items:center;
+    gap:12px; padding:15px 16px 12px;
+  }
+  .pricesPage .pricesMobileVariantTop h4 {
+    min-width:0; margin:0; font-size:17px; font-weight:750; line-height:1.35;
+    white-space:normal; overflow-wrap:anywhere; color:var(--text,#f2f6fa);
+  }
+  .pricesPage .pricesMobileGst {
+    display:grid; justify-items:end; gap:3px; min-width:58px;
+  }
+  .pricesPage .pricesMobileGst span,
+  .pricesPage .pricesMobileDetail span {
+    color:var(--muted,#aab7c5); font-size:11px; line-height:1.25;
+    font-weight:750; letter-spacing:.045em; text-transform:uppercase;
+  }
+  .pricesPage .pricesMobileGst strong {
+    color:var(--text,#f2f6fa); font-size:16px; line-height:1.2; font-weight:750;
+  }
+  .pricesPage .pricesMobileVariantDetails {
+    display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px 16px;
+    padding:0 16px 15px;
+  }
+  .pricesPage .pricesMobileDetail { display:grid; gap:4px; min-width:0; }
+  .pricesPage .pricesMobileDetail strong {
+    min-width:0; color:var(--text,#f2f6fa); font-size:15px; font-weight:600;
+    line-height:1.35; overflow-wrap:anywhere; white-space:normal;
+  }
+  .pricesPage .pricesMobileNoDetails { grid-column:1/-1; color:var(--muted,#aab7c5); font-size:13px; }
+  .pricesPage .pricesMobileModelHeading { font-size:22px; }
+  html:not([data-theme="dark"]) .pricesPage .pricesMobileVariantTop h4,
+  html:not([data-theme="dark"]) .pricesPage .pricesMobileGst strong,
+  html:not([data-theme="dark"]) .pricesPage .pricesMobileDetail strong { color:#17212b; }
+}
+
+
+/* Subtle colour coding for the two-row mobile price cards. */
+@media (max-width:600px) {
+  .pricesPage .pricesMobileGroup {
+    border-color:#3d6074;
+    box-shadow:0 3px 12px rgb(0 0 0 / 12%);
+  }
+  .pricesPage .pricesMobileModelHeading {
+    background:linear-gradient(105deg,#233f52 0%,#293b4d 55%,#343b55 100%);
+    color:#f5f9ff;
+    border-bottom-color:#486174;
+  }
+  .pricesPage .pricesMobileModelHeading span {
+    color:#c4d8e7;
+    background:rgb(255 255 255 / 8%);
+    border:1px solid rgb(255 255 255 / 12%);
+    border-radius:999px;
+    padding:4px 8px;
+  }
+  .pricesPage .pricesMobileVariantCard:nth-child(odd) {
+    background:rgb(43 105 120 / 10%);
+  }
+  .pricesPage .pricesMobileVariantCard:nth-child(even) {
+    background:rgb(111 89 160 / 9%);
+  }
+  .pricesPage .pricesMobileVariantTop h4 {
+    color:#77d4ce;
+  }
+  .pricesPage .pricesMobileGst {
+    min-width:68px;
+    padding:7px 10px;
+    border:1px solid #4d8b8e;
+    border-radius:10px;
+    background:rgb(39 131 128 / 16%);
+  }
+  .pricesPage .pricesMobileGst span { color:#8fded5; }
+  .pricesPage .pricesMobileGst strong { color:#b8f3e9; }
+  .pricesPage .pricesMobileVariantDetails {
+    border-top:1px solid rgb(120 157 178 / 18%);
+    padding-top:12px;
+  }
+  .pricesPage .pricesMobileDetail {
+    min-height:58px;
+    padding:9px 10px;
+    border-radius:9px;
+    background:rgb(118 145 174 / 10%);
+    border:1px solid rgb(125 157 184 / 14%);
+  }
+  .pricesPage .pricesMobileDetail:nth-child(4n+1),
+  .pricesPage .pricesMobileDetail:nth-child(4n+2) {
+    background:rgb(51 130 145 / 12%);
+  }
+  .pricesPage .pricesMobileDetail span {
+    color:#a9c1d3;
+  }
+  .pricesPage .pricesMobileDetail strong {
+    color:#f0f6fc;
+  }
+  html:not([data-theme="dark"]) .pricesPage .pricesMobileGroup {
+    border-color:#c6dce7;
+    box-shadow:0 3px 12px rgb(31 68 91 / 8%);
+  }
+  html:not([data-theme="dark"]) .pricesPage .pricesMobileModelHeading {
+    background:linear-gradient(105deg,#dceff4 0%,#e6e8f7 100%);
+    color:#173849;
+    border-bottom-color:#c6dce7;
+  }
+  html:not([data-theme="dark"]) .pricesPage .pricesMobileModelHeading span {
+    color:#456778;
+    background:rgb(255 255 255 / 70%);
+    border-color:#c7dce7;
+  }
+  html:not([data-theme="dark"]) .pricesPage .pricesMobileVariantCard:nth-child(odd) {
+    background:#f2fafb;
+  }
+  html:not([data-theme="dark"]) .pricesPage .pricesMobileVariantCard:nth-child(even) {
+    background:#f7f5fc;
+  }
+  html:not([data-theme="dark"]) .pricesPage .pricesMobileVariantTop h4 {
+    color:#176f78;
+  }
+  html:not([data-theme="dark"]) .pricesPage .pricesMobileGst {
+    background:#e0f5ef;
+    border-color:#a5d8cc;
+  }
+  html:not([data-theme="dark"]) .pricesPage .pricesMobileGst span { color:#287b71; }
+  html:not([data-theme="dark"]) .pricesPage .pricesMobileGst strong { color:#145d55; }
+  html:not([data-theme="dark"]) .pricesPage .pricesMobileDetail {
+    background:#edf3f8;
+    border-color:#dce6ef;
+  }
+  html:not([data-theme="dark"]) .pricesPage .pricesMobileDetail:nth-child(4n+1),
+  html:not([data-theme="dark"]) .pricesPage .pricesMobileDetail:nth-child(4n+2) {
+    background:#e8f5f6;
+  }
+  html:not([data-theme="dark"]) .pricesPage .pricesMobileDetail span { color:#5d7488; }
+  html:not([data-theme="dark"]) .pricesPage .pricesMobileDetail strong { color:#1b2d3b; }
+}
+
+
+/* Stronger colour hierarchy and prominent commercial values on mobile. */
+@media (max-width:600px) {
+  .pricesPage .pricesMobileVariantCard:nth-child(4n+1) {
+    background:#193b48 !important;
+    border-left:4px solid #39b9ad;
+  }
+  .pricesPage .pricesMobileVariantCard:nth-child(4n+2) {
+    background:#302b4b !important;
+    border-left:4px solid #a99ae8;
+  }
+  .pricesPage .pricesMobileVariantCard:nth-child(4n+3) {
+    background:#233d32 !important;
+    border-left:4px solid #79c99a;
+  }
+  .pricesPage .pricesMobileVariantCard:nth-child(4n+4) {
+    background:#493426 !important;
+    border-left:4px solid #e6ad72;
+  }
+  .pricesPage .pricesMobileVariantTop h4 {
+    font-size:18px;
+    line-height:1.4;
+    color:#e8f8ff;
+  }
+  .pricesPage .pricesMobileGst {
+    border-color:#57c5b8;
+    background:#174f50;
+  }
+  .pricesPage .pricesMobileGst span { color:#a4eee4; }
+  .pricesPage .pricesMobileGst strong { color:#ffffff; font-size:18px; }
+  .pricesPage .pricesMobileVariantDetails { gap:10px 12px; }
+  .pricesPage .pricesMobileDetail {
+    min-height:70px;
+    padding:11px 12px;
+    background:rgb(8 18 29 / 35%) !important;
+    border-color:rgb(190 218 237 / 20%);
+  }
+  .pricesPage .pricesMobileDetail span {
+    font-size:12px;
+    color:#b9d0e1;
+  }
+  .pricesPage .pricesMobileDetail strong {
+    font-size:19px;
+    line-height:1.3;
+    font-weight:800;
+    letter-spacing:-.015em;
+    color:#ffffff;
+  }
+  html:not([data-theme="dark"]) .pricesPage .pricesMobileVariantCard:nth-child(4n+1) {
+    background:#e4f6f5 !important; border-left-color:#168b83;
+  }
+  html:not([data-theme="dark"]) .pricesPage .pricesMobileVariantCard:nth-child(4n+2) {
+    background:#f0ebfc !important; border-left-color:#7861be;
+  }
+  html:not([data-theme="dark"]) .pricesPage .pricesMobileVariantCard:nth-child(4n+3) {
+    background:#e8f6ec !important; border-left-color:#378b57;
+  }
+  html:not([data-theme="dark"]) .pricesPage .pricesMobileVariantCard:nth-child(4n+4) {
+    background:#fff0e1 !important; border-left-color:#b36a2f;
+  }
+  html:not([data-theme="dark"]) .pricesPage .pricesMobileVariantTop h4 { color:#183548; }
+  html:not([data-theme="dark"]) .pricesPage .pricesMobileGst { background:#c8f0e8; border-color:#69bdb1; }
+  html:not([data-theme="dark"]) .pricesPage .pricesMobileGst span { color:#17685f; }
+  html:not([data-theme="dark"]) .pricesPage .pricesMobileGst strong { color:#114a44; }
+  html:not([data-theme="dark"]) .pricesPage .pricesMobileDetail { background:rgb(255 255 255 / 78%) !important; border-color:rgb(50 76 99 / 16%); }
+  html:not([data-theme="dark"]) .pricesPage .pricesMobileDetail span { color:#526b80; }
+  html:not([data-theme="dark"]) .pricesPage .pricesMobileDetail strong { color:#172b3a; }
+}
+
+
+/* ============================================================
+   Stellantis Sales Cockpit — Unified Data Typography V1
+   Shared scale: commercial figures 30px, operational data 22–24px,
+   model/variant names 20px, percentages 22px, labels 14px.
+   ============================================================ */
+:root {
+  --type-commercial: 30px;
+  --type-operational: 23px;
+  --type-entity: 20px;
+  --type-percentage: 22px;
+  --type-field-label: 14px;
+  --type-supporting: 15px;
+}
+@media (max-width: 650px) {
+  /* Price List: commercial values are the visual priority. */
+  .pricesPage .pricesMobileDetail strong {
+    font-size: var(--type-commercial) !important;
+    line-height: 1.2;
+    font-weight: 800;
+    letter-spacing: -.02em;
+    overflow-wrap: anywhere;
+  }
+  .pricesPage .pricesMobileDetail span {
+    font-size: var(--type-field-label) !important;
+    line-height: 1.3;
+    font-weight: 750;
+  }
+  .pricesPage .pricesMobileVariantTop h4 {
+    font-size: var(--type-entity) !important;
+    line-height: 1.35;
+    font-weight: 750;
+  }
+  .pricesPage .pricesMobileGst strong {
+    font-size: var(--type-percentage) !important;
+    line-height: 1.2;
+  }
+  .pricesPage .pricesMobileGst span {
+    font-size: var(--type-field-label) !important;
+  }
+  .pricesPage .pricesMobileModelHeading { font-size: 24px !important; }
+  .pricesPage .pricesMobileModelHeading span { font-size: var(--type-supporting) !important; }
+
+  /* Model-wise matrix: month values and annual figures. */
+  .model-wise .periodMatrixValue,
+  .periodMatrix .periodMatrixValue,
+  .periodMatrixValue {
+    font-size: var(--type-operational) !important;
+    line-height: 1.3;
+    font-weight: 700;
+  }
+  .periodMatrixModel,
+  .modelTableRow .scopeName,
+  .modelBreakdownRow .scopeName {
+    font-size: var(--type-entity) !important;
+    line-height: 1.35;
+    font-weight: 750;
+  }
+  .modelTableRow > div:nth-child(2),
+  .modelTableRow > div:nth-child(3) {
+    font-size: var(--type-operational) !important;
+    line-height: 1.3;
+    font-weight: 700;
+  }
+  .modelTableRow .statusText { font-size: var(--type-supporting) !important; }
+
+  /* Industry model and segment tables. */
+  .industryModelDetailRow,
+  .industryTableRow,
+  .industryMonthModelRow,
+  .industryMonthRow {
+    font-size: var(--type-operational) !important;
+    line-height: 1.35;
+  }
+  .industryModelDetailRow strong,
+  .industryTableRow strong,
+  .industryMonthModelRow strong,
+  .industryMonthUnits {
+    font-size: var(--type-operational) !important;
+    font-weight: 750;
+  }
+  .industryModelDetailHeader,
+  .industryTableHeader,
+  .industryMonthModelsHeader,
+  .industryMonthModelHeader {
+    font-size: var(--type-field-label) !important;
+    font-weight: 800;
+  }
+
+  /* Variant-wise retail: model labels, variant labels and values. */
+  .variantModelName { font-size: 22px !important; font-weight: 800; }
+  .variantModelMeta { font-size: var(--type-supporting) !important; }
+  .variantMatrixVariant,
+  .variantMatrixEntry,
+  .variantExpandedDetail,
+  .variantMixDetail {
+    font-size: var(--type-entity) !important;
+    line-height: 1.35;
+  }
+  .variantMatrixNumber {
+    font-size: var(--type-operational) !important;
+    font-weight: 750;
+    line-height: 1.3;
+  }
+  .variantMatrixHeader { font-size: var(--type-field-label) !important; font-weight: 800; }
+
+  /* Data Entry and other data tables. */
+  .recentRow,
+  .recentTable td,
+  .recentTable tbody th {
+    font-size: var(--type-operational) !important;
+    line-height: 1.35;
+  }
+  .recentHeader,
+  .recentTable thead th {
+    font-size: var(--type-field-label) !important;
+    font-weight: 800;
+  }
+
+  /* Shared labels and secondary information, excluding navigation/filter controls. */
+  .pricesPage .priceVariantCell,
+  .variantRetailPage .priceVariantCell {
+    font-size: var(--type-entity) !important;
+    line-height: 1.35;
+  }
+}
+@media (min-width: 651px) {
+  .pricesPage .pricesMobileDetail strong { font-size: var(--type-commercial); }
+}
+
+
+/* Follow-up refinement from iPhone review: budget rows need the same
+   readable data scale, while long price figures must stay on one line. */
+@media (max-width: 650px) {
+  .budgetTable .budgetTableHeader,
+  .budgetTable .budgetTableRow,
+  .budgetTable .budgetTableTotal,
+  .budgetCompareTable .budgetCompareHeader,
+  .budgetCompareTable .budgetCompareRow {
+    font-size: 19px !important;
+    line-height: 1.4;
+  }
+  .budgetTable .budgetTableRow strong,
+  .budgetTable .budgetTableTotal strong,
+  .budgetCompareTable .budgetCompareRow strong {
+    font-size: 20px !important;
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+  }
+  .budgetTable .budgetTableHeader,
+  .budgetCompareTable .budgetCompareHeader {
+    font-size: 14px !important;
+    letter-spacing: .035em;
+  }
+
+  /* ESP / Dealer Margin are headline values, but must not wrap at commas. */
+  .pricesPage .pricesMobileDetail {
+    min-width: 0;
+    overflow: hidden;
+  }
+  .pricesPage .pricesMobileDetail strong {
+    font-size: 22px !important;
+    line-height: 1.25;
+    white-space: nowrap;
+    overflow-wrap: normal;
+    word-break: keep-all;
+    letter-spacing: -.035em;
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+
+/* Mobile navigation and dropdown controls: match the cockpit's larger data type. */
+@media (max-width: 650px) {
+  .cockpit .menuToggle,
+  .cockpit .menuButton,
+  .cockpit .navMenuToggle,
+  .cockpit button[aria-expanded],
+  .cockpit .navigationMenuButton {
+    font-size:20px !important;
+    font-weight:750;
+    min-height:58px;
+  }
+  .cockpit .navGroupTitle,
+  .cockpit .navAccordionTitle,
+  .cockpit .navSectionTitle,
+  .cockpit .menuSectionTitle {
+    font-size:18px !important;
+    line-height:1.35;
+    font-weight:800;
+    letter-spacing:.06em;
+  }
+  .cockpit .navMenu a,
+  .cockpit .navMenu button,
+  .cockpit .navGroup a,
+  .cockpit .navGroup button,
+  .cockpit .navAccordion a,
+  .cockpit .navAccordion button,
+  .cockpit .menuPanel a,
+  .cockpit .menuPanel button {
+    font-size:19px !important;
+    line-height:1.35;
+    font-weight:700;
+    min-height:56px;
+  }
+  .cockpit .filters select,
+  .cockpit .filters input,
+  .cockpit .filter select,
+  .cockpit .filter input,
+  .cockpit select,
+  .cockpit input:not([type="checkbox"]):not([type="radio"]):not([type="file"]) {
+    font-size:20px !important;
+    min-height:56px;
+  }
+  .cockpit .filters label,
+  .cockpit .filter label {
+    font-size:15px !important;
+    line-height:1.35;
+    font-weight:800;
+  }
+  .cockpit .budgetViewTabs button,
+  .cockpit .periodTabs button,
+  .cockpit .scopeTabs button {
+    font-size:18px !important;
+    font-weight:750;
+    min-height:50px;
+  }
+}
+
+
+/* Actual mobile navigation menu selectors: make group headings and links
+   substantially larger; previous generic selectors did not reach these elements. */
+@media (max-width:650px) {
+  .cockpitMobileMenuButton {
+    font-size:20px !important;
+    font-weight:800 !important;
+    min-height:60px;
+    padding:14px 16px !important;
+  }
+  .cockpitMobileMenu .cockpitNavGroupHeader {
+    font-size:19px !important;
+    line-height:1.35 !important;
+    font-weight:850 !important;
+    min-height:62px !important;
+    padding:18px 16px !important;
+    letter-spacing:.055em;
+  }
+  .cockpitMobileMenu .cockpitNavGroupLinks a {
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    min-height:64px !important;
+    padding:16px 12px !important;
+    font-size:20px !important;
+    line-height:1.35 !important;
+    font-weight:750 !important;
+    text-align:center;
+  }
+  .cockpitMobileMenu .cockpitNavGroupLinks {
+    gap:8px !important;
+    padding:10px 8px !important;
+  }
+  .cockpitMobileMenu .cockpitNavGroup {
+    margin-bottom:10px !important;
+  }
+  .mobileFilterSummaryText,
+  .mobileFilterSummaryAction {
+    font-size:16px !important;
+    line-height:1.4;
+  }
+}
+
+
+/* Variant-wise Retail: stronger, consistent grid lines for easier scanning. */
+.variantRetailPage .variantModelMatrix {
+  border:1px solid var(--border,#c6d0da);
+  border-radius:10px;
+  overflow-x:auto;
+  overflow-y:hidden;
+}
+.variantRetailPage .variantMatrixHeader,
+.variantRetailPage .variantMatrixRow {
+  border-bottom:1.5px solid #8c9aa8;
+}
+.variantRetailPage .variantMatrixHeader > span,
+.variantRetailPage .variantMatrixRow > span {
+  border-right:1.5px solid #718091;
+}
+.variantRetailPage .variantMatrixHeader > span:last-child,
+.variantRetailPage .variantMatrixRow > span:last-child {
+  border-right:0;
+}
+.variantRetailPage .variantMatrixRow > span:first-child,
+.variantRetailPage .variantMatrixHeader > span:first-child {
+  border-right:2px solid #718091;
+}
+.variantRetailPage .variantMatrixRow:last-child {
+  border-bottom:0;
+}
+html[data-theme="dark"] .variantRetailPage .variantModelMatrix {
+  border-color:#536171;
+}
+html[data-theme="dark"] .variantRetailPage .variantMatrixHeader,
+html[data-theme="dark"] .variantRetailPage .variantMatrixRow {
+  border-bottom-color:#596777;
+}
+html[data-theme="dark"] .variantRetailPage .variantMatrixHeader > span,
+html[data-theme="dark"] .variantRetailPage .variantMatrixRow > span {
+  border-right-color:#465565;
+}
+html[data-theme="dark"] .variantRetailPage .variantMatrixRow > span:first-child,
+html[data-theme="dark"] .variantRetailPage .variantMatrixHeader > span:first-child {
+  border-right:2px solid #667789;
+}
+html[data-theme="light"] .variantRetailPage .variantModelMatrix {
+  border-color:#aebbc8;
+}
+html[data-theme="light"] .variantRetailPage .variantMatrixHeader,
+html[data-theme="light"] .variantRetailPage .variantMatrixRow {
+  border-bottom-color:#c0ccd7;
+}
+html[data-theme="light"] .variantRetailPage .variantMatrixHeader > span,
+html[data-theme="light"] .variantRetailPage .variantMatrixRow > span {
+  border-right-color:#d0d9e2;
+}
+html[data-theme="light"] .variantRetailPage .variantMatrixRow > span:first-child,
+html[data-theme="light"] .variantRetailPage .variantMatrixHeader > span:first-child {
+  border-right:2px solid #aebbc8;
+}
+@media (max-width:650px) {
+  .variantRetailPage .variantModelGroup {
+    border:1.5px solid #647283;
+  }
+  .variantRetailPage .variantMatrixHeader,
+  .variantRetailPage .variantMatrixRow {
+    border-bottom-width:1.5px;
+  }
+  .variantRetailPage .variantMatrixHeader > span,
+  .variantRetailPage .variantMatrixRow > span {
+    border-right-width:1.5px;
+  }
+}
+
+
+/* Keep long variant names fully inside the frozen first grid column. */
+.variantRetailPage .variantMatrixHeader,
+.variantRetailPage .variantMatrixRow {
+  box-sizing:border-box;
+  min-width:0;
+}
+.variantRetailPage .variantMatrixHeader > span,
+.variantRetailPage .variantMatrixRow > span {
+  box-sizing:border-box;
+  min-width:0;
+}
+.variantRetailPage .variantMatrixVariant {
+  display:block;
+  width:100%;
+  min-width:0;
+  max-width:100%;
+  white-space:normal !important;
+  overflow-wrap:anywhere;
+  word-break:normal;
+  hyphens:auto;
+  line-height:1.28;
+  padding-right:6px;
+}
+@media (max-width:650px) {
+  .variantRetailPage .variantMatrixHeader > span:first-child,
+  .variantRetailPage .variantMatrixRow > span:first-child {
+    min-width:0;
+    max-width:100%;
+    overflow:hidden;
+  }
+  .variantRetailPage .variantMatrixVariant {
+    font-size:17px !important;
+    overflow-wrap:anywhere;
+    line-height:1.28;
+  }
+}
+
+
+/* Variant-wise Retail: wider identity column with a more compact label size. */
+@media (max-width:650px) {
+  .variantRetailPage .variantMatrixHeader,
+  .variantRetailPage .variantMatrixRow {
+    min-width:720px;
+  }
+  .variantRetailPage .variantMatrixHeader > span:first-child,
+  .variantRetailPage .variantMatrixRow > span:first-child {
+    width:auto;
+    min-width:0;
+  }
+  .variantRetailPage .variantMatrixVariant {
+    font-size:15px !important;
+    line-height:1.3;
+    padding-right:8px;
+    overflow-wrap:break-word;
+  }
+}
+
+
+/* Global typography preference: no bold text anywhere in the cockpit.
+   Preserve each component's existing font size, colour, spacing and layout. */
+html body *,
+html body *::before,
+html body *::after {
+  font-weight:400 !important;
+}
+
+
+/* Variant-wise Retail: colourful variant labels, neutral card surfaces.
+   Keep the GST badge teal; use the rotating palette only for variant text/accent. */
+.variantRetailPage .variantModelGroup,
+.variantRetailPage .variantModelGroup .variantModelHeader,
+.variantRetailPage .variantModelGroup .variantMatrixHeader,
+.variantRetailPage .variantModelGroup .variantMatrixRow,
+.variantRetailPage .variantModelGroup .variantMatrixRow > span {
+  background-color:var(--panel,#1d2934) !important;
+}
+.variantRetailPage .variantModelGroup .variantMatrixRow:nth-child(4n+1) {
+  border-left:4px solid #39b7ae;
+}
+.variantRetailPage .variantModelGroup .variantMatrixRow:nth-child(4n+1) .variantMatrixVariant {
+  color:#65d4ca !important;
+}
+.variantRetailPage .variantModelGroup .variantMatrixRow:nth-child(4n+2) {
+  border-left:4px solid #a78bfa;
+}
+.variantRetailPage .variantModelGroup .variantMatrixRow:nth-child(4n+2) .variantMatrixVariant {
+  color:#c4b5fd !important;
+}
+.variantRetailPage .variantModelGroup .variantMatrixRow:nth-child(4n+3) {
+  border-left:4px solid #67c58a;
+}
+.variantRetailPage .variantModelGroup .variantMatrixRow:nth-child(4n+3) .variantMatrixVariant {
+  color:#86dba2 !important;
+}
+.variantRetailPage .variantModelGroup .variantMatrixRow:nth-child(4n) {
+  border-left:4px solid #f0ad65;
+}
+.variantRetailPage .variantModelGroup .variantMatrixRow:nth-child(4n) .variantMatrixVariant {
+  color:#f5bd7b !important;
+}
+html[data-theme="light"] .variantRetailPage .variantModelGroup,
+html[data-theme="light"] .variantRetailPage .variantModelGroup .variantModelHeader,
+html[data-theme="light"] .variantRetailPage .variantModelGroup .variantMatrixHeader,
+html[data-theme="light"] .variantRetailPage .variantModelGroup .variantMatrixRow,
+html[data-theme="light"] .variantRetailPage .variantModelGroup .variantMatrixRow > span {
+  background-color:#f4f7fa !important;
+}
+
+
+/* Final Variant-wise Retail colour treatment: monochrome surfaces only.
+   Use colour for the variant name and slim left accent, never the card fill. */
+.variantRetailPage .variantModelGroup,
+.variantRetailPage .variantModelGroup .variantModelHeader,
+.variantRetailPage .variantModelGroup .variantMatrixHeader,
+.variantRetailPage .variantModelGroup .variantMatrixRow,
+.variantRetailPage .variantModelGroup .variantMatrixRow > span,
+.variantRetailPage .variantModelGroup .variantMatrixRow:nth-child(4n+1),
+.variantRetailPage .variantModelGroup .variantMatrixRow:nth-child(4n+2),
+.variantRetailPage .variantModelGroup .variantMatrixRow:nth-child(4n+3),
+.variantRetailPage .variantModelGroup .variantMatrixRow:nth-child(4n) {
+  background:#111820 !important;
+  background-image:none !important;
+}
+.variantRetailPage .variantModelGroup .variantMatrixRow:nth-child(4n+1) .variantMatrixVariant { color:#62d4c8 !important; }
+.variantRetailPage .variantModelGroup .variantMatrixRow:nth-child(4n+2) .variantMatrixVariant { color:#b9a3ff !important; }
+.variantRetailPage .variantModelGroup .variantMatrixRow:nth-child(4n+3) .variantMatrixVariant { color:#80dba0 !important; }
+.variantRetailPage .variantModelGroup .variantMatrixRow:nth-child(4n) .variantMatrixVariant { color:#f4bd79 !important; }
+.variantRetailPage .variantModelGroup .variantMatrixRow:nth-child(4n+1) { border-left:4px solid #39b7ae !important; }
+.variantRetailPage .variantModelGroup .variantMatrixRow:nth-child(4n+2) { border-left:4px solid #a78bfa !important; }
+.variantRetailPage .variantModelGroup .variantMatrixRow:nth-child(4n+3) { border-left:4px solid #67c58a !important; }
+.variantRetailPage .variantModelGroup .variantMatrixRow:nth-child(4n) { border-left:4px solid #f0ad65 !important; }
+.variantRetailPage .variantModelGroup .variantMatrixRow .variantMatrixVariant {
+  background:transparent !important;
+}
+html[data-theme="light"] .variantRetailPage .variantModelGroup,
+html[data-theme="light"] .variantRetailPage .variantModelGroup .variantModelHeader,
+html[data-theme="light"] .variantRetailPage .variantModelGroup .variantMatrixHeader,
+html[data-theme="light"] .variantRetailPage .variantModelGroup .variantMatrixRow,
+html[data-theme="light"] .variantRetailPage .variantModelGroup .variantMatrixRow > span,
+html[data-theme="light"] .variantRetailPage .variantModelGroup .variantMatrixRow:nth-child(n) {
+  background:#ffffff !important;
+  background-image:none !important;
+}
+html[data-theme="light"] .variantRetailPage .variantModelGroup .variantMatrixRow:nth-child(4n+1) .variantMatrixVariant { color:#087f78 !important; }
+html[data-theme="light"] .variantRetailPage .variantModelGroup .variantMatrixRow:nth-child(4n+2) .variantMatrixVariant { color:#6841c8 !important; }
+html[data-theme="light"] .variantRetailPage .variantModelGroup .variantMatrixRow:nth-child(4n+3) .variantMatrixVariant { color:#187a3c !important; }
+html[data-theme="light"] .variantRetailPage .variantModelGroup .variantMatrixRow:nth-child(4n) .variantMatrixVariant { color:#a85b00 !important; }
+html[data-theme="light"] .variantRetailPage .variantModelGroup .variantMatrixRow:nth-child(4n+1) { border-left:4px solid #39b7ae !important; }
+html[data-theme="light"] .variantRetailPage .variantModelGroup .variantMatrixRow:nth-child(4n+2) { border-left:4px solid #a78bfa !important; }
+html[data-theme="light"] .variantRetailPage .variantModelGroup .variantMatrixRow:nth-child(4n+3) { border-left:4px solid #67c58a !important; }
+html[data-theme="light"] .variantRetailPage .variantModelGroup .variantMatrixRow:nth-child(4n) { border-left:4px solid #f0ad65 !important; }
+
+
+/* PRICES PAGE ONLY: neutralize colourful price-card fills.
+   Variant-wise Retail colour styling must remain scoped to its own page. */
+.pricesPage .priceCard,
+.pricesPage .priceVariantCard,
+.pricesPage .priceListCard,
+.pricesPage .variantCard,
+.pricesPage .priceCardHeader,
+.pricesPage .priceCardDetails,
+.pricesPage .priceCardBody {
+  background:#111820 !important;
+  background-image:none !important;
+}
+html[data-theme="light"] .pricesPage .priceCard,
+html[data-theme="light"] .pricesPage .priceVariantCard,
+html[data-theme="light"] .pricesPage .priceListCard,
+html[data-theme="light"] .pricesPage .variantCard,
+html[data-theme="light"] .pricesPage .priceCardHeader,
+html[data-theme="light"] .pricesPage .priceCardDetails,
+html[data-theme="light"] .pricesPage .priceCardBody {
+  background:#ffffff !important;
+  background-image:none !important;
+}
+
+
+/* Actual mobile Prices page card classes: neutral backgrounds, coloured text only. */
+.pricesPage .pricesMobileVariantCard,
+.pricesPage .pricesMobileVariantTop,
+.pricesPage .pricesMobileVariantDetails,
+.pricesPage .pricesMobileDetail {
+  background:#111820 !important;
+  background-image:none !important;
+}
+.pricesPage .pricesMobileVariantCard:nth-child(4n+1),
+.pricesPage .pricesMobileVariantCard:nth-child(4n+2),
+.pricesPage .pricesMobileVariantCard:nth-child(4n+3),
+.pricesPage .pricesMobileVariantCard:nth-child(4n) {
+  background:#111820 !important;
+  background-image:none !important;
+}
+.pricesPage .pricesMobileVariantTop,
+.pricesPage .pricesMobileVariantDetails,
+.pricesPage .pricesMobileDetail {
+  background:transparent !important;
+}
+html[data-theme="light"] .pricesPage .pricesMobileVariantCard,
+html[data-theme="light"] .pricesPage .pricesMobileVariantTop,
+html[data-theme="light"] .pricesPage .pricesMobileVariantDetails,
+html[data-theme="light"] .pricesPage .pricesMobileDetail {
+  background:#ffffff !important;
+  background-image:none !important;
+}
