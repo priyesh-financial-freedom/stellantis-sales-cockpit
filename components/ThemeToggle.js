@@ -33,7 +33,7 @@ export default function ThemeToggle() {
   return (
     <button
       type="button"
-      className="themeToggle"
+      className="themeToggle cockpitMenuThemeToggle"
       onClick={toggleTheme}
       aria-label={dark ? "Switch to light mode" : "Switch to dark mode"}
       title={dark ? "Switch to light mode" : "Switch to dark mode"}
