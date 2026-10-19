@@ -5466,3 +5466,45 @@ html body *::before,
 html body *::after {
   font-weight:400 !important;
 }
+
+
+/* Variant-wise Retail: colourful variant labels, neutral card surfaces.
+   Keep the GST badge teal; use the rotating palette only for variant text/accent. */
+.variantRetailPage .variantModelGroup,
+.variantRetailPage .variantModelGroup .variantModelHeader,
+.variantRetailPage .variantModelGroup .variantMatrixHeader,
+.variantRetailPage .variantModelGroup .variantMatrixRow,
+.variantRetailPage .variantModelGroup .variantMatrixRow > span {
+  background-color:var(--panel,#1d2934) !important;
+}
+.variantRetailPage .variantModelGroup .variantMatrixRow:nth-child(4n+1) {
+  border-left:4px solid #39b7ae;
+}
+.variantRetailPage .variantModelGroup .variantMatrixRow:nth-child(4n+1) .variantMatrixVariant {
+  color:#65d4ca !important;
+}
+.variantRetailPage .variantModelGroup .variantMatrixRow:nth-child(4n+2) {
+  border-left:4px solid #a78bfa;
+}
+.variantRetailPage .variantModelGroup .variantMatrixRow:nth-child(4n+2) .variantMatrixVariant {
+  color:#c4b5fd !important;
+}
+.variantRetailPage .variantModelGroup .variantMatrixRow:nth-child(4n+3) {
+  border-left:4px solid #67c58a;
+}
+.variantRetailPage .variantModelGroup .variantMatrixRow:nth-child(4n+3) .variantMatrixVariant {
+  color:#86dba2 !important;
+}
+.variantRetailPage .variantModelGroup .variantMatrixRow:nth-child(4n) {
+  border-left:4px solid #f0ad65;
+}
+.variantRetailPage .variantModelGroup .variantMatrixRow:nth-child(4n) .variantMatrixVariant {
+  color:#f5bd7b !important;
+}
+html[data-theme="light"] .variantRetailPage .variantModelGroup,
+html[data-theme="light"] .variantRetailPage .variantModelGroup .variantModelHeader,
+html[data-theme="light"] .variantRetailPage .variantModelGroup .variantMatrixHeader,
+html[data-theme="light"] .variantRetailPage .variantModelGroup .variantMatrixRow,
+html[data-theme="light"] .variantRetailPage .variantModelGroup .variantMatrixRow > span {
+  background-color:#f4f7fa !important;
+}
