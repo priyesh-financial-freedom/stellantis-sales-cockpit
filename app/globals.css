@@ -5328,3 +5328,74 @@ html[data-theme="light"] .periodMatrixModel.periodMatrixSticky {
     line-height:1.4;
   }
 }
+
+
+/* Variant-wise Retail: stronger, consistent grid lines for easier scanning. */
+.variantRetailPage .variantModelMatrix {
+  border:1px solid var(--border,#c6d0da);
+  border-radius:10px;
+  overflow-x:auto;
+  overflow-y:hidden;
+}
+.variantRetailPage .variantMatrixHeader,
+.variantRetailPage .variantMatrixRow {
+  border-bottom:1.5px solid #8c9aa8;
+}
+.variantRetailPage .variantMatrixHeader > span,
+.variantRetailPage .variantMatrixRow > span {
+  border-right:1.5px solid #718091;
+}
+.variantRetailPage .variantMatrixHeader > span:last-child,
+.variantRetailPage .variantMatrixRow > span:last-child {
+  border-right:0;
+}
+.variantRetailPage .variantMatrixRow > span:first-child,
+.variantRetailPage .variantMatrixHeader > span:first-child {
+  border-right:2px solid #718091;
+}
+.variantRetailPage .variantMatrixRow:last-child {
+  border-bottom:0;
+}
+html[data-theme="dark"] .variantRetailPage .variantModelMatrix {
+  border-color:#536171;
+}
+html[data-theme="dark"] .variantRetailPage .variantMatrixHeader,
+html[data-theme="dark"] .variantRetailPage .variantMatrixRow {
+  border-bottom-color:#596777;
+}
+html[data-theme="dark"] .variantRetailPage .variantMatrixHeader > span,
+html[data-theme="dark"] .variantRetailPage .variantMatrixRow > span {
+  border-right-color:#465565;
+}
+html[data-theme="dark"] .variantRetailPage .variantMatrixRow > span:first-child,
+html[data-theme="dark"] .variantRetailPage .variantMatrixHeader > span:first-child {
+  border-right:2px solid #667789;
+}
+html[data-theme="light"] .variantRetailPage .variantModelMatrix {
+  border-color:#aebbc8;
+}
+html[data-theme="light"] .variantRetailPage .variantMatrixHeader,
+html[data-theme="light"] .variantRetailPage .variantMatrixRow {
+  border-bottom-color:#c0ccd7;
+}
+html[data-theme="light"] .variantRetailPage .variantMatrixHeader > span,
+html[data-theme="light"] .variantRetailPage .variantMatrixRow > span {
+  border-right-color:#d0d9e2;
+}
+html[data-theme="light"] .variantRetailPage .variantMatrixRow > span:first-child,
+html[data-theme="light"] .variantRetailPage .variantMatrixHeader > span:first-child {
+  border-right:2px solid #aebbc8;
+}
+@media (max-width:650px) {
+  .variantRetailPage .variantModelGroup {
+    border:1.5px solid #647283;
+  }
+  .variantRetailPage .variantMatrixHeader,
+  .variantRetailPage .variantMatrixRow {
+    border-bottom-width:1.5px;
+  }
+  .variantRetailPage .variantMatrixHeader > span,
+  .variantRetailPage .variantMatrixRow > span {
+    border-right-width:1.5px;
+  }
+}
