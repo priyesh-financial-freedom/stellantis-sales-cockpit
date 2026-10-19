@@ -172,6 +172,31 @@ export default function ModelWiseClient({ brand }) {
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState("");
   const [cachedAt, setCachedAt] = useState(null);
+  const [filtersOpen, setFiltersOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+  const [draft, setDraft] = useState(null);
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 180);
+    onScroll(); window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+  function openFilters() {
+    setDraft({period,periodValue:[...periodValue],year:[...year],salesType:[...salesType],selectedModels:[...selectedModels],customFrom,customTo});
+    setFiltersOpen(true);
+  }
+  function applyFilters() {
+    if (!draft) return;
+    setPeriod(draft.period); setPeriodValue(draft.periodValue); setYear(draft.year);
+    setSalesType(draft.salesType); setSelectedModels(draft.selectedModels);
+    setCustomFrom(draft.customFrom); setCustomTo(draft.customTo); setFiltersOpen(false);
+  }
+  const filterSummary = [period,
+    period === "Custom Period" ? customFrom + "–" + customTo :
+    (periodValue.length === 0 || periodValue.includes("All") ? (period === "Monthly" ? "All months" : period === "Quarterly" ? "All quarters" : period === "Half-Yearly" ? "Both halves" : "All periods") : periodValue.join(", ")),
+    year.length === 0 ? "All years" : year.join(", "),
+    salesType.length === 0 ? "All sales types" : salesType.join(", "),
+    selectedModels.length === 0 ? "All models" : (selectedModels.length === 1 ? selectedModels[0] : selectedModels.length + " selected")
+  ].join(" · ");
 
   useEffect(() => {
     let active = true;
@@ -408,7 +433,10 @@ export default function ModelWiseClient({ brand }) {
       </header>
 
       <CockpitNavigation active={brand === "Jeep" ? "/model-wise/jeep" : "/model-wise/citroen"} />
-
+      <div className={"mobileStickyCockpitBar" + (scrolled ? " isVisible" : "")}>
+        <strong>{brand} Model Wise</strong><button type="button" onClick={openFilters} aria-label="Open sales filters"><span>{period} · {year.length === 0 ? "All years" : year.join(", ")} · {salesType.length === 0 ? "All sales types" : salesType.join(", ")}</span><span aria-hidden="true">☷</span></button>
+      </div>
+      <button type="button" className="mobileFilterSummary" onClick={openFilters}><span className="mobileFilterSummaryText">{filterSummary}</span><span className="mobileFilterSummaryAction">☷ Filters</span></button>
       <section className="filters modelFilters">
         <div className="filter">
           <label>Period</label>
@@ -444,6 +472,22 @@ export default function ModelWiseClient({ brand }) {
         </div>
       </section>
 
+      {filtersOpen && draft && (
+        <div className="mobileFilterBackdrop" role="presentation" onClick={event => { if (event.target === event.currentTarget) setFiltersOpen(false); }}>
+          <section className="mobileFilterSheet" role="dialog" aria-modal="true" aria-labelledby="mobile-filter-title">
+            <div className="mobileFilterSheetHandle" />
+            <div className="mobileFilterSheetHeading"><div><div className="eyebrow">SALES COCKPIT</div><h2 id="mobile-filter-title">Filters</h2></div><button type="button" className="mobileFilterClose" onClick={() => setFiltersOpen(false)} aria-label="Close filters">×</button></div>
+            <div className="mobileFilterSheetBody">
+              <div className="filter"><label>Period</label><select value={draft.period} onChange={e => setDraft(d => ({...d,period:e.target.value,periodValue:["All"]}))}>{PERIODS.map(item=><option key={item}>{item}</option>)}</select></div>
+              <div className="filter">{draft.period === "Custom Period" ? <div className="customDates"><input aria-label="Start date" type="date" value={draft.customFrom} onChange={e=>setDraft(d=>({...d,customFrom:e.target.value}))}/><input aria-label="End date" type="date" value={draft.customTo} onChange={e=>setDraft(d=>({...d,customTo:e.target.value}))}/></div> : <MultiSelect label={draft.period==="Monthly"?"Month":draft.period==="Quarterly"?"Quarter":draft.period==="Half-Yearly"?"Half-Year":"Period"} options={draft.period==="Monthly"?MONTH_OPTIONS:draft.period==="Quarterly"?QUARTER_OPTIONS:draft.period==="Half-Yearly"?HALF_YEAR_OPTIONS:["All"]} value={draft.periodValue} onChange={v=>setDraft(d=>({...d,periodValue:v}))}/>}</div>
+              <div className="filter"><MultiSelect label="Year" options={MODEL_YEARS.map(String)} value={draft.year} onChange={v=>setDraft(d=>({...d,year:v}))}/></div>
+              <div className="filter"><MultiSelect label="Sales Type" options={SALES_TYPES} value={draft.salesType} onChange={v=>setDraft(d=>({...d,salesType:v}))}/></div>
+              <div className="filter"><MultiSelect label="Model" options={allModels} value={draft.selectedModels} onChange={v=>setDraft(d=>({...d,selectedModels:v}))}/></div>
+            </div>
+            <div className="mobileFilterSheetActions"><button type="button" className="mobileFilterCancel" onClick={()=>setFiltersOpen(false)}>Cancel</button><button type="button" className="mobileFilterApply" onClick={applyFilters}>Apply filters</button></div>
+          </section>
+        </div>
+      )}
       {bookingsOnly ? (
         <section className="summary">
           <div className="sectionHeading">
