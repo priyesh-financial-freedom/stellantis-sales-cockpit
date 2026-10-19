@@ -4692,3 +4692,57 @@ html[data-theme="light"] .periodMatrixModel.periodMatrixSticky {
     color: #f2f6fa;
   }
 }
+
+
+/* Hard reset the legacy stacked-card display rules for the comparison table. */
+@media (max-width: 600px) {
+  .pricesPage .pricesPrimaryTableScroll { display:block !important; }
+  .pricesPage table.pricesPrimaryTable { display:table !important; width:max-content !important; min-width:100% !important; }
+  .pricesPage table.pricesPrimaryTable thead { display:table-header-group !important; }
+  .pricesPage table.pricesPrimaryTable tbody { display:table-row-group !important; padding:0 !important; }
+  .pricesPage table.pricesPrimaryTable tbody tr {
+    display:table-row !important;
+    grid-template-columns:none !important;
+    gap:0 !important;
+    padding:0 !important;
+    border:0 !important;
+    border-radius:0 !important;
+  }
+  .pricesPage table.pricesPrimaryTable th,
+  .pricesPage table.pricesPrimaryTable td {
+    display:table-cell !important;
+    flex-direction:initial !important;
+    align-items:initial !important;
+    gap:0 !important;
+    max-width:none !important;
+    min-height:0 !important;
+    overflow-wrap:normal !important;
+    padding:13px 14px !important;
+    vertical-align:middle !important;
+    border-top:0 !important;
+    border-bottom:1px solid var(--border,#d7dfe8) !important;
+  }
+  .pricesPage table.pricesPrimaryTable td::before { display:none !important; content:none !important; }
+  .pricesPage table.pricesPrimaryTable td[data-label="Model"] {
+    position:sticky !important; left:0 !important; z-index:4 !important;
+    width:112px !important; min-width:112px !important; max-width:112px !important;
+    background:var(--card,#fff) !important; box-shadow:2px 0 0 var(--border,#d7dfe8) !important;
+  }
+  .pricesPage table.pricesPrimaryTable td[data-label="Description / Variant"] {
+    position:sticky !important; left:112px !important; z-index:3 !important;
+    width:190px !important; min-width:190px !important; max-width:190px !important;
+    white-space:normal !important; overflow-wrap:anywhere !important;
+    background:var(--card,#fff) !important; box-shadow:2px 0 0 var(--border,#d7dfe8) !important;
+  }
+  .pricesPage table.pricesPrimaryTable th:nth-child(1),
+  .pricesPage table.pricesPrimaryTable th:nth-child(2) {
+    position:sticky !important; top:0 !important; z-index:7 !important;
+    background:var(--table-header,#293543) !important;
+  }
+  .pricesPage table.pricesPrimaryTable th:nth-child(1) { left:0 !important; width:112px !important; min-width:112px !important; }
+  .pricesPage table.pricesPrimaryTable th:nth-child(2) { left:112px !important; width:190px !important; min-width:190px !important; }
+  html[data-theme="dark"] .pricesPage table.pricesPrimaryTable td[data-label="Model"],
+  html[data-theme="dark"] .pricesPage table.pricesPrimaryTable td[data-label="Description / Variant"] {
+    background:#1d2833 !important; color:#f2f6fa !important;
+  }
+}
