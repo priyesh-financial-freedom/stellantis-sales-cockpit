@@ -4503,3 +4503,90 @@ html[data-theme="light"] .periodMatrixModel.periodMatrixSticky {
   .variantRetailPage .variantMatrixNumber { font-size: 18px; }
   .variantRetailPage .variantMatrixMix { font-size: 14px; }
 }
+
+
+/* Compact mobile navigation and filter bottom sheet */
+.cockpitMobileMenuButton,.cockpitMobileMenu{display:none}
+.mobileFilterSummary,.mobileStickyCockpitBar{display:none}
+@media(max-width:650px){
+ .header{padding-top:12px;padding-bottom:12px;gap:8px;align-items:flex-start}
+ .header h1{font-size:clamp(30px,8vw,42px);line-height:1.05;margin:4px 0 8px}
+ .header .subtitle{font-size:16px;line-height:1.35;margin:6px 0}
+ .header .dataFreshness{display:inline-flex;align-items:center;gap:7px;margin-top:7px;font-size:12px}
+ .header .headerStatus{font-size:0;display:inline-flex;align-items:center;padding:0;border:0;background:transparent;min-width:0}
+ .header .headerStatus .statusDot{width:9px;height:9px;background:#28b765;box-shadow:0 0 0 3px rgb(40 183 101 / 15%)}
+ .cockpitNavGroups{margin:8px 0 12px;position:relative;z-index:30}
+ .cockpitDesktopNav{display:none}
+ .cockpitMobileMenuButton{display:flex;align-items:center;gap:9px;border:1px solid var(--border,#d0d7de);background:var(--surface,#fff);color:var(--text,#17212b);border-radius:12px;padding:10px 14px;font-size:14px;font-weight:700}
+ .cockpitMobileMenuButton span:first-child{font-size:20px;line-height:1}
+ .cockpitMobileMenu:not([hidden]){display:block;position:absolute;right:0;top:calc(100% + 8px);width:min(340px,calc(100vw - 32px));max-height:70vh;overflow:auto;padding:12px;border:1px solid var(--border,#d0d7de);border-radius:16px;background:var(--surface,#fff);box-shadow:0 18px 44px rgb(0 0 0 / 25%)}
+ .cockpitMobileMenu .cockpitNavGroup{margin:0 0 8px;border-radius:10px;overflow:hidden}
+ .cockpitMobileMenu .cockpitNavGroupHeader{min-height:48px;padding:12px;background:var(--table-header,#eef2f6);border-radius:10px}
+ .cockpitMobileMenu .cockpitNavGroupLinks{display:grid;gap:4px;padding:8px}
+ .cockpitMobileMenu .cockpitNavGroupLinks a{padding:10px;border-radius:8px}
+ .cockpitMenuTheme{padding-top:10px;border-top:1px solid var(--border,#d0d7de)}
+ .cockpitMenuTheme .themeToggle{position:static;box-shadow:none;width:100%;justify-content:center}
+ .mobileFilterSummary{display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%;min-height:54px;margin:0 0 14px;padding:12px 14px;text-align:left;border:1px solid var(--border,#d0d7de);border-radius:14px;background:var(--surface,#fff);color:var(--text,#17212b)}
+ .mobileFilterSummaryText{font-size:13px;font-weight:650;line-height:1.35;min-width:0;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+ .mobileFilterSummaryAction{white-space:nowrap;font-size:13px;font-weight:800;color:var(--accent,#287e8b)}
+ .modelFilters{display:none!important}
+ .mobileStickyCockpitBar{position:fixed;top:0;left:0;right:0;z-index:45;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:calc(env(safe-area-inset-top) + 8px) 14px 9px;background:var(--surface,#fff);border-bottom:1px solid var(--border,#d0d7de);box-shadow:0 5px 18px rgb(0 0 0 / 12%);transform:translateY(-120%);transition:transform .2s ease}
+ .mobileStickyCockpitBar.isVisible{transform:translateY(0)}
+ .mobileStickyCockpitBar strong{font-size:14px;white-space:nowrap}
+ .mobileStickyCockpitBar button{display:flex;align-items:center;gap:8px;min-width:0;max-width:66%;border:1px solid var(--border,#d0d7de);border-radius:9px;background:var(--table-header,#eef2f6);color:var(--text,#17212b);padding:8px 10px;font-size:12px}
+ .mobileStickyCockpitBar button span:first-child{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+ .mobileFilterBackdrop{position:fixed;inset:0;z-index:100;background:rgb(0 0 0 / 56%);display:flex;align-items:flex-end;justify-content:center}
+ .mobileFilterSheet{width:100%;max-height:min(88dvh,900px);overflow:hidden;display:flex;flex-direction:column;background:var(--surface,#fff);color:var(--text,#17212b);border-radius:22px 22px 0 0;padding:8px 18px calc(env(safe-area-inset-bottom) + 12px);box-shadow:0 -12px 40px rgb(0 0 0 / 25%)}
+ .mobileFilterSheetHandle{align-self:center;width:42px;height:5px;border-radius:9px;background:var(--muted,#9aa5b1);opacity:.65;margin:2px 0 14px}
+ .mobileFilterSheetHeading{display:flex;align-items:center;justify-content:space-between;padding-bottom:10px;border-bottom:1px solid var(--border,#d0d7de)}
+ .mobileFilterSheetHeading h2{font-size:25px;margin:2px 0}
+ .mobileFilterClose{width:40px;height:40px;border:0;border-radius:50%;background:var(--table-header,#eef2f6);color:var(--text,#17212b);font-size:27px}
+ .mobileFilterSheetBody{overflow-y:auto;padding:10px 0 18px;display:grid;gap:12px}
+ .mobileFilterSheetBody .filter{display:grid;gap:6px}
+ .mobileFilterSheetBody .filter>label,.mobileFilterSheetBody .filter label{font-size:12px}
+ .mobileFilterSheetBody select,.mobileFilterSheetBody input{min-height:48px}
+ .mobileFilterSheetActions{display:flex;gap:10px;padding-top:12px;border-top:1px solid var(--border,#d0d7de)}
+ .mobileFilterSheetActions button{min-height:48px;border-radius:12px;font-weight:750;flex:1}
+ .mobileFilterCancel{border:1px solid var(--border,#d0d7de);background:transparent;color:var(--text,#17212b)}
+ .mobileFilterApply{border:1px solid #247985;background:#247985;color:white}
+ html[data-theme="dark"] .mobileFilterSheet{background:#17212b;color:#edf3f8}
+ html[data-theme="dark"] .mobileFilterSummary,html[data-theme="dark"] .cockpitMobileMenuButton{background:#1b2632;color:#edf3f8;border-color:#3c4855}
+ html[data-theme="dark"] .cockpitMobileMenu:not([hidden]){background:#1b2632;border-color:#3c4855}
+}
+
+@media(max-width:650px){
+ .header .headerStatus{display:none!important}
+ .header .dataFreshness{display:inline-flex;align-items:center;gap:7px}
+ .freshnessStatusDot{display:inline-block;width:8px;height:8px;flex:0 0 8px;border-radius:50%;background:#28b765;box-shadow:0 0 0 3px rgb(40 183 101 / 15%)}
+ .freshnessStatusDot.isRefreshing{background:#d99a27;box-shadow:0 0 0 3px rgb(217 154 39 / 15%)}
+}
+
+
+/* Match annual model cards to the more compact typography of the monthly matrix. */
+@media (max-width: 650px) {
+  .modelTableRow {
+    min-height: 0;
+    padding: 16px 16px;
+    gap: 8px 14px;
+  }
+  .modelTableRow .scopeName {
+    font-size: 19px;
+    line-height: 1.2;
+  }
+  .modelTableRow > div:nth-child(2) {
+    font-size: 21px;
+    line-height: 1.2;
+    font-weight: 750;
+  }
+  .modelTableRow > div:nth-child(3) {
+    font-size: 17px;
+    line-height: 1.25;
+  }
+  .modelTableRow .statusText {
+    font-size: 14px;
+    line-height: 1.25;
+  }
+  .modelTotalRow {
+    min-height: 0;
+  }
+}
