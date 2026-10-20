@@ -5665,3 +5665,87 @@ html[data-theme="light"] .pricesPage .pricesMobileDetail {
   .themeModeOptions { gap: 6px; }
   .themeModeOption { flex-direction: column; gap: 4px; min-height: 58px; padding: 8px 4px; font-size: 14px; }
 }
+
+
+/* iPad/tablet Prices layout: use the available width without changing the phone layout. */
+@media (min-width: 761px) and (max-width: 1100px) {
+  .pricesPage .pricesFilters {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px 18px;
+    padding: 20px;
+  }
+  .pricesPage .pricesFilters label,
+  .pricesPage .pricesBrandSelect {
+    min-width: 0;
+  }
+  .pricesPage .pricesDateControl {
+    min-width: 0;
+    width: 100%;
+  }
+  .pricesPage .pricesDateControl > input[type="text"] {
+    min-width: 0;
+    flex: 1 1 0;
+    width: 0;
+  }
+  .pricesPage .pricesCalendarPicker {
+    flex: 0 0 46px;
+    height: 46px;
+  }
+  .pricesPage .pricesFilters input,
+  .pricesPage .pricesFilters select,
+  .pricesPage .pricesBrandSelect select {
+    min-width: 0;
+    width: 100%;
+    min-height: 48px;
+    font-size: 16px;
+  }
+  .pricesPage .pricesTableScroll {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  .pricesPage .pricesTable {
+    width: 100%;
+    min-width: 760px;
+    table-layout: auto;
+    font-size: 14px;
+  }
+  .pricesPage .pricesTable th,
+  .pricesPage .pricesTable td {
+    padding: 13px 14px;
+    white-space: nowrap;
+  }
+  .pricesPage .pricesTable th:nth-child(2),
+  .pricesPage .pricesTable td:nth-child(2) {
+    min-width: 240px;
+    white-space: normal;
+  }
+  .pricesPage .pricesSectionHeading {
+    padding: 20px 22px;
+  }
+  .pricesPage .pricesFieldPicker {
+    padding: 0 20px 16px;
+  }
+  .pricesPage .pricesFieldPickerButton {
+    min-height: 52px;
+    font-size: 16px;
+    padding: 13px 16px;
+  }
+  .pricesPage .pricesMobileGroups {
+    display: none !important;
+  }
+  .pricesPage .pricesDesktopComparison {
+    display: block !important;
+  }
+  .pricesPage .pricesHeaderActions {
+    gap: 12px;
+  }
+  .pricesPage .pricesHeaderActions .primaryButton {
+    min-height: 46px;
+    white-space: nowrap;
+  }
+  .pricesPage .cockpitMobileMenuButton {
+    min-height: 50px;
+  }
+}
