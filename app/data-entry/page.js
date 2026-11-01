@@ -12,7 +12,7 @@ import CockpitNavigation from "../../components/CockpitNavigation";
 const BRANDS = ["Jeep", "Citroën", "SAARC"];
 const MODEL_BRANDS = ["Jeep", "Citroën"];
 const SALES_TYPES = ["All", "Bookings", "Retail", "Wholesale"];
-const DATASETS = ["Model Monthly", "Industry History", "Manufacturer History"];
+const DATASETS = ["Model Monthly", "SAARC Monthly", "Industry History", "Manufacturer History"];
 
 function csvEscape(value) {
   const text = value === null || value === undefined ? "" : String(value);
@@ -38,6 +38,14 @@ function downloadCsv(filename, csv) {
 
 
 const TEMPLATE_SCHEMAS = {
+  "SAARC Monthly": {
+    filename: "template-saarc-monthly.csv",
+    columns: [
+      { key: "sales_year", label: "sales_year" }, { key: "sales_month", label: "sales_month" },
+      { key: "retail", label: "retail" }, { key: "wholesale", label: "wholesale" },
+    ],
+    sample: { sales_year: 2026, sales_month: 10, retail: 100, wholesale: 120 },
+  },
   "Daily Sales": {
     filename: "template-daily-sales.csv",
     columns: [
@@ -312,6 +320,8 @@ export default function DataEntryPage() {
   const [bookings, setBookings] = useState("");
   const [retail, setRetail] = useState("");
   const [wholesale, setWholesale] = useState("");
+  const [saarcYear, setSaarcYear] = useState("2026");
+  const [saarcMonth, setSaarcMonth] = useState("Oct");
   const [model, setModel] = useState(MODEL_NAMES.Jeep[0]);
   const [year, setYear] = useState("2026");
   const [month, setMonth] = useState("Oct");
@@ -348,6 +358,13 @@ export default function DataEntryPage() {
 
   async function loadRecent() {
     if (exportOnly) { setRecent([]); return; }
+    if (dataset === "SAARC Monthly") {
+      const result = await supabase.from("sales_cockpit_daily")
+        .select("sales_date,retail,wholesale").eq("brand", "SAARC")
+        .order("sales_date", { ascending: false }).limit(12);
+      if (!result.error) setRecent(result.data || []);
+      return;
+    }
     if (dataset === "Daily Sales") {
       const result = await supabase.from("sales_cockpit_daily")
         .select("brand,sales_date,test_drives,bookings,retail,wholesale")
@@ -368,7 +385,23 @@ export default function DataEntryPage() {
     try {
       if (dataset === "Retail Sales" || dataset === "Daily Sales") throw new Error("Daily Sales entry has been retired. Use Model Monthly for Bookings, Retail and Wholesale.");
       setSaving(true); setError(""); setMessage("");
-      if (dataset === "Daily Sales") {
+      if (dataset === "SAARC Monthly") {
+        const salesMonth = MODEL_PERIODS.indexOf(saarcMonth) + 1;
+        const salesDate = `${saarcYear}-${String(salesMonth).padStart(2, "0")}-01`;
+        const numericRetail = numberOrNull(retail);
+        const numericWholesale = numberOrNull(wholesale);
+        if (!salesMonth || numericRetail === null || numericWholesale === null) throw new Error("Enter valid Retail and Wholesale units for the selected month.");
+        const payload = { brand: "SAARC", sales_date: salesDate, test_drives: null, bookings: null, retail: numericRetail, wholesale: numericWholesale };
+        const monthStart = `${saarcYear}-${String(salesMonth).padStart(2, "0")}-01`;
+        const nextMonthDate = new Date(Number(saarcYear), salesMonth, 1);
+        const monthEnd = `${nextMonthDate.getFullYear()}-${String(nextMonthDate.getMonth() + 1).padStart(2, "0")}-01`;
+        const removed = await supabase.from("sales_cockpit_daily").delete()
+          .eq("brand", "SAARC").gte("sales_date", monthStart).lt("sales_date", monthEnd);
+        if (removed.error) throw removed.error;
+        const result = await supabase.from("sales_cockpit_daily").insert(payload);
+        if (result.error) throw result.error;
+        setMessage(`SAARC ${saarcMonth} ${saarcYear} figures replaced successfully.`);
+      } else if (dataset === "Daily Sales") {
         if (!date) throw new Error("Please select a date.");
         const payload = { brand, sales_date: date, test_drives: numberOrNull(testDrives), bookings: numberOrNull(bookings), retail: numberOrNull(retail), wholesale: numberOrNull(wholesale) };
         if (!Object.values(payload).slice(2).some((value) => value !== null)) throw new Error("Enter at least one sales metric.");
@@ -403,7 +436,8 @@ export default function DataEntryPage() {
         }
       }
       if (dataset === "Model Monthly") clearClientCache(MODEL_CACHE_KEY);
-      setMessage("Model monthly record saved.");
+      if (dataset === "SAARC Monthly") clearClientCache("saarc-sales-performance-v2");
+      if (dataset === "Model Monthly") setMessage("Model monthly record saved.");
       await loadRecent();
     } catch (err) {
       setError(err.message || "Unable to save data.");
@@ -422,6 +456,22 @@ export default function DataEntryPage() {
     const brandLabel = selectedBrands.length === 1 ? selectedBrands[0] : "multi";
     const startDate = Math.min(...yearList) + "-01-01";
     const endDate = Math.max(...yearList) + "-12-31";
+
+    if (dataset === "SAARC Monthly") {
+      const result = await supabase.from("sales_cockpit_daily").select("sales_date,retail,wholesale")
+        .eq("brand", "SAARC").gte("sales_date", startDate).lte("sales_date", endDate).order("sales_date");
+      if (result.error) throw result.error;
+      return {
+        filename: "saarc-monthly-sales-" + yearLabel,
+        title: "Stellantis India — SAARC Monthly Sales",
+        subtitle: "Years: " + yearLabel + " · Consolidated SAARC Retail and Wholesale",
+        rows: (result.data || []).map(row => ({ sales_year: Number(row.sales_date.slice(0, 4)), sales_month: Number(row.sales_date.slice(5, 7)), retail: row.retail ?? "", wholesale: row.wholesale ?? "" })),
+        columns: [
+          { key: "sales_year", label: "Year" }, { key: "sales_month", label: "Month (1–12)" },
+          { key: "retail", label: "Retail" }, { key: "wholesale", label: "Wholesale" },
+        ],
+      };
+    }
 
     if (dataset === "Industry History") {
       const result = await supabase.from("industry_segment_history_v2")
@@ -576,7 +626,13 @@ export default function DataEntryPage() {
         const integer = (value) => value !== "" && /^\d+$/.test(String(value).trim());
         const validMonthDate = (value) => /^\d{4}-(0[1-9]|1[0-2])-01$/.test(String(value || "").trim());
         let key = "";
-        if (dataset === "Daily Sales") {
+        if (dataset === "SAARC Monthly") {
+          const monthNum = Number(row.sales_month);
+          if (!/^\d{4}$/.test(String(row.sales_year || "")) || Number(row.sales_year) < 2021 || Number(row.sales_year) > 2035) rowErrors.push("Row " + line + ": sales_year must be a valid year.");
+          if (!integer(row.sales_month) || monthNum < 1 || monthNum > 12) rowErrors.push("Row " + line + ": sales_month must be 1–12.");
+          ["retail", "wholesale"].forEach(field => { if (!integer(row[field])) rowErrors.push("Row " + line + ": " + field + " must be a non-negative whole number."); });
+          key = [row.sales_year, row.sales_month].join("|");
+        } else if (dataset === "Daily Sales") {
           if (!BRANDS.includes(row.brand)) rowErrors.push("Row " + line + ": brand must be Jeep, Citroën or SAARC.");
           if (!/^\d{4}-\d{2}-\d{2}$/.test(row.sales_date || "") || Number.isNaN(Date.parse(row.sales_date))) rowErrors.push("Row " + line + ": sales_date must use YYYY-MM-DD.");
           ["test_drives", "bookings", "retail", "wholesale"].forEach((field) => { if (row[field] !== "" && !integer(row[field])) rowErrors.push("Row " + line + ": " + field + " must be a non-negative whole number or blank."); });
@@ -610,7 +666,18 @@ export default function DataEntryPage() {
       let count = 0;
 
       for (const row of imported) {
-        if (dataset === "Daily Sales") {
+        if (dataset === "SAARC Monthly") {
+          const monthNum = Number(row.sales_month);
+          const salesDate = `${Number(row.sales_year)}-${String(monthNum).padStart(2, "0")}-01`;
+          const payload = { brand: "SAARC", sales_date: salesDate, test_drives: null, bookings: null, retail: Number(row.retail), wholesale: Number(row.wholesale) };
+          const nextMonthDate = new Date(Number(row.sales_year), monthNum, 1);
+          const monthEnd = `${nextMonthDate.getFullYear()}-${String(nextMonthDate.getMonth() + 1).padStart(2, "0")}-01`;
+          const removed = await supabase.from("sales_cockpit_daily").delete()
+            .eq("brand", "SAARC").gte("sales_date", salesDate).lt("sales_date", monthEnd);
+          if (removed.error) throw removed.error;
+          const result = await supabase.from("sales_cockpit_daily").insert(payload);
+          if (result.error) throw result.error;
+        } else if (dataset === "Daily Sales") {
           if (!BRANDS.includes(row.brand) || !row.sales_date) throw new Error("Daily CSV requires valid brand and sales_date.");
           const payload = { brand: row.brand, sales_date: row.sales_date, test_drives: numberOrNull(row.test_drives), bookings: numberOrNull(row.bookings), retail: numberOrNull(row.retail), wholesale: numberOrNull(row.wholesale) };
           const found = await supabase.from("sales_cockpit_daily").select("id").eq("brand", payload.brand).eq("sales_date", payload.sales_date).maybeSingle();
@@ -670,6 +737,7 @@ export default function DataEntryPage() {
       }
       setMessage(count + " record" + (count === 1 ? "" : "s") + " imported.");
       if (dataset === "Model Monthly") clearClientCache(MODEL_CACHE_KEY);
+      if (dataset === "SAARC Monthly") clearClientCache("saarc-sales-performance-v2");
       await loadRecent();
     } catch (err) {
       setError(err.message || "Import failed.");
@@ -679,7 +747,7 @@ export default function DataEntryPage() {
     }
   }
 
-  const columns = ["Model", "Sales Type", "Year", "Month", "Units"];
+  const columns = dataset === "SAARC Monthly" ? ["Month", "Retail", "Wholesale"] : ["Model", "Sales Type", "Year", "Month", "Units"];
   const recentRows = useMemo(() => recent, [recent]);
 
   return (
@@ -693,7 +761,7 @@ export default function DataEntryPage() {
 
       <section className="filters modelFilters">
         <div className="filter"><label>Data Set</label><select value={dataset} onChange={(e) => setDataset(e.target.value)}>{DATASETS.map((item) => <option key={item}>{item}</option>)}</select></div>
-        {dataset !== "Industry History" && dataset !== "Manufacturer History" && (
+        {dataset !== "Industry History" && dataset !== "Manufacturer History" && dataset !== "SAARC Monthly" && (
           <div className="filter">
             <MultiSelect
               label="Brand"
@@ -739,6 +807,16 @@ export default function DataEntryPage() {
             <h3>{dataset}</h3>
             <p>Manual entry is disabled for this dataset. You can export the selected year, or use Download Template and Import CSV to load validated monthly records.</p>
           </div>
+        ) : dataset === "SAARC Monthly" ? (
+          <>
+            <div className="entryGrid">
+              <div className="filter"><label htmlFor="saarc-entry-year">Year</label><select id="saarc-entry-year" value={saarcYear} onChange={e => setSaarcYear(e.target.value)}>{MODEL_YEARS.map(item => <option key={item}>{item}</option>)}</select></div>
+              <div className="filter"><label htmlFor="saarc-entry-month">Month</label><select id="saarc-entry-month" value={saarcMonth} onChange={e => setSaarcMonth(e.target.value)}>{MODEL_PERIODS.map(item => <option key={item}>{item}</option>)}</select></div>
+              <div className="filter"><label htmlFor="saarc-entry-retail">Retail</label><input id="saarc-entry-retail" type="number" min="0" step="1" value={retail} onChange={e => setRetail(e.target.value)} placeholder="Enter units" /></div>
+              <div className="filter"><label htmlFor="saarc-entry-wholesale">Wholesale</label><input id="saarc-entry-wholesale" type="number" min="0" step="1" value={wholesale} onChange={e => setWholesale(e.target.value)} placeholder="Enter units" /></div>
+            </div>
+            <p className="subtitle">One consolidated SAARC record per month. Saving an existing month updates its figures.</p>
+          </>
         ) : dataset === "Daily Sales" ? (
           <div className="entryGrid">
             <div className="filter"><label>Date</label><input type="date" value={date} onChange={(e) => setDate(e.target.value)} /></div>
@@ -750,7 +828,7 @@ export default function DataEntryPage() {
           </div>
         ) : (
           <div className="entryGrid">
-            <div className="filter"><label>Brand</label><select value={brand} onChange={(e) => setBrand(e.target.value)}>{MODEL_BRANDS.map((item) => <option key={item}>{item}</option>)}</select></div>
+            <div className="filter"><label>Brand</label><select value={dataset === "SAARC Monthly" ? "SAARC" : brand} onChange={(e) => { const selectedBrand = e.target.value; setBrand(selectedBrand); setDataset(selectedBrand === "SAARC" ? "SAARC Monthly" : "Model Monthly"); }}><option value="Jeep">Jeep</option><option value="Citroën">Citroën</option><option value="SAARC">SAARC</option></select></div>
             <div className="filter"><label>Sales Type</label><select value={salesType} onChange={(e) => setSalesType(e.target.value)}>{SALES_TYPES.filter((item) => item !== "All").map((item) => <option key={item}>{item}</option>)}</select></div>
             <div className="filter"><label>Model</label><select value={model} onChange={(e) => setModel(e.target.value)}>{models.map((item) => <option key={item}>{item}</option>)}</select></div>
             <div className="filter"><label>Year</label><select value={year} onChange={(e) => setYear(e.target.value)}>{MODEL_YEARS.map((item) => <option key={item}>{item}</option>)}</select></div>
@@ -758,7 +836,7 @@ export default function DataEntryPage() {
             <div className="filter"><label>Units</label><input type="number" min="0" value={units} onChange={(e) => setUnits(e.target.value)} /></div>
           </div>
         )}
-        <div className="entryFooter"><div className="messageArea">{message && <span className="successMessage">{message}</span>}{error && <span className="errorMessage">{error}</span>}</div><button type="button" className="primaryButton" disabled={saving || exportOnly || brand === "All" || salesType === "All"} onClick={save}>{saving ? "Saving..." : "Save Record"}</button></div>
+        <div className="entryFooter"><div className="messageArea">{message && <span className="successMessage">{message}</span>}{error && <span className="errorMessage">{error}</span>}</div><button type="button" className="primaryButton" disabled={saving || exportOnly || (dataset === "Model Monthly" && (brand === "All" || salesType === "All"))} onClick={save}>{saving ? "Saving..." : dataset === "SAARC Monthly" ? "Save / Update Month" : "Save Record"}</button></div>
       </section>
 
       {!exportOnly && <section className="tableCard recentDataCard">
@@ -766,7 +844,15 @@ export default function DataEntryPage() {
         <div className="recentTable">
           <div className="recentHeader">{columns.map((column) => <div key={column}>{column}</div>)}</div>
           {recentRows.map((row, index) => (
-            <div className="recentRow" key={row.model_name + row.sales_type + row.sales_year + row.sales_month + index}><div>{row.model_name}</div><div>{row.sales_type}</div><div>{row.sales_year}</div><div>{MODEL_PERIODS[row.sales_month - 1]}</div><div>{row.units ?? "—"}</div></div>
+            dataset === "SAARC Monthly" ? (
+              <div className="recentRow saarcRecentRow" key={row.sales_date + index}>
+                <div><span className="recentMobileLabel">Month</span><strong>{formatMonthYear(row.sales_date)}</strong></div>
+                <div><span className="recentMobileLabel">Retail</span><strong>{row.retail ?? "—"}</strong></div>
+                <div><span className="recentMobileLabel">Wholesale</span><strong>{row.wholesale ?? "—"}</strong></div>
+              </div>
+            ) : (
+              <div className="recentRow" key={row.model_name + row.sales_type + row.sales_year + row.sales_month + index}><div>{row.model_name}</div><div>{row.sales_type}</div><div>{row.sales_year}</div><div>{MODEL_PERIODS[row.sales_month - 1]}</div><div>{row.units ?? "—"}</div></div>
+            )
           ))}
         </div>
       </section>}
