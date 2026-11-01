@@ -160,7 +160,7 @@ export default function SaarcSalesPerformancePage() {
               ))}
             </tbody>
             <tfoot>
-              <tr><th scope="row">All metrics</th>{periods.map((_, index) => <td key={index}>{formatNumber(METRICS.reduce((sum, metric) => sum + matrix[metric.key][index], 0))}</td>)}<td className="saarcTotalCell">{formatNumber(METRICS.reduce((sum, metric) => sum + totals[metric.key], 0))}</td></tr>
+              <tr><th scope="row">Retail + Wholesale</th>{periods.map((_, index) => <td key={index} className={monthClass(index)}>{formatNumber(METRICS.reduce((sum, metric) => sum + matrix[metric.key][index], 0))}</td>)}<td className="saarcTotalCell">{formatNumber(METRICS.reduce((sum, metric) => sum + totals[metric.key], 0))}</td></tr>
             </tfoot>
           </table>
         </div>
