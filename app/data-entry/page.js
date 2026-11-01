@@ -842,7 +842,11 @@ export default function DataEntryPage() {
           <div className="recentHeader">{columns.map((column) => <div key={column}>{column}</div>)}</div>
           {recentRows.map((row, index) => (
             dataset === "SAARC Monthly" ? (
-              <div className="recentRow" key={row.sales_date + index}><div>{formatMonthYear(row.sales_date)}</div><div>{row.retail ?? "—"}</div><div>{row.wholesale ?? "—"}</div></div>
+              <div className="recentRow saarcRecentRow" key={row.sales_date + index}>
+                <div><span className="recentMobileLabel">Month</span><strong>{formatMonthYear(row.sales_date)}</strong></div>
+                <div><span className="recentMobileLabel">Retail</span><strong>{row.retail ?? "—"}</strong></div>
+                <div><span className="recentMobileLabel">Wholesale</span><strong>{row.wholesale ?? "—"}</strong></div>
+              </div>
             ) : (
               <div className="recentRow" key={row.model_name + row.sales_type + row.sales_year + row.sales_month + index}><div>{row.model_name}</div><div>{row.sales_type}</div><div>{row.sales_year}</div><div>{MODEL_PERIODS[row.sales_month - 1]}</div><div>{row.units ?? "—"}</div></div>
             )
