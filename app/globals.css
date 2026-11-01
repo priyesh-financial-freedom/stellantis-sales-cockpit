@@ -5782,3 +5782,40 @@ html[data-theme="dark"] .saarcMatrix tfoot td { background: #202c3a; }
   .saarcMatrix { min-width: 720px; }
   .saarcMatrix th, .saarcMatrix td { padding: 15px 13px; font-size: 15px; }
 }
+
+
+/* SAARC monthly recent records: keep Month, Retail and Wholesale aligned. */
+.recentMobileLabel { display: none; }
+.saarcRecentRow {
+  grid-template-columns: minmax(0, 1.6fr) minmax(0, .8fr) minmax(0, .9fr);
+  gap: 12px;
+}
+.saarcRecentRow > div { min-width: 0; }
+.saarcRecentRow strong { font-weight: 600; }
+
+@media (max-width: 650px) {
+  .saarcRecentRow {
+    grid-template-columns: minmax(0, 1.35fr) minmax(0, .8fr) minmax(0, .95fr) !important;
+    gap: 8px;
+    padding: 16px 12px;
+    min-height: 76px;
+    align-items: center;
+  }
+  .saarcRecentRow > div {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    overflow-wrap: normal;
+    word-break: normal;
+  }
+  .saarcRecentRow > div:first-child strong { white-space: normal; }
+  .saarcRecentRow strong { font-size: 16px; line-height: 1.25; }
+  .recentMobileLabel {
+    display: block;
+    color: var(--muted, #6b7078);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: .5px;
+    text-transform: uppercase;
+  }
+}
