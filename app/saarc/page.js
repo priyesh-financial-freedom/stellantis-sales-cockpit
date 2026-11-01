@@ -8,12 +8,11 @@ import CockpitNavigation from "../../components/CockpitNavigation";
 const YEARS = ["2024", "2025", "2026"];
 const PERIODS = ["Monthly", "Quarterly", "Half-Yearly", "Annual"];
 const METRICS = [
-  { key: "bookings", label: "Bookings" },
   { key: "retail", label: "Retail" },
   { key: "wholesale", label: "Wholesale" },
 ];
 const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-const CACHE_KEY = "saarc-sales-performance-v1";
+const CACHE_KEY = "saarc-sales-performance-v2";
 
 function formatNumber(value) {
   return new Intl.NumberFormat("en-IN", { maximumFractionDigits: 0 }).format(value || 0);
@@ -31,6 +30,13 @@ function bucketIndex(period, month) {
   if (period === "Half-Yearly") return month <= 6 ? 0 : 1;
   if (period === "Annual") return 0;
   return month - 1;
+}
+
+function periodEndMonth(period, index) {
+  if (period === "Quarterly") return (index + 1) * 3;
+  if (period === "Half-Yearly") return (index + 1) * 6;
+  if (period === "Annual") return 12;
+  return index + 1;
 }
 
 export default function SaarcSalesPerformancePage() {
@@ -55,7 +61,7 @@ export default function SaarcSalesPerformancePage() {
       try {
         const { data, error: queryError } = await supabase
           .from("sales_cockpit_daily")
-          .select("brand,sales_date,bookings,retail,wholesale")
+          .select("brand,sales_date,retail,wholesale")
           .eq("brand", "SAARC")
           .gte("sales_date", "2024-01-01")
           .lte("sales_date", "2026-12-31")
@@ -93,6 +99,9 @@ export default function SaarcSalesPerformancePage() {
   }, [selectedRows, periods, period]);
 
   const hasData = selectedRows.length > 0;
+  const currentYear = new Date().getFullYear();
+  const currentMonth = new Date().getMonth() + 1;
+  const monthClass = index => (Number(year) < currentYear || (Number(year) === currentYear && periodEndMonth(period, index) < currentMonth)) ? "completeStatus" : "futureValue";
   const totals = useMemo(() => Object.fromEntries(METRICS.map(metric => [
     metric.key, matrix[metric.key].reduce((sum, value) => sum + value, 0),
   ])), [matrix]);
@@ -103,7 +112,7 @@ export default function SaarcSalesPerformancePage() {
         <div>
           <div className="eyebrow">STELLANTIS INDIA · REGIONAL PERFORMANCE</div>
           <h1>SAARC Sales Performance</h1>
-          <p className="subtitle">Monthly Bookings, Retail and Wholesale performance across the SAARC business</p>
+          <p className="subtitle">Monthly Retail and Wholesale performance across the SAARC business</p>
           {cachedAt && <div className="dataFreshness">{refreshing ? "Refreshing data…" : "Updated " + new Date(cachedAt).toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" })}</div>}
         </div>
         <div className="headerStatus"><span className={"statusDot" + (loading || refreshing ? " loadingDot" : "")} />{loading ? "Loading data" : error ? "Cached / offline data" : "Data connected"}</div>
@@ -145,7 +154,7 @@ export default function SaarcSalesPerformancePage() {
               {METRICS.map(metric => (
                 <tr key={metric.key}>
                   <th scope="row">{metric.label}</th>
-                  {matrix[metric.key].map((value, index) => <td key={periods[index]}>{formatNumber(value)}</td>)}
+                  {matrix[metric.key].map((value, index) => <td key={periods[index]} className={monthClass(index)}>{formatNumber(value)}</td>)}
                   <td className="saarcTotalCell">{formatNumber(totals[metric.key])}</td>
                 </tr>
               ))}
