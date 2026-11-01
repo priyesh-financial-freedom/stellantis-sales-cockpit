@@ -392,13 +392,15 @@ export default function DataEntryPage() {
         const numericWholesale = numberOrNull(wholesale);
         if (!salesMonth || numericRetail === null || numericWholesale === null) throw new Error("Enter valid Retail and Wholesale units for the selected month.");
         const payload = { brand: "SAARC", sales_date: salesDate, test_drives: null, bookings: null, retail: numericRetail, wholesale: numericWholesale };
-        const found = await supabase.from("sales_cockpit_daily").select("id").eq("brand", "SAARC").eq("sales_date", salesDate).maybeSingle();
-        if (found.error) throw found.error;
-        const result = found.data?.id
-          ? await supabase.from("sales_cockpit_daily").update(payload).eq("id", found.data.id)
-          : await supabase.from("sales_cockpit_daily").insert(payload);
+        const monthStart = `${saarcYear}-${String(salesMonth).padStart(2, "0")}-01`;
+        const nextMonthDate = new Date(Number(saarcYear), salesMonth, 1);
+        const monthEnd = `${nextMonthDate.getFullYear()}-${String(nextMonthDate.getMonth() + 1).padStart(2, "0")}-01`;
+        const removed = await supabase.from("sales_cockpit_daily").delete()
+          .eq("brand", "SAARC").gte("sales_date", monthStart).lt("sales_date", monthEnd);
+        if (removed.error) throw removed.error;
+        const result = await supabase.from("sales_cockpit_daily").insert(payload);
         if (result.error) throw result.error;
-        setMessage(`SAARC ${saarcMonth} ${saarcYear} figures ${found.data?.id ? "updated" : "saved"}.`);
+        setMessage(`SAARC ${saarcMonth} ${saarcYear} figures replaced successfully.`);
       } else if (dataset === "Daily Sales") {
         if (!date) throw new Error("Please select a date.");
         const payload = { brand, sales_date: date, test_drives: numberOrNull(testDrives), bookings: numberOrNull(bookings), retail: numberOrNull(retail), wholesale: numberOrNull(wholesale) };
@@ -668,11 +670,12 @@ export default function DataEntryPage() {
           const monthNum = Number(row.sales_month);
           const salesDate = `${Number(row.sales_year)}-${String(monthNum).padStart(2, "0")}-01`;
           const payload = { brand: "SAARC", sales_date: salesDate, test_drives: null, bookings: null, retail: Number(row.retail), wholesale: Number(row.wholesale) };
-          const found = await supabase.from("sales_cockpit_daily").select("id").eq("brand", "SAARC").eq("sales_date", salesDate).maybeSingle();
-          if (found.error) throw found.error;
-          const result = found.data?.id
-            ? await supabase.from("sales_cockpit_daily").update(payload).eq("id", found.data.id)
-            : await supabase.from("sales_cockpit_daily").insert(payload);
+          const nextMonthDate = new Date(Number(row.sales_year), monthNum, 1);
+          const monthEnd = `${nextMonthDate.getFullYear()}-${String(nextMonthDate.getMonth() + 1).padStart(2, "0")}-01`;
+          const removed = await supabase.from("sales_cockpit_daily").delete()
+            .eq("brand", "SAARC").gte("sales_date", salesDate).lt("sales_date", monthEnd);
+          if (removed.error) throw removed.error;
+          const result = await supabase.from("sales_cockpit_daily").insert(payload);
           if (result.error) throw result.error;
         } else if (dataset === "Daily Sales") {
           if (!BRANDS.includes(row.brand) || !row.sales_date) throw new Error("Daily CSV requires valid brand and sales_date.");
