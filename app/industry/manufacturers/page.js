@@ -172,9 +172,12 @@ export default function ManufacturerHistoryPage() {
   }, [matrixSource, period]);
   const matrixTotals = useMemo(() => {
     const values = {};
-    for (const item of matrixRows) for (const [key,value] of Object.entries(item.values)) values[key] = (values[key] || 0) + value;
+    for (const row of matrixSource) {
+      const p = matrixPeriodKey(row);
+      values[p.key] = (values[p.key] || 0) + Number(row.units || 0);
+    }
     return values;
-  }, [matrixRows]);
+  }, [matrixSource, period]);
   const matrixYtd = item => Object.values(item.values).reduce((sum,value)=>sum+value,0);
 
   const yearLabel=year.length===0?"All":year.length===1?year[0]:String(year.length)+" selected";
