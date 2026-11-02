@@ -359,8 +359,8 @@ export default function DataEntryPage() {
   const templateAvailable = Boolean(TEMPLATE_SCHEMAS[dataset]);
 
   useEffect(() => {
-    if (dataset === "Model Monthly" && !MODEL_BRANDS.includes(brand)) setBrand("Jeep");
-    if (dataset !== "Model Monthly" && !BRANDS.includes(brand) && brand !== "All") setBrand("Jeep");
+    if ((dataset === "Model Monthly" || dataset === "Brand Monthly Bookings") && !MODEL_BRANDS.includes(brand)) setBrand("Jeep");
+    if (dataset !== "Model Monthly" && dataset !== "Brand Monthly Bookings" && !BRANDS.includes(brand) && brand !== "All") setBrand("Jeep");
   }, [dataset, brand]);
 
   useEffect(() => {
