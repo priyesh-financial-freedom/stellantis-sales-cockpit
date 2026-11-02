@@ -5976,3 +5976,30 @@ html[data-theme="dark"] .manufacturerMatrix th:first-child,
 html[data-theme="dark"] .manufacturerMatrix td:first-child { background:#19222e !important; }
 html[data-theme="dark"] .manufacturerMatrix thead th:first-child,
 html[data-theme="dark"] .manufacturerMatrix tfoot th:first-child { background:#202c3a !important; }
+
+
+/* Improve legibility of the manufacturer matrix on phones. */
+@media (max-width:700px) {
+  .manufacturerMatrix th,
+  .manufacturerMatrix td {
+    font-size:16px !important;
+    line-height:1.35 !important;
+    padding:15px 12px !important;
+  }
+  .manufacturerMatrix thead th {
+    font-size:14px !important;
+    line-height:1.3 !important;
+  }
+  .manufacturerMatrix th:first-child,
+  .manufacturerMatrix td:first-child {
+    min-width:168px !important;
+    width:168px !important;
+  }
+  .manufacturerMatrix .manufacturerMatrixYtd {
+    min-width:120px !important;
+  }
+  .manufacturerMatrixNote {
+    font-size:14px !important;
+    line-height:1.45 !important;
+  }
+}
