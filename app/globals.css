@@ -6139,3 +6139,70 @@ html[data-theme="dark"] .multiSelectQuickActions button.selected { background:#2
     font-size:17px !important;
   }
 }
+
+
+
+/* Multi-select dark-mode contrast: keep all text readable on dark surfaces. */
+html[data-theme="dark"] .multiSelectMenu,
+html[data-theme="dark"] .multiSelectMenu .multiSelectPanelHeader,
+html[data-theme="dark"] .multiSelectMenu .multiSelectFooter {
+  background:#17212d !important;
+  color:#edf3fb !important;
+  border-color:#344252 !important;
+}
+html[data-theme="dark"] .multiSelectMenu .multiSelectPanelTitle,
+html[data-theme="dark"] .multiSelectMenu .multiSelectOption,
+html[data-theme="dark"] .multiSelectMenu .multiSelectOption span,
+html[data-theme="dark"] .multiSelectMenu .multiSelectFooter > span {
+  color:#edf3fb !important;
+}
+html[data-theme="dark"] .multiSelectMenu .multiSelectList {
+  background:#111923 !important;
+}
+html[data-theme="dark"] .multiSelectMenu .multiSelectList .multiSelectOption,
+html[data-theme="dark"] .multiSelectMenu .multiSelectList .multiSelectOption span {
+  color:#edf3fb !important;
+}
+html[data-theme="dark"] .multiSelectMenu .multiSelectList .multiSelectOption:hover,
+html[data-theme="dark"] .multiSelectMenu .multiSelectList .multiSelectOption.checked {
+  background:#26384b !important;
+}
+html[data-theme="dark"] .multiSelectMenu .multiSelectSearch {
+  background:#101923 !important;
+  border-color:#435366 !important;
+}
+html[data-theme="dark"] .multiSelectMenu .multiSelectSearch input {
+  color:#f4f7fb !important;
+  caret-color:#f4f7fb;
+}
+html[data-theme="dark"] .multiSelectMenu .multiSelectSearch input::placeholder {
+  color:#aab7c6 !important;
+  opacity:1;
+}
+html[data-theme="dark"] .multiSelectMenu .multiSelectQuickActions {
+  background:#1d2a38 !important;
+  border-color:#344252 !important;
+}
+html[data-theme="dark"] .multiSelectMenu .multiSelectQuickActions button,
+html[data-theme="dark"] .multiSelectMenu .multiSelectCancel {
+  background:#243242 !important;
+  border-color:#46576a !important;
+  color:#edf3fb !important;
+}
+html[data-theme="dark"] .multiSelectMenu .multiSelectQuickActions button.selected {
+  background:#173c5a !important;
+  border-color:#4da3e0 !important;
+  color:#c7e7ff !important;
+}
+html[data-theme="dark"] .multiSelectMenu .multiSelectCount {
+  color:#b7c4d2 !important;
+}
+html[data-theme="dark"] .multiSelectMenu .multiSelectDone {
+  background:#176fae !important;
+  border-color:#328bc8 !important;
+  color:#fff !important;
+}
+html[data-theme="dark"] .multiSelectMenu .multiSelectClose {
+  background:#26384b !important;
+  color:#f4f7fb !important;
+}
