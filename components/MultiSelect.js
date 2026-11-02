@@ -65,7 +65,8 @@ export default function MultiSelect({
 
   function toggle(option) {
     if (draftAll) {
-      setDraft([option]);
+      // Expand the implicit "All" selection, then remove the unchecked option.
+      setDraft(cleanOptions.filter(item => item !== option));
       return;
     }
     setDraft(current =>
