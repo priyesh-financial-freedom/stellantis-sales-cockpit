@@ -1,10 +1,12 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+
+const NONE_SELECTED = "__MULTISELECT_NONE__";
 
 export default function MultiSelect({
   label,
-  options,
+  options = [],
   value,
   onChange,
   allLabel = "All",
@@ -12,99 +14,168 @@ export default function MultiSelect({
   disabled = false,
 }) {
   const [open, setOpen] = useState(false);
-  const ref = useRef(null);
+  const [draft, setDraft] = useState([]);
+  const [search, setSearch] = useState("");
+  const rootRef = useRef(null);
+  const searchRef = useRef(null);
 
   const normalized = Array.isArray(value) ? value : [];
-  const cleanOptions = options.filter((option, index, array) => array.indexOf(option) === index);
-  const allOptionPresent = cleanOptions.includes(allLabel);
-  const allSelected = normalized.length === 0 || normalized.includes(allLabel) || normalized.length === cleanOptions.length;
+  const cleanOptions = useMemo(
+    () => options.filter((option, index, array) => array.indexOf(option) === index),
+    [options]
+  );
+  // An empty value is the established app-wide representation of "All".
+  const allSelected = normalized.length === 0 || normalized.includes(allLabel) || normalized.length >= cleanOptions.length;
   const effectiveSelection = allSelected ? [] : normalized.filter(item => item !== allLabel);
-  const selectedLabels = allSelected ? [allLabel] : effectiveSelection;
+  const draftNone = draft.includes(NONE_SELECTED);
+  const draftAll = !draftNone && (draft.length === 0 || draft.includes(allLabel) || draft.length >= cleanOptions.length);
+  const visibleOptions = useMemo(() => {
+    const query = search.trim().toLocaleLowerCase();
+    return query ? cleanOptions.filter(option => option.toLocaleLowerCase().includes(query)) : cleanOptions;
+  }, [cleanOptions, search]);
 
   useEffect(() => {
-    function handleOutside(event) {
-      if (ref.current && !ref.current.contains(event.target)) setOpen(false);
-    }
-    document.addEventListener("mousedown", handleOutside);
-    return () => document.removeEventListener("mousedown", handleOutside);
-  }, []);
+    if (!open) return;
+    const handlePointer = event => {
+      if (rootRef.current && !rootRef.current.contains(event.target)) closeWithoutApply();
+    };
+    const handleKey = event => {
+      if (event.key === "Escape") closeWithoutApply();
+    };
+    document.addEventListener("mousedown", handlePointer);
+    document.addEventListener("touchstart", handlePointer, { passive: true });
+    document.addEventListener("keydown", handleKey);
+    const focusTimer = window.setTimeout(() => searchRef.current?.focus(), 80);
+    return () => {
+      document.removeEventListener("mousedown", handlePointer);
+      document.removeEventListener("touchstart", handlePointer);
+      document.removeEventListener("keydown", handleKey);
+      window.clearTimeout(focusTimer);
+    };
+  }, [open]);
+
+  function openPanel() {
+    if (disabled) return;
+    setDraft(effectiveSelection);
+    setSearch("");
+    setOpen(true);
+  }
+
+  function closeWithoutApply() {
+    setOpen(false);
+    setSearch("");
+  }
 
   function toggle(option) {
-    if (option === allLabel) {
-      onChange([]);
+    if (draftAll) {
+      // Expand the implicit "All" selection, then remove the unchecked option.
+      setDraft(cleanOptions.filter(item => item !== option));
       return;
     }
-    if (effectiveSelection.includes(option)) {
-      onChange(effectiveSelection.filter(item => item !== option));
-    } else {
-      onChange([...effectiveSelection, option]);
+    if (draftNone) {
+      setDraft([option]);
+      return;
     }
+    setDraft(current =>
+      current.includes(option)
+        ? current.filter(item => item !== option)
+        : [...current, option]
+    );
   }
 
   function selectAll() {
-    onChange([]);
+    setDraft([]);
   }
 
-  function clearSelection() {
-    // Clear always restores the filter's default state: All.
-    onChange([]);
+  function resetSelection() {
+    // Reset means no options selected; All remains a separate action.
+    setDraft([NONE_SELECTED]);
+    setSearch("");
+  }
+
+  function applySelection() {
+    onChange(draftAll ? [] : draftNone ? [NONE_SELECTED] : draft);
     setOpen(false);
+    setSearch("");
   }
 
-  const summary =
-    selectedLabels.length === 1
-      ? selectedLabels[0]
-      : allSelected
-        ? allLabel
-        : selectedLabels.length === 0
-          ? placeholder
-          : `${selectedLabels.length} selected`;
+  const selectedCount = draftAll ? cleanOptions.length : draftNone ? 0 : draft.length;
+  const summary = allSelected
+    ? allLabel
+    : effectiveSelection.length === 1
+      ? effectiveSelection[0]
+      : `${effectiveSelection.length} selected`;
 
   return (
-    <div className="multiSelect" ref={ref}>
+    <div className="multiSelect" ref={rootRef}>
       {label && <label>{label}</label>}
       <button
         type="button"
         className={"multiSelectButton" + (open ? " open" : "")}
-        onClick={() => !disabled && setOpen(current => !current)}
+        onClick={open ? closeWithoutApply : openPanel}
         disabled={disabled}
-        aria-haspopup="listbox"
+        aria-haspopup="dialog"
         aria-expanded={open}
       >
         <span className="multiSelectSummary">{summary || placeholder}</span>
-        <span className="multiSelectChevron">{open ? "⌃" : "⌄"}</span>
+        <span className="multiSelectChevron" aria-hidden="true">{open ? "⌃" : "⌄"}</span>
       </button>
 
       {open && (
-        <div className="multiSelectMenu" role="listbox" aria-multiselectable="true">
-          <div className="multiSelectQuickActions">
-            <button type="button" className={allSelected ? "selected" : ""} onClick={selectAll}>
-              {allSelected ? "✓ " : ""}{allLabel}
-            </button>
-            <button type="button" onClick={clearSelection}>Clear</button>
-          </div>
+        <>
+          <button type="button" className="multiSelectBackdrop" aria-label="Close filter" onClick={closeWithoutApply} />
+          <section className="multiSelectMenu" role="dialog" aria-label={label || "Filter options"}>
+            <div className="multiSelectPanelHeader">
+              <div className="multiSelectPanelTitle">{label || "Select options"}</div>
+              <button type="button" className="multiSelectClose" onClick={closeWithoutApply} aria-label="Close">×</button>
+            </div>
 
-          <div className="multiSelectList">
-            {cleanOptions.map(option => {
-              const checked = allSelected || normalized.includes(option);
-              return (
-                <label className={"multiSelectOption" + (checked ? " checked" : "")} key={option}>
-                  <input
-                    type="checkbox"
-                    checked={checked}
-                    onChange={() => toggle(option)}
-                  />
-                  <span>{option}</span>
-                </label>
-              );
-            })}
-          </div>
+            <div className="multiSelectSearch">
+              <span aria-hidden="true">⌕</span>
+              <input
+                ref={searchRef}
+                type="search"
+                value={search}
+                onChange={event => setSearch(event.target.value)}
+                placeholder={`Search ${(label || "options").toLowerCase()}...`}
+                aria-label={`Search ${label || "options"}`}
+              />
+              {search && <button type="button" onClick={() => setSearch("")}>Clear</button>}
+            </div>
 
-          <div className="multiSelectFooter">
-            <span>{allSelected ? `${cleanOptions.length} selected` : `${normalized.length} selected`}</span>
-            <button type="button" className="multiSelectDone" onClick={() => setOpen(false)}>Done</button>
-          </div>
-        </div>
+            <div className="multiSelectQuickActions">
+              <button type="button" className={draftAll ? "selected" : ""} onClick={selectAll}>
+                {draftAll ? "✓ " : ""}All
+              </button>
+              <button type="button" onClick={resetSelection}>Reset</button>
+              <span className="multiSelectCount">{selectedCount} of {cleanOptions.length} selected</span>
+            </div>
+
+            <div className="multiSelectList" role="group" aria-label="Available options">
+              {visibleOptions.length ? visibleOptions.map(option => {
+                const checked = draftAll || (!draftNone && draft.includes(option));
+                return (
+                  <label className={"multiSelectOption" + (checked ? " checked" : "")} key={option}>
+                    <input
+                      type="checkbox"
+                      checked={checked}
+                      onChange={() => toggle(option)}
+                    />
+                    <span>{option}</span>
+                  </label>
+                );
+              }) : <div className="multiSelectNoResults">No matching options</div>}
+            </div>
+
+            <div className="multiSelectFooter">
+              <span>{selectedCount} selected</span>
+              <div className="multiSelectFooterActions">
+                <button type="button" className="multiSelectCancel" onClick={closeWithoutApply}>Cancel</button>
+                <button type="button" className="multiSelectDone" onClick={applySelection}>Apply</button>
+              </div>
+            </div>
+          </section>
+        </>
       )}
     </div>
   );
