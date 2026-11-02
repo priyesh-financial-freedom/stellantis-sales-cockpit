@@ -161,7 +161,7 @@ export default function ModelWiseClient({ brand }) {
   const [year, setYear] = useState(["2026"]);
   const [salesType, setSalesType] = useState(["Retail"]);
   const [selectedModels, setSelectedModels] = useState([]);
-  const [period, setPeriod] = useState("Annual");
+  const [period, setPeriod] = useState("Monthly");
   const [periodValue, setPeriodValue] = useState(["All"]);
   const [customFrom, setCustomFrom] = useState("2026-01-01");
   const [customTo, setCustomTo] = useState("2026-12-31");
