@@ -12,7 +12,7 @@ import CockpitNavigation from "../../components/CockpitNavigation";
 const BRANDS = ["Jeep", "Citroën", "SAARC"];
 const MODEL_BRANDS = ["Jeep", "Citroën"];
 const SALES_TYPES = ["All", "Bookings", "Retail", "Wholesale"];
-const DATASETS = ["Model Monthly", "SAARC Monthly", "Industry History", "Manufacturer History"];
+const DATASETS = ["Model Monthly", "Brand Monthly Bookings", "SAARC Monthly", "Industry History", "Manufacturer History"];
 
 function csvEscape(value) {
   const text = value === null || value === undefined ? "" : String(value);
@@ -38,6 +38,14 @@ function downloadCsv(filename, csv) {
 
 
 const TEMPLATE_SCHEMAS = {
+  "Brand Monthly Bookings": {
+    filename: "template-brand-monthly-bookings.csv",
+    columns: [
+      { key: "brand", label: "brand" }, { key: "sales_year", label: "sales_year" },
+      { key: "sales_month", label: "sales_month" }, { key: "units", label: "units" },
+    ],
+    sample: { brand: "Jeep", sales_year: 2026, sales_month: 10, units: 350 },
+  },
   "SAARC Monthly": {
     filename: "template-saarc-monthly.csv",
     columns: [
@@ -320,6 +328,9 @@ export default function DataEntryPage() {
   const [bookings, setBookings] = useState("");
   const [retail, setRetail] = useState("");
   const [wholesale, setWholesale] = useState("");
+  const [brandBookingYear, setBrandBookingYear] = useState("2026");
+  const [brandBookingMonth, setBrandBookingMonth] = useState("Oct");
+  const [brandBookingUnits, setBrandBookingUnits] = useState("");
   const [saarcYear, setSaarcYear] = useState("2026");
   const [saarcMonth, setSaarcMonth] = useState("Oct");
   const [model, setModel] = useState(MODEL_NAMES.Jeep[0]);
@@ -348,8 +359,8 @@ export default function DataEntryPage() {
   const templateAvailable = Boolean(TEMPLATE_SCHEMAS[dataset]);
 
   useEffect(() => {
-    if (dataset === "Model Monthly" && !MODEL_BRANDS.includes(brand)) setBrand("Jeep");
-    if (dataset !== "Model Monthly" && !BRANDS.includes(brand) && brand !== "All") setBrand("Jeep");
+    if ((dataset === "Model Monthly" || dataset === "Brand Monthly Bookings") && !MODEL_BRANDS.includes(brand)) setBrand("Jeep");
+    if (dataset !== "Model Monthly" && dataset !== "Brand Monthly Bookings" && !BRANDS.includes(brand) && brand !== "All") setBrand("Jeep");
   }, [dataset, brand]);
 
   useEffect(() => {
@@ -358,6 +369,13 @@ export default function DataEntryPage() {
 
   async function loadRecent() {
     if (exportOnly) { setRecent([]); return; }
+    if (dataset === "Brand Monthly Bookings") {
+      const result = await supabase.from("sales_cockpit_brand_monthly_bookings")
+        .select("brand,sales_year,sales_month,units,source").eq("brand", brand)
+        .order("sales_year", { ascending: false }).order("sales_month", { ascending: false }).limit(12);
+      if (!result.error) setRecent(result.data || []);
+      return;
+    }
     if (dataset === "SAARC Monthly") {
       const result = await supabase.from("sales_cockpit_daily")
         .select("sales_date,retail,wholesale").eq("brand", "SAARC")
@@ -385,7 +403,15 @@ export default function DataEntryPage() {
     try {
       if (dataset === "Retail Sales" || dataset === "Daily Sales") throw new Error("Daily Sales entry has been retired. Use Model Monthly for Bookings, Retail and Wholesale.");
       setSaving(true); setError(""); setMessage("");
-      if (dataset === "SAARC Monthly") {
+      if (dataset === "Brand Monthly Bookings") {
+        const salesMonth = MODEL_PERIODS.indexOf(brandBookingMonth) + 1;
+        const numericUnits = numberOrNull(brandBookingUnits);
+        if (!MODEL_BRANDS.includes(brand) || !salesMonth || numericUnits === null) throw new Error("Select Jeep or Citroën and enter a valid monthly booking total.");
+        const payload = { brand, sales_year: Number(brandBookingYear), sales_month: salesMonth, units: numericUnits, source: "User supplied monthly bookings", updated_at: new Date().toISOString() };
+        const result = await supabase.from("sales_cockpit_brand_monthly_bookings").upsert(payload, { onConflict: "brand,sales_year,sales_month" });
+        if (result.error) throw result.error;
+        setMessage(`${brand} ${brandBookingMonth} ${brandBookingYear} bookings saved / updated.`);
+      } else if (dataset === "SAARC Monthly") {
         const salesMonth = MODEL_PERIODS.indexOf(saarcMonth) + 1;
         const salesDate = `${saarcYear}-${String(salesMonth).padStart(2, "0")}-01`;
         const numericRetail = numberOrNull(retail);
@@ -435,7 +461,8 @@ export default function DataEntryPage() {
           setMessage("Model monthly record added.");
         }
       }
-      if (dataset === "Model Monthly") clearClientCache(MODEL_CACHE_KEY);
+      if (dataset === "Brand Monthly Bookings") clearClientCache(MODEL_CACHE_KEY);
+      if (dataset === "Model Monthly" || dataset === "Brand Monthly Bookings") clearClientCache(MODEL_CACHE_KEY);
       if (dataset === "SAARC Monthly") clearClientCache("saarc-sales-performance-v2");
       if (dataset === "Model Monthly") setMessage("Model monthly record saved.");
       await loadRecent();
@@ -456,6 +483,12 @@ export default function DataEntryPage() {
     const brandLabel = selectedBrands.length === 1 ? selectedBrands[0] : "multi";
     const startDate = Math.min(...yearList) + "-01-01";
     const endDate = Math.max(...yearList) + "-12-31";
+
+    if (dataset === "Brand Monthly Bookings") {
+      const result = await supabase.from("sales_cockpit_brand_monthly_bookings").select("brand,sales_year,sales_month,units,source").eq("brand", brand).in("sales_year", selectedYears).order("sales_year").order("sales_month");
+      if (result.error) throw result.error;
+      return { filename: "brand-monthly-bookings-" + brand.toLowerCase().replace(/[^a-z0-9]+/g, "-") + "-" + yearLabel, title: "Stellantis India — Brand Monthly Bookings", subtitle: "Brand: " + brand + " · Years: " + yearLabel + " · Consolidated monthly bookings, all models combined", rows: result.data || [], columns: [{ key: "brand", label: "Brand" }, { key: "sales_year", label: "Year" }, { key: "sales_month", label: "Month (1–12)" }, { key: "units", label: "Bookings" }, { key: "source", label: "Source" }] };
+    }
 
     if (dataset === "SAARC Monthly") {
       const result = await supabase.from("sales_cockpit_daily").select("sales_date,retail,wholesale")
@@ -626,7 +659,14 @@ export default function DataEntryPage() {
         const integer = (value) => value !== "" && /^\d+$/.test(String(value).trim());
         const validMonthDate = (value) => /^\d{4}-(0[1-9]|1[0-2])-01$/.test(String(value || "").trim());
         let key = "";
-        if (dataset === "SAARC Monthly") {
+        if (dataset === "Brand Monthly Bookings") {
+          const monthNum = Number(row.sales_month);
+          if (!MODEL_BRANDS.includes(row.brand)) rowErrors.push("Row " + line + ": brand must be Jeep or Citroën.");
+          if (!integer(row.sales_year) || Number(row.sales_year) < 2021 || Number(row.sales_year) > 2035) rowErrors.push("Row " + line + ": sales_year must be a valid year.");
+          if (!integer(row.sales_month) || monthNum < 1 || monthNum > 12) rowErrors.push("Row " + line + ": sales_month must be 1–12.");
+          if (!integer(row.units)) rowErrors.push("Row " + line + ": units must be a non-negative whole number.");
+          key = [row.brand, row.sales_year, row.sales_month].join("|");
+        } else if (dataset === "SAARC Monthly") {
           const monthNum = Number(row.sales_month);
           if (!/^\d{4}$/.test(String(row.sales_year || "")) || Number(row.sales_year) < 2021 || Number(row.sales_year) > 2035) rowErrors.push("Row " + line + ": sales_year must be a valid year.");
           if (!integer(row.sales_month) || monthNum < 1 || monthNum > 12) rowErrors.push("Row " + line + ": sales_month must be 1–12.");
@@ -666,7 +706,11 @@ export default function DataEntryPage() {
       let count = 0;
 
       for (const row of imported) {
-        if (dataset === "SAARC Monthly") {
+        if (dataset === "Brand Monthly Bookings") {
+          const payload = { brand: row.brand, sales_year: Number(row.sales_year), sales_month: Number(row.sales_month), units: Number(row.units), source: "CSV import", updated_at: new Date().toISOString() };
+          const result = await supabase.from("sales_cockpit_brand_monthly_bookings").upsert(payload, { onConflict: "brand,sales_year,sales_month" });
+          if (result.error) throw result.error;
+        } else if (dataset === "SAARC Monthly") {
           const monthNum = Number(row.sales_month);
           const salesDate = `${Number(row.sales_year)}-${String(monthNum).padStart(2, "0")}-01`;
           const payload = { brand: "SAARC", sales_date: salesDate, test_drives: null, bookings: null, retail: Number(row.retail), wholesale: Number(row.wholesale) };
@@ -747,7 +791,7 @@ export default function DataEntryPage() {
     }
   }
 
-  const columns = dataset === "SAARC Monthly" ? ["Month", "Retail", "Wholesale"] : ["Model", "Sales Type", "Year", "Month", "Units"];
+  const columns = dataset === "SAARC Monthly" ? ["Month", "Retail", "Wholesale"] : dataset === "Brand Monthly Bookings" ? ["Year", "Month", "Bookings"] : ["Model", "Sales Type", "Year", "Month", "Units"];
   const recentRows = useMemo(() => recent, [recent]);
 
   return (
@@ -807,6 +851,16 @@ export default function DataEntryPage() {
             <h3>{dataset}</h3>
             <p>Manual entry is disabled for this dataset. You can export the selected year, or use Download Template and Import CSV to load validated monthly records.</p>
           </div>
+        ) : dataset === "Brand Monthly Bookings" ? (
+          <>
+            <div className="entryGrid">
+              <div className="filter"><label htmlFor="brand-booking-brand">Brand</label><select id="brand-booking-brand" value={brand} onChange={e => setBrand(e.target.value)}>{MODEL_BRANDS.map(item => <option key={item}>{item}</option>)}</select></div>
+              <div className="filter"><label htmlFor="brand-booking-year">Year</label><select id="brand-booking-year" value={brandBookingYear} onChange={e => setBrandBookingYear(e.target.value)}>{MODEL_YEARS.map(item => <option key={item}>{item}</option>)}</select></div>
+              <div className="filter"><label htmlFor="brand-booking-month">Month</label><select id="brand-booking-month" value={brandBookingMonth} onChange={e => setBrandBookingMonth(e.target.value)}>{MODEL_PERIODS.map(item => <option key={item}>{item}</option>)}</select></div>
+              <div className="filter"><label htmlFor="brand-booking-units">Total Bookings (all models)</label><input id="brand-booking-units" type="number" min="0" step="1" value={brandBookingUnits} onChange={e => setBrandBookingUnits(e.target.value)} placeholder="Enter monthly total" /></div>
+            </div>
+            <p className="subtitle">Enter one consolidated booking total for the entire brand. Saving the same brand and month replaces its previous total; do not enter model-wise splits here.</p>
+          </>
         ) : dataset === "SAARC Monthly" ? (
           <>
             <div className="entryGrid">
@@ -836,7 +890,7 @@ export default function DataEntryPage() {
             <div className="filter"><label>Units</label><input type="number" min="0" value={units} onChange={(e) => setUnits(e.target.value)} /></div>
           </div>
         )}
-        <div className="entryFooter"><div className="messageArea">{message && <span className="successMessage">{message}</span>}{error && <span className="errorMessage">{error}</span>}</div><button type="button" className="primaryButton" disabled={saving || exportOnly || (dataset === "Model Monthly" && (brand === "All" || salesType === "All"))} onClick={save}>{saving ? "Saving..." : dataset === "SAARC Monthly" ? "Save / Update Month" : "Save Record"}</button></div>
+        <div className="entryFooter"><div className="messageArea">{message && <span className="successMessage">{message}</span>}{error && <span className="errorMessage">{error}</span>}</div><button type="button" className="primaryButton" disabled={saving || exportOnly || (dataset === "Model Monthly" && (brand === "All" || salesType === "All"))} onClick={save}>{saving ? "Saving..." : (dataset === "SAARC Monthly" || dataset === "Brand Monthly Bookings") ? "Save / Update Month" : "Save Record"}</button></div>
       </section>
 
       {!exportOnly && <section className="tableCard recentDataCard">
@@ -844,7 +898,11 @@ export default function DataEntryPage() {
         <div className="recentTable">
           <div className="recentHeader">{columns.map((column) => <div key={column}>{column}</div>)}</div>
           {recentRows.map((row, index) => (
-            dataset === "SAARC Monthly" ? (
+            dataset === "Brand Monthly Bookings" ? (
+              <div className="recentRow brandBookingRecentRow" key={row.brand + row.sales_year + row.sales_month}>
+                <div>{row.sales_year}</div><div>{MODEL_PERIODS[Number(row.sales_month) - 1]}</div><div>{row.units ?? "—"}</div>
+              </div>
+            ) : dataset === "SAARC Monthly" ? (
               <div className="recentRow saarcRecentRow" key={row.sales_date + index}>
                 <div><span className="recentMobileLabel">Month</span><strong>{formatMonthYear(row.sales_date)}</strong></div>
                 <div><span className="recentMobileLabel">Retail</span><strong>{row.retail ?? "—"}</strong></div>
