@@ -2,6 +2,8 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 
+const NONE_SELECTED = "__MULTISELECT_NONE__";
+
 export default function MultiSelect({
   label,
   options = [],
@@ -25,7 +27,8 @@ export default function MultiSelect({
   // An empty value is the established app-wide representation of "All".
   const allSelected = normalized.length === 0 || normalized.includes(allLabel) || normalized.length >= cleanOptions.length;
   const effectiveSelection = allSelected ? [] : normalized.filter(item => item !== allLabel);
-  const draftAll = draft.length === 0 || draft.includes(allLabel) || draft.length >= cleanOptions.length;
+  const draftNone = draft.includes(NONE_SELECTED);
+  const draftAll = !draftNone && (draft.length === 0 || draft.includes(allLabel) || draft.length >= cleanOptions.length);
   const visibleOptions = useMemo(() => {
     const query = search.trim().toLocaleLowerCase();
     return query ? cleanOptions.filter(option => option.toLocaleLowerCase().includes(query)) : cleanOptions;
@@ -69,6 +72,10 @@ export default function MultiSelect({
       setDraft(cleanOptions.filter(item => item !== option));
       return;
     }
+    if (draftNone) {
+      setDraft([option]);
+      return;
+    }
     setDraft(current =>
       current.includes(option)
         ? current.filter(item => item !== option)
@@ -81,17 +88,18 @@ export default function MultiSelect({
   }
 
   function resetSelection() {
-    // Empty selection is the app's established default state: show All.
-    setDraft([]);
+    // Reset means no options selected; All remains a separate action.
+    setDraft([NONE_SELECTED]);
+    setSearch("");
   }
 
   function applySelection() {
-    onChange(draftAll ? [] : draft);
+    onChange(draftAll ? [] : draftNone ? [NONE_SELECTED] : draft);
     setOpen(false);
     setSearch("");
   }
 
-  const selectedCount = draftAll ? cleanOptions.length : draft.length;
+  const selectedCount = draftAll ? cleanOptions.length : draftNone ? 0 : draft.length;
   const summary = allSelected
     ? allLabel
     : effectiveSelection.length === 1
@@ -145,7 +153,7 @@ export default function MultiSelect({
 
             <div className="multiSelectList" role="group" aria-label="Available options">
               {visibleOptions.length ? visibleOptions.map(option => {
-                const checked = draftAll || draft.includes(option);
+                const checked = draftAll || (!draftNone && draft.includes(option));
                 return (
                   <label className={"multiSelectOption" + (checked ? " checked" : "")} key={option}>
                     <input
