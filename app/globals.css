@@ -6032,3 +6032,53 @@ html[data-theme="dark"] .manufacturerMatrix tfoot th:first-child { background:#2
     line-height:1.5 !important;
   }
 }
+
+
+/* Shared searchable multi-select: compact desktop popover and mobile bottom sheet. */
+.multiSelect { position:relative; width:100%; }
+.multiSelectButton { width:100%; min-height:44px; padding:0 14px; display:flex; align-items:center; justify-content:space-between; gap:12px; border:1px solid var(--line,#d9dfe5); border-radius:10px; background:var(--card,#fff); color:var(--text,#17212b); text-align:left; cursor:pointer; }
+.multiSelectButton.open,.multiSelectButton:focus-visible { border-color:var(--blue,#176b9a); outline:none; box-shadow:0 0 0 3px rgba(23,107,154,.12); }
+.multiSelectSummary { min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.multiSelectChevron { color:var(--muted,#68717c); font-size:18px; }
+.multiSelectBackdrop { position:fixed; inset:0; z-index:1190; display:block; width:100%; height:100%; border:0; padding:0; background:rgba(13,22,32,.38); cursor:default; }
+.multiSelectMenu { position:absolute; z-index:1200; top:calc(100% + 8px); left:0; width:min(390px, calc(100vw - 40px)); max-height:min(560px,72vh); display:flex; flex-direction:column; overflow:hidden; border:1px solid var(--line,#d9dfe5); border-radius:16px; background:var(--card,#fff); color:var(--text,#17212b); box-shadow:0 18px 50px rgba(15,30,45,.22); }
+.multiSelectPanelHeader { display:flex; align-items:center; justify-content:space-between; gap:12px; padding:15px 16px 10px; }
+.multiSelectPanelTitle { font-size:16px; font-weight:650; }
+.multiSelectClose { width:34px; height:34px; border:0; border-radius:50%; background:var(--surface,#f1f4f7); color:var(--text,#17212b); font-size:23px; line-height:1; cursor:pointer; }
+.multiSelectSearch { display:flex; align-items:center; gap:10px; margin:4px 14px 10px; padding:0 12px; min-height:46px; border:1px solid var(--line,#d9dfe5); border-radius:10px; background:var(--surface,#f7f9fb); color:var(--muted,#68717c); }
+.multiSelectSearch input { flex:1; min-width:0; width:100%; height:42px; border:0 !important; outline:none; box-shadow:none !important; background:transparent !important; color:var(--text,#17212b) !important; font-size:15px; }
+.multiSelectSearch button { border:0; background:transparent; color:var(--blue,#176b9a); font-size:13px; cursor:pointer; }
+.multiSelectQuickActions { display:flex; align-items:center; gap:8px; padding:0 14px 11px; border-bottom:1px solid var(--line,#e5e9ed); }
+.multiSelectQuickActions button { min-height:34px; padding:0 13px; border:1px solid var(--line,#d9dfe5); border-radius:8px; background:var(--card,#fff); color:var(--text,#4d5965); font-size:13px; cursor:pointer; }
+.multiSelectQuickActions button.selected { border-color:var(--blue,#176b9a); background:var(--blue-soft,#eaf3fa); color:var(--blue,#176b9a); font-weight:650; }
+.multiSelectCount { margin-left:auto; color:var(--muted,#68717c); font-size:12px; white-space:nowrap; }
+.multiSelectList { min-height:80px; max-height:340px; overflow-y:auto; overscroll-behavior:contain; padding:5px 8px; }
+.multiSelectOption { display:flex; align-items:center; gap:12px; min-height:44px; padding:7px 10px; border-radius:8px; color:var(--text,#17212b); font-size:15px; cursor:pointer; }
+.multiSelectOption:hover,.multiSelectOption.checked { background:var(--surface,#f3f7fa); }
+.multiSelectOption input { flex:0 0 auto; width:18px; height:18px; margin:0; accent-color:var(--blue,#176b9a); }
+.multiSelectNoResults { padding:24px 12px; color:var(--muted,#68717c); text-align:center; font-size:14px; }
+.multiSelectFooter { display:flex; align-items:center; justify-content:space-between; gap:12px; padding:12px 14px; border-top:1px solid var(--line,#e5e9ed); color:var(--muted,#68717c); font-size:13px; background:var(--card,#fff); }
+.multiSelectFooterActions { display:flex; align-items:center; gap:8px; }
+.multiSelectCancel,.multiSelectDone { min-height:40px; padding:0 16px; border:1px solid var(--line,#d9dfe5); border-radius:9px; background:var(--card,#fff); color:var(--text,#4d5965); font-size:14px; font-weight:600; cursor:pointer; }
+.multiSelectDone { border-color:var(--blue,#176b9a); background:var(--blue,#176b9a); color:#fff; }
+html[data-theme="dark"] .multiSelectSearch { background:#111923; border-color:#3a4656; }
+html[data-theme="dark"] .multiSelectOption:hover,
+html[data-theme="dark"] .multiSelectOption.checked { background:#26364a; }
+html[data-theme="dark"] .multiSelectQuickActions button.selected { background:#203b54; color:#9dcdf5; }
+@media(max-width:650px) {
+  .multiSelectButton { min-height:56px; padding:0 16px; border-radius:11px; font-size:19px; }
+  .multiSelectBackdrop { z-index:1190; }
+  .multiSelectMenu { position:fixed; z-index:1200; left:0; right:0; bottom:0; top:auto; width:100%; max-width:none; max-height:82dvh; border-radius:20px 20px 0 0; border-bottom:0; padding-bottom:env(safe-area-inset-bottom); box-shadow:0 -12px 40px rgba(15,30,45,.2); }
+  .multiSelectPanelHeader { padding:18px 18px 12px; }
+  .multiSelectPanelTitle { font-size:18px; }
+  .multiSelectSearch { min-height:50px; margin:4px 16px 12px; }
+  .multiSelectSearch input { height:46px; font-size:16px; }
+  .multiSelectQuickActions { padding:0 16px 12px; }
+  .multiSelectQuickActions button { min-height:40px; padding:0 16px; font-size:14px; }
+  .multiSelectCount { font-size:13px; }
+  .multiSelectList { flex:1; min-height:100px; max-height:none; padding:8px 10px; }
+  .multiSelectOption { min-height:50px; padding:9px 12px; font-size:16px; }
+  .multiSelectOption input { width:20px; height:20px; }
+  .multiSelectFooter { padding:12px 16px; min-height:66px; }
+  .multiSelectCancel,.multiSelectDone { min-height:46px; padding:0 20px; font-size:15px; }
+}
