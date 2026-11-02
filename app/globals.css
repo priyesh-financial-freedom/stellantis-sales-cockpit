@@ -5920,3 +5920,59 @@ html[data-theme="dark"] .saarcMatrix tfoot td { background: #202c3a; }
   .manufacturerMatrix th:first-child, .manufacturerMatrix td:first-child { min-width: 148px; width: 148px; }
   .manufacturerMatrix .manufacturerMatrixYtd { min-width: 108px; }
 }
+
+
+/* Force the manufacturer matrix to remain a real horizontally scrollable table on phones.
+   This deliberately overrides legacy mobile rules that convert data tables into stacked cards. */
+.manufacturerMatrixCard { max-width:100%; overflow:hidden; }
+.manufacturerMatrixScroll {
+  display:block !important;
+  width:100% !important;
+  max-width:100% !important;
+  overflow-x:auto !important;
+  overflow-y:auto !important;
+  -webkit-overflow-scrolling:touch;
+  touch-action:pan-x pan-y;
+}
+table.manufacturerMatrix {
+  display:table !important;
+  width:max-content !important;
+  min-width:100% !important;
+  table-layout:auto !important;
+}
+.manufacturerMatrix thead { display:table-header-group !important; }
+.manufacturerMatrix tbody { display:table-row-group !important; padding:0 !important; }
+.manufacturerMatrix tfoot { display:table-footer-group !important; }
+.manufacturerMatrix tr { display:table-row !important; padding:0 !important; border:0 !important; }
+.manufacturerMatrix th,
+.manufacturerMatrix td {
+  display:table-cell !important;
+  flex-direction:initial !important;
+  align-items:initial !important;
+  white-space:nowrap !important;
+}
+.manufacturerMatrix th:first-child,
+.manufacturerMatrix td:first-child {
+  position:sticky !important;
+  left:0 !important;
+  z-index:4 !important;
+  min-width:148px !important;
+  width:148px !important;
+  background:var(--card,#fff) !important;
+}
+.manufacturerMatrix thead th:first-child { z-index:7 !important; background:var(--table-header,#eef2f6) !important; }
+.manufacturerMatrix thead th { position:sticky !important; top:0 !important; z-index:5 !important; }
+.manufacturerMatrix tfoot th,
+.manufacturerMatrix tfoot td { position:sticky; bottom:0; z-index:3; }
+.manufacturerMatrix tfoot th:first-child { z-index:8 !important; background:var(--table-header,#eaf0f5) !important; }
+@media(max-width:700px) {
+  .manufacturerMatrixScroll { max-height:72vh !important; }
+  table.manufacturerMatrix { min-width:max-content !important; }
+  .manufacturerMatrix th,.manufacturerMatrix td { min-width:92px !important; padding:12px 10px !important; font-size:13px !important; }
+  .manufacturerMatrix th:first-child,.manufacturerMatrix td:first-child { min-width:148px !important; width:148px !important; }
+  .manufacturerMatrix .manufacturerMatrixYtd { min-width:108px !important; }
+}
+html[data-theme="dark"] .manufacturerMatrix th:first-child,
+html[data-theme="dark"] .manufacturerMatrix td:first-child { background:#19222e !important; }
+html[data-theme="dark"] .manufacturerMatrix thead th:first-child,
+html[data-theme="dark"] .manufacturerMatrix tfoot th:first-child { background:#202c3a !important; }
