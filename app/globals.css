@@ -6003,3 +6003,32 @@ html[data-theme="dark"] .manufacturerMatrix tfoot th:first-child { background:#2
     line-height:1.45 !important;
   }
 }
+
+
+/* Further enlarge the mobile manufacturer matrix for comfortable reading. */
+@media (max-width:700px) {
+  .manufacturerMatrix th,
+  .manufacturerMatrix td {
+    font-size:18px !important;
+    line-height:1.4 !important;
+    padding:17px 13px !important;
+  }
+  .manufacturerMatrix thead th {
+    font-size:15px !important;
+    line-height:1.35 !important;
+    padding-top:16px !important;
+    padding-bottom:16px !important;
+  }
+  .manufacturerMatrix th:first-child,
+  .manufacturerMatrix td:first-child {
+    min-width:184px !important;
+    width:184px !important;
+  }
+  .manufacturerMatrix .manufacturerMatrixYtd {
+    min-width:128px !important;
+  }
+  .manufacturerMatrixNote {
+    font-size:15px !important;
+    line-height:1.5 !important;
+  }
+}
