@@ -144,8 +144,8 @@ export default function ManufacturerHistoryPage() {
     return { key: y + "-" + String(m).padStart(2, "0"), label: MONTHS[m - 1] + "'" + y.slice(2), sort: y + "-" + String(m).padStart(2, "0") };
   };
   const matrixSource = period === "Annual"
-    ? rows.filter(r => (year.includes("All") || year.includes(String(r.sales_period).slice(0,4))) && (manufacturerSelection.length === 0 || manufacturerSelection.includes(r.manufacturer)))
-    : filtered;
+    ? rows.filter(r => (year.includes("All") || year.includes(String(r.sales_period).slice(0,4))) && (r.period_type === "ANNUAL" || r.period_type === "MONTHLY"))
+    : allManufacturerRows;
   const matrixColumns = useMemo(() => {
     const map = new Map();
     for (const row of matrixSource) {
@@ -157,6 +157,7 @@ export default function ManufacturerHistoryPage() {
   const matrixRows = useMemo(() => {
     const map = new Map();
     for (const row of matrixSource) {
+      if (manufacturerSelection.length && !manufacturerSelection.includes(row.manufacturer)) continue;
       const p = matrixPeriodKey(row);
       const key = row.manufacturer;
       if (!map.has(key)) map.set(key, { manufacturer: key, values: {} });
