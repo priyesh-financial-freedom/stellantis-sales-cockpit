@@ -128,31 +128,72 @@ export default function ManufacturerHistoryPage() {
     return [...map.values()].filter(r=>r.units>0).map(r=>({...r,total:manufacturerSelection.length===0?r.units:(totals.get(r.key)||0)})).sort((a,b)=>a.key.localeCompare(b.key));
   },[filtered,allManufacturerRows,manufacturerSelection,period]);
 
+  const matrixPeriodKey = row => {
+    const date = String(row.sales_period);
+    const y = date.slice(0, 4);
+    const m = Number(date.slice(5, 7));
+    if (period === "Annual" || row.period_type === "ANNUAL") return { key: y, label: y, sort: y + "-00" };
+    if (period === "Quarterly") {
+      const q = "Q" + Math.floor((m - 1) / 3 + 1);
+      return { key: y + "-" + q, label: q + "'" + y.slice(2), sort: y + "-" + String(Math.floor((m - 1) / 3 + 1)).padStart(2, "0") };
+    }
+    if (period === "Half-Yearly") {
+      const h = m <= 6 ? "H1" : "H2";
+      return { key: y + "-" + h, label: h + "'" + y.slice(2), sort: y + "-" + (h === "H1" ? "01" : "07") };
+    }
+    return { key: y + "-" + String(m).padStart(2, "0"), label: MONTHS[m - 1] + "'" + y.slice(2), sort: y + "-" + String(m).padStart(2, "0") };
+  };
+  const matrixSource = period === "Annual"
+    ? rows.filter(r => (year.includes("All") || year.includes(String(r.sales_period).slice(0,4))) && (manufacturerSelection.length === 0 || manufacturerSelection.includes(r.manufacturer)))
+    : filtered;
+  const matrixColumns = useMemo(() => {
+    const map = new Map();
+    for (const row of matrixSource) {
+      const p = matrixPeriodKey(row);
+      map.set(p.key, p);
+    }
+    return [...map.values()].sort((a,b) => a.sort.localeCompare(b.sort));
+  }, [matrixSource, period]);
+  const matrixRows = useMemo(() => {
+    const map = new Map();
+    for (const row of matrixSource) {
+      const p = matrixPeriodKey(row);
+      const key = row.manufacturer;
+      if (!map.has(key)) map.set(key, { manufacturer: key, values: {} });
+      const item = map.get(key);
+      item.values[p.key] = (item.values[p.key] || 0) + Number(row.units || 0);
+    }
+    return [...map.values()].sort((a,b) => {
+      const totalA = Object.values(a.values).reduce((s,v)=>s+v,0);
+      const totalB = Object.values(b.values).reduce((s,v)=>s+v,0);
+      return totalB-totalA || a.manufacturer.localeCompare(b.manufacturer);
+    });
+  }, [matrixSource, period]);
+  const matrixTotals = useMemo(() => {
+    const values = {};
+    for (const item of matrixRows) for (const [key,value] of Object.entries(item.values)) values[key] = (values[key] || 0) + value;
+    return values;
+  }, [matrixRows]);
+  const matrixYtd = item => Object.values(item.values).reduce((sum,value)=>sum+value,0);
+
   const yearLabel=year.length===0?"All":year.length===1?year[0]:String(year.length)+" selected";
   const label=period==="Custom Period"?"Custom Period":period==="Annual"?"Annual":periodValue.includes("All")?"All / YTD":periodValue.join(", ");
 
   function changePeriod(v){setPeriod(v);setPeriodValue("All");}
 
   function exportManufacturer() {
-    const source = filtered;
-    const rows = source.map(row => ({
-      sales_period: row.sales_period,
-      manufacturer: row.manufacturer,
-      units: row.units,
-    }));
+    const header = ["Manufacturer", ...matrixColumns.map(p => p.label), "YTD"];
+    const lines = [header, ...matrixRows.map(item => [item.manufacturer, ...matrixColumns.map(p => item.values[p.key] ?? ""), matrixYtd(item)]), ["INDUSTRY TOTAL", ...matrixColumns.map(p => matrixTotals[p.key] ?? ""), Object.values(matrixTotals).reduce((s,v)=>s+v,0)]];
     const csvEscape = value => {
       const text = value === null || value === undefined ? "" : String(value);
-      return /[",\n]/.test(text) ? '"' + text.replace(/"/g, '""') + '"' : text;
+      return /[",\\n]/.test(text) ? '"' + text.replace(/"/g, '""') + '"' : text;
     };
-    const csv = [
-      ["sales_period", "manufacturer", "units"].join(","),
-      ...rows.map(row => [row.sales_period, row.manufacturer, row.units].map(csvEscape).join(",")),
-    ].join("\n");
+    const csv = lines.map(row => row.map(csvEscape).join(",")).join("\\n");
     const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
     const url = URL.createObjectURL(blob);
     const anchor = document.createElement("a");
     anchor.href = url;
-    anchor.download = `manufacturer-${yearLabel}-${period.toLowerCase().replace(/\s+/g, "-")}-${manufacturerSelection.length === 0 ? "all" : manufacturerSelection.join("-").replace(/\s+/g, "-").toLowerCase()}.csv`;
+    anchor.download = `manufacturer-matrix-${yearLabel}-${period.toLowerCase().replace(/\\s+/g, "-")}.csv`;
     anchor.click();
     URL.revokeObjectURL(url);
   }
@@ -168,14 +209,28 @@ export default function ManufacturerHistoryPage() {
     </section>
     <section className="industrySummaryGrid"><div className="queryCard"><div className="eyebrow">MANUFACTURER TIV</div><h2>{manufacturerLabel}</h2><strong className="industryHeadline">{fmt(total)}</strong><p>{label} · {yearLabel}</p></div><div className="queryCard"><div className="eyebrow">HISTORICAL LAYER</div><h2>1991 → 2026</h2><p>Annual 1991–1996 · monthly 1997 onward.</p></div></section>
     {error&&<div className="errorBanner">{error}</div>}
-    <section><div className="sectionHeading"><div><h2>Manufacturer movement</h2><p className="subtitle">Source: comp.xlsx · Master-Sep26</p></div><button type="button" className="secondaryButton" onClick={exportManufacturer} disabled={loading || !filtered.length}>Export CSV</button></div><div className="tableCard">
-      {breakdownRows.length ? <>
-        <div className="industryBreakdownHeader"><div>Year</div><div>Period</div><div>{manufacturerSelection.length===0?"Industry":"Manufacturer"}</div><div>Units</div><div>Share</div><div>Status</div></div>
-        {breakdownRows.map(r=>{ const status=rowStatus(r); const forecast=status==="FORECAST"; return <div className={"industryBreakdownRow " + (forecast ? "industryIncompleteRow" : "industryCompletedRow")} key={r.key}>
-          <div>{r.year}</div><div>{r.label}</div><div className="scopeName">{manufacturerSelection.length===0?"Industry":manufacturerLabel}</div><div>{fmt(r.units)}</div><div>{r.total?((r.units/r.total)*100).toFixed(1)+"%":"—"}</div><div className={forecast?"industryStatusBadge":"industryCompletedBadge"}>{forecast?"Forecast":"Completed"}</div>
-        </div>})}
-      </> : <div className="industryEmpty">{loading?"Loading...":"No manufacturer data is available for the selected filters."}</div>}
-    </div></section>
+    <section>
+      <div className="sectionHeading">
+        <div><h2>Manufacturer-wise monthly movement</h2><p className="subtitle">Each manufacturer on one row · monthly volumes across columns · ranked by selected-period sales</p></div>
+        <button type="button" className="secondaryButton" onClick={exportManufacturer} disabled={loading || !matrixRows.length}>Export Matrix CSV</button>
+      </div>
+      <div className="manufacturerMatrixCard">
+        {matrixColumns.length ? <div className="manufacturerMatrixScroll">
+          <table className="manufacturerMatrix">
+            <thead><tr><th>Manufacturer</th>{matrixColumns.map(p=><th key={p.key}>{p.label}</th>)}<th className="manufacturerMatrixYtd">YTD / Total</th></tr></thead>
+            <tbody>
+              {matrixRows.map(item=><tr key={item.manufacturer}>
+                <th scope="row">{item.manufacturer}</th>
+                {matrixColumns.map(p=><td key={p.key}>{item.values[p.key] == null ? "—" : fmt(item.values[p.key])}</td>)}
+                <td className="manufacturerMatrixYtd">{fmt(matrixYtd(item))}</td>
+              </tr>)}
+            </tbody>
+            <tfoot><tr><th>INDUSTRY TOTAL</th>{matrixColumns.map(p=><td key={p.key}>{fmt(matrixTotals[p.key] || 0)}</td>)}<td className="manufacturerMatrixYtd">{fmt(Object.values(matrixTotals).reduce((s,v)=>s+v,0))}</td></tr></tfoot>
+          </table>
+        </div> : <div className="industryEmpty">{loading ? "Loading..." : "No manufacturer data is available for the selected filters."}</div>}
+      </div>
+      <p className="manufacturerMatrixNote">Missing periods are shown as dashes, not zero. The YTD / Total column sums the periods currently included in the selection.</p>
+    </section>
     <footer><span>Manufacturer filters mirror the Sales Cockpit period structure.</span><span>1991–1996 annual · 1997 onward monthly</span></footer>
   </main>;
 }
