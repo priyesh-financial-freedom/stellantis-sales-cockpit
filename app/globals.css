@@ -6206,3 +6206,92 @@ html[data-theme="dark"] .multiSelectMenu .multiSelectClose {
   background:#26384b !important;
   color:#f4f7fb !important;
 }
+
+
+
+/* Consolidated Stellantis brand comparison */
+.stellantisComparison {
+  margin: 28px 0;
+  padding: 18px;
+  border: 1px solid var(--line, #dce3e8);
+  border-radius: 16px;
+  background: var(--card, #fff);
+  color: var(--text, #17212b);
+  box-shadow: 0 3px 12px rgba(20, 40, 60, .04);
+}
+.stellantisComparison .sectionHeading { margin-bottom: 14px; }
+.stellantisComparison .sectionHeading h2 { margin-bottom: 5px; }
+.stellantisComparisonScroll {
+  width: 100%;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  border: 1px solid var(--line, #dce3e8);
+  border-radius: 10px;
+  -webkit-overflow-scrolling: touch;
+}
+.stellantisComparisonTable {
+  width: 100%;
+  min-width: 700px;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-variant-numeric: tabular-nums;
+}
+.stellantisComparisonTable th,
+.stellantisComparisonTable td {
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--line, #e0e5e9);
+  border-right: 1px solid var(--line, #e0e5e9);
+  text-align: right;
+  white-space: nowrap;
+  font-size: 14px;
+}
+.stellantisComparisonTable thead th {
+  background: var(--surface, #f2f5f8);
+  color: var(--muted, #65717d);
+  font-weight: 650;
+  font-size: 12px;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+}
+.stellantisComparisonTable th:first-child,
+.stellantisComparisonTable td:first-child,
+.stellantisComparisonTable th:nth-child(2),
+.stellantisComparisonTable td:nth-child(2) { text-align: left; }
+.stellantisComparisonTable tbody th { font-weight: 600; }
+.stellantisComparisonTable .stellantisComparisonTotal {
+  font-weight: 750;
+  color: var(--blue, #176fae);
+  background: var(--surface, #f7f9fb);
+}
+.stellantisComparisonTable .comparisonNotApplicable { color: var(--muted, #7a8793); text-align:center; }
+.stellantisComparisonTable .completedValue { color: #238354; }
+.stellantisComparisonTable .futureValue { color: #c83e3e; }
+.comparisonNote {
+  margin: 12px 2px 0;
+  color: var(--muted, #6d7883);
+  font-size: 12px;
+  line-height: 1.5;
+}
+html[data-theme="dark"] .stellantisComparison {
+  background: #151d27;
+  border-color: #354252;
+  color: #edf3fb;
+}
+html[data-theme="dark"] .stellantisComparisonScroll,
+html[data-theme="dark"] .stellantisComparisonTable th,
+html[data-theme="dark"] .stellantisComparisonTable td { border-color: #354252; }
+html[data-theme="dark"] .stellantisComparisonTable thead th,
+html[data-theme="dark"] .stellantisComparisonTable .stellantisComparisonTotal { background: #202d3b; }
+html[data-theme="dark"] .stellantisComparisonTable thead th,
+html[data-theme="dark"] .comparisonNote { color: #b8c5d2; }
+html[data-theme="dark"] .stellantisComparisonTable tbody th,
+html[data-theme="dark"] .stellantisComparisonTable td { color: #edf3fb; }
+html[data-theme="dark"] .stellantisComparisonTable td.completedValue { color: #83d6a8; }
+html[data-theme="dark"] .stellantisComparisonTable td.futureValue { color: #f09a9a; }
+html[data-theme="dark"] .stellantisComparisonTable .stellantisComparisonTotal { color: #82c8f5; }
+@media (max-width: 650px) {
+  .stellantisComparison { padding: 13px; margin: 22px 0; }
+  .stellantisComparisonTable { min-width: 660px; }
+  .stellantisComparisonTable th, .stellantisComparisonTable td { padding: 13px 12px; font-size: 14px; }
+  .stellantisComparison .sectionHeading h2 { font-size: 20px; }
+}
