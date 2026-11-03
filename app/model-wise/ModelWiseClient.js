@@ -7,6 +7,7 @@ import { readClientCache } from "../../lib/clientCache";
 import MultiSelect from "../../components/MultiSelect";
 import { supabase } from "../../lib/supabase";
 import CockpitNavigation from "../../components/CockpitNavigation";
+import StellantisComparison from "../../components/StellantisComparison";
 
 const PERIODS = ["Monthly", "Quarterly", "Half-Yearly", "Annual", "Custom Period"];
 const SALES_TYPES = ["Bookings", "Retail", "Wholesale"];
@@ -599,6 +600,14 @@ export default function ModelWiseClient({ brand }) {
         </div>
       </section>
       )}
+      <StellantisComparison
+        period={period}
+        periodValue={periodValue}
+        year={year}
+        customFrom={customFrom}
+        customTo={customTo}
+        salesTypes={salesType.length === 0 || salesType.includes("All") ? SALES_TYPES : salesType}
+      />
       <footer>
         <span>Stellantis Sales Cockpit</span><span>•</span><span>Model data: 2021–2026 · monthly source records</span>
       </footer>
