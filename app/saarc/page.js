@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { supabase } from "../../lib/supabase";
 import { readClientCacheAsync, writeClientCache } from "../../lib/clientCache";
 import CockpitNavigation from "../../components/CockpitNavigation";
+import StellantisComparison from "../../components/StellantisComparison";
 
 const YEARS = ["2024", "2025", "2026"];
 const PERIODS = ["Monthly", "Quarterly", "Half-Yearly", "Annual"];
@@ -159,14 +160,17 @@ export default function SaarcSalesPerformancePage() {
                 </tr>
               ))}
             </tbody>
-            <tfoot>
-              <tr><th scope="row">Retail + Wholesale</th>{periods.map((_, index) => <td key={index} className={monthClass(index)}>{formatNumber(METRICS.reduce((sum, metric) => sum + matrix[metric.key][index], 0))}</td>)}<td className="saarcTotalCell">{formatNumber(METRICS.reduce((sum, metric) => sum + totals[metric.key], 0))}</td></tr>
-            </tfoot>
           </table>
         </div>
         {!loading && !hasData && <p className="saarcEmpty">No SAARC daily sales records are available for {year}.</p>}
       </section>
 
+      <StellantisComparison
+        period={period}
+        periodValue={["All"]}
+        year={[year]}
+        salesTypes={["Retail", "Wholesale"]}
+      />
       <p className="saarcDataNote">Data source: SAARC records in sales_cockpit_daily. This source currently stores SAARC as one consolidated brand and does not contain a country field; country-wise analysis will require country-level source data.</p>
       <footer className="saarcFooter">Stellantis Sales Cockpit · SAARC regional sales</footer>
     </main>
