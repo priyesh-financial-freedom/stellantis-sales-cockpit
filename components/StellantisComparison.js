@@ -5,7 +5,7 @@ import { supabase } from "../lib/supabase";
 import { loadModelMonthlyData } from "../lib/modelData";
 import { readClientCacheAsync, writeClientCache } from "../lib/clientCache";
 
-const YEARS = [2024, 2025, 2026];
+const YEARS = [2021, 2022, 2023, 2024, 2025, 2026];
 const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 const BOOKING_CACHE = "stellantis-brand-bookings-comparison-v1";
 const SAARC_CACHE = "stellantis-saarc-comparison-v1";
@@ -94,11 +94,9 @@ function sumBookings(rows, brand, year, months) {
 }
 
 function sumSaarc(rows, metric, start, end) {
-  return rows.reduce((sum, row) => (
-    row.sales_date >= start && row.sales_date <= end
-      ? sum + (Number(row[metric.toLowerCase()]) || 0)
-      : sum
-  ), 0);
+  const matching = rows.filter(row => row.sales_date >= start && row.sales_date <= end);
+  if (!matching.length) return null;
+  return matching.reduce((sum, row) => sum + (Number(row[metric.toLowerCase()]) || 0), 0);
 }
 
 function valueStatus(bucket) {
@@ -145,7 +143,7 @@ export default function StellantisComparison({
           supabase.from("sales_cockpit_daily")
             .select("brand,sales_date,retail,wholesale")
             .eq("brand", "SAARC")
-            .gte("sales_date", "2024-01-01")
+            .gte("sales_date", "2021-01-01")
             .lte("sales_date", "2026-12-31")
             .order("sales_date", { ascending: true }),
         ]);
@@ -217,7 +215,7 @@ export default function StellantisComparison({
           </tbody>
         </table>
       </div>
-      <p className="comparisonNote">Bookings are brand-level for Jeep and Citroën; SAARC bookings are not captured in the current source and are therefore excluded from the total. SAARC Retail and Wholesale are included in Stellantis Total.</p>
+      <p className="comparisonNote">Bookings are brand-level for Jeep and Citroën; SAARC bookings are not captured and are excluded from that total. SAARC values are shown as a dash where no source records exist for the selected period. SAARC Retail and Wholesale are included in Stellantis Total wherever records are available.</p>
     </section>
   );
 }
