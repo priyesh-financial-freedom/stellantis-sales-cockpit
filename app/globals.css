@@ -6295,3 +6295,22 @@ html[data-theme="dark"] .stellantisComparisonTable .stellantisComparisonTotal { 
   .stellantisComparisonTable th, .stellantisComparisonTable td { padding: 13px 12px; font-size: 14px; }
   .stellantisComparison .sectionHeading h2 { font-size: 20px; }
 }
+
+
+/* Match the mobile Stellantis comparison table to the larger model-wise matrix. */
+@media (max-width: 650px) {
+  .stellantisComparisonTable th,
+  .stellantisComparisonTable td {
+    font-size: 18px !important;
+    line-height: 1.4 !important;
+    padding: 16px 13px !important;
+  }
+  .stellantisComparisonTable thead th {
+    font-size: 16px !important;
+    line-height: 1.35 !important;
+  }
+  .comparisonNote {
+    font-size: 15px !important;
+    line-height: 1.5 !important;
+  }
+}
