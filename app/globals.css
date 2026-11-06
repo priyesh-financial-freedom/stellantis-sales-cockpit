@@ -6613,3 +6613,60 @@ html[data-theme="dark"] .variantRetailTable .variantMonthlyContribution span:las
     font-weight:600 !important;
   }
 }
+
+
+/* Variant-wise Retail mobile typography v2: target navigation directly and
+   make variant labels/details easier to read without changing the layout. */
+@media (max-width:650px) {
+  /* CockpitNavigation is a sibling of the page content in some layouts;
+     scope through its own nav root rather than relying on the page wrapper. */
+  .cockpitNavGroups .cockpitMobileMenuButton {
+    font-size:26px !important;
+    line-height:1.35 !important;
+    font-weight:700 !important;
+    min-height:76px !important;
+    padding:18px 20px !important;
+  }
+  .cockpitNavGroups .cockpitMobileMenu .cockpitNavGroupHeader {
+    font-size:23px !important;
+    line-height:1.4 !important;
+    font-weight:700 !important;
+    min-height:74px !important;
+    padding:19px 18px !important;
+  }
+  .cockpitNavGroups .cockpitMobileMenu .cockpitNavGroupLinks a {
+    font-size:22px !important;
+    line-height:1.4 !important;
+    font-weight:600 !important;
+    min-height:72px !important;
+    padding:18px 16px !important;
+  }
+
+  .variantRetailPage .variantMatrixVariant {
+    font-size:19px !important;
+    line-height:1.4 !important;
+    font-weight:600 !important;
+  }
+  .variantRetailPage .variantExpandedDetail {
+    font-size:19px !important;
+    line-height:1.55 !important;
+    padding:18px 16px 20px !important;
+  }
+  .variantRetailPage .variantMonthlyFocusDetail h4 {
+    font-size:22px !important;
+    line-height:1.4 !important;
+  }
+  .variantRetailPage .variantMonthlyFocusCell {
+    padding:16px 15px !important;
+    min-height:122px !important;
+    gap:10px !important;
+  }
+  .variantRetailPage .variantMonthlyFocusCell strong {
+    font-size:20px !important;
+    line-height:1.4 !important;
+  }
+  .variantRetailPage .variantMonthlyFocusCell span {
+    font-size:17px !important;
+    line-height:1.5 !important;
+  }
+}
