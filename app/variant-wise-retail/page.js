@@ -38,9 +38,28 @@ export default function VariantWiseRetailPage() {
             }
           }
           if (modelName.toLowerCase() === "ec3") modelName = "EC3";
+          const monthIndex = Number(row.sales_month)-1;
+          // Supabase currently stores C3 Live + Live Option as one combined
+          // "Live" value. Recreate the historically validated split for Jan-Sep.
+          // October remains combined under Live until the user supplies the split.
+          if (modelName.toLowerCase() === "c3" && variantName.toLowerCase() === "live") {
+            const historicalLive = [512,342,264,227,158,539,475,342,311];
+            const historicalLiveOption = [0,77,189,184,176,241,208,232,270];
+            const liveKey = [brandName,"C3","Live"].join("|");
+            const optionKey = [brandName,"C3","Live Option"].join("|");
+            if (!grouped.has(liveKey)) grouped.set(liveKey,{brand:brandName,model:"C3",variant:"Live",months:Array(12).fill(null)});
+            if (!grouped.has(optionKey)) grouped.set(optionKey,{brand:brandName,model:"C3",variant:"Live Option",months:Array(12).fill(null)});
+            if (monthIndex >= 0 && monthIndex < 9) {
+              grouped.get(liveKey).months[monthIndex] = historicalLive[monthIndex];
+              grouped.get(optionKey).months[monthIndex] = historicalLiveOption[monthIndex];
+            } else if (monthIndex === 9) {
+              grouped.get(liveKey).months[monthIndex] = Number(row.units);
+              // October split to be supplied; keep the option value unavailable.
+            }
+            return;
+          }
           const key = [brandName,modelName,variantName].join("|");
           if (!grouped.has(key)) grouped.set(key,{brand:brandName,model:modelName,variant:variantName,months:Array(12).fill(null)});
-          const monthIndex = Number(row.sales_month)-1;
           if (monthIndex >= 0 && monthIndex < 12) grouped.get(key).months[monthIndex] = Number(row.units);
         });
         if (active) {
@@ -151,6 +170,7 @@ export default function VariantWiseRetailPage() {
     <header className="pageHeader"><div><h1>Variant-wise Retail</h1><p className="subtitle">Monthly variant retail performance · Jeep and Citroën · 2026</p>{dataLoading&&<p className="subtitle">Refreshing live Citroën variant data…</p>}{dataError&&<p className="subtitle">{dataError}</p>}</div></header>
     <CockpitNavigation active="Variant-wise Retail" />
     <section className="pricesNotice"><strong>Retail data only</strong><span>Monthly retail volumes by model and variant. Blank source cells are shown as unavailable (—); reported zeroes remain zero. Months after the latest month with positive retail activity for the selected brand are hidden.</span></section>
+    <p className="pricesStorageNote">C3 Live and Live Option are shown separately using the validated January–September split. October’s combined 675 units are temporarily carried under Live; the October split is pending.</p>
     <button type="button" className="variantFiltersToggle" aria-expanded={showMobileFilters} onClick={()=>setShowMobileFilters(v=>!v)}><span>Filters</span><span>{[period,brand,model].join(" · ")}</span><strong>{showMobileFilters?"Hide −":"Edit +"} </strong></button>
     <section className={"pricesFilters variantRetailFilters"+(showMobileFilters?" isOpen":"")}>
       <label>Period type<select value={period} onChange={e=>{setPeriod(e.target.value);setPeriodValue(e.target.value==="Monthly"?"All":"0");}}>{periods.map(p=><option key={p}>{p}</option>)}</select></label>
