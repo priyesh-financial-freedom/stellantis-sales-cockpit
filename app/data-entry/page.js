@@ -12,7 +12,7 @@ import CockpitNavigation from "../../components/CockpitNavigation";
 const BRANDS = ["Jeep", "Citroën", "SAARC"];
 const MODEL_BRANDS = ["Jeep", "Citroën"];
 const SALES_TYPES = ["All", "Bookings", "Retail", "Wholesale"];
-const DATASETS = ["Model Monthly", "Brand Monthly Bookings", "SAARC Monthly", "Industry History", "Manufacturer History"];
+const DATASETS = ["Model Monthly", "Variant Monthly", "Brand Monthly Bookings", "SAARC Monthly", "Industry History", "Manufacturer History"];
 
 function csvEscape(value) {
   const text = value === null || value === undefined ? "" : String(value);
@@ -38,6 +38,7 @@ function downloadCsv(filename, csv) {
 
 
 const TEMPLATE_SCHEMAS = {
+  "Variant Monthly": { filename: "template-variant-monthly.csv", columns: [{key:"brand",label:"brand"},{key:"model_name",label:"model_name"},{key:"variant_name",label:"variant_name"},{key:"sales_type",label:"sales_type"},{key:"sales_year",label:"sales_year"},{key:"sales_month",label:"sales_month"},{key:"units",label:"units"}], sample: {brand:"Citroën",model_name:"C3",variant_name:"Live",sales_type:"Retail",sales_year:2026,sales_month:10,units:675} },
   "Brand Monthly Bookings": {
     filename: "template-brand-monthly-bookings.csv",
     columns: [
@@ -337,6 +338,7 @@ export default function DataEntryPage() {
   const [year, setYear] = useState("2026");
   const [month, setMonth] = useState("Oct");
   const [units, setUnits] = useState("");
+  const [variantName, setVariantName] = useState("");
 
   // Filter selections are independent from manual-entry fields so multiple
   // records can be exported without changing the record being entered.
@@ -369,6 +371,11 @@ export default function DataEntryPage() {
 
   async function loadRecent() {
     if (exportOnly) { setRecent([]); return; }
+    if (dataset === "Variant Monthly") {
+      const result = await supabase.from("sales_cockpit_variant_monthly").select("brand,model_name,variant_name,sales_type,sales_year,sales_month,units,source").eq("brand",brand).eq("sales_type",salesType).order("sales_year",{ascending:false}).order("sales_month",{ascending:false}).limit(20);
+      if (!result.error) setRecent(result.data || []);
+      return;
+    }
     if (dataset === "Brand Monthly Bookings") {
       const result = await supabase.from("sales_cockpit_brand_monthly_bookings")
         .select("brand,sales_year,sales_month,units,source").eq("brand", brand)
@@ -403,7 +410,15 @@ export default function DataEntryPage() {
     try {
       if (dataset === "Retail Sales" || dataset === "Daily Sales") throw new Error("Daily Sales entry has been retired. Use Model Monthly for Bookings, Retail and Wholesale.");
       setSaving(true); setError(""); setMessage("");
-      if (dataset === "Brand Monthly Bookings") {
+      if (dataset === "Variant Monthly") {
+        const salesMonth = MODEL_PERIODS.indexOf(month) + 1;
+        const numericUnits = numberOrNull(units);
+        if (!MODEL_BRANDS.includes(brand) || !model || !variantName.trim() || !["Bookings","Retail","Wholesale"].includes(salesType) || !salesMonth || numericUnits === null) throw new Error("Complete all variant fields and enter valid units.");
+        const payload = {brand,model_name:model,variant_name:variantName.trim(),sales_type:salesType,sales_year:Number(year),sales_month:salesMonth,units:numericUnits,source:"Manual entry",updated_at:new Date().toISOString()};
+        const result = await supabase.from("sales_cockpit_variant_monthly").upsert(payload,{onConflict:"brand,model_name,variant_name,sales_type,sales_year,sales_month"});
+        if (result.error) throw result.error;
+        setMessage("Variant monthly record saved / updated.");
+      } else if (dataset === "Brand Monthly Bookings") {
         const salesMonth = MODEL_PERIODS.indexOf(brandBookingMonth) + 1;
         const numericUnits = numberOrNull(brandBookingUnits);
         if (!MODEL_BRANDS.includes(brand) || !salesMonth || numericUnits === null) throw new Error("Select Jeep or Citroën and enter a valid monthly booking total.");
@@ -484,6 +499,14 @@ export default function DataEntryPage() {
     const startDate = Math.min(...yearList) + "-01-01";
     const endDate = Math.max(...yearList) + "-12-31";
 
+    if (dataset === "Variant Monthly") {
+      let query = supabase.from("sales_cockpit_variant_monthly").select("brand,model_name,variant_name,sales_type,sales_year,sales_month,units,source").in("sales_year",selectedYears).order("sales_year").order("sales_month");
+      if (selectedBrands.length && selectedBrands.length < MODEL_BRANDS.length) query = query.in("brand",selectedBrands);
+      if (selectedSalesTypes.length && selectedSalesTypes.length < SALES_TYPES.filter(item=>item!=="All").length) query = query.in("sales_type",selectedSalesTypes);
+      if (selectedModels.length && selectedModels.length < filterModelOptions.length) query = query.in("model_name",selectedModels);
+      const result = await query; if (result.error) throw result.error;
+      return {filename:"stellantis-variant-monthly-"+yearLabel,title:"Stellantis India — Variant Monthly Sales",subtitle:"Brands: "+brandLabel+" · Years: "+yearLabel,rows:result.data||[],columns:[{key:"brand",label:"Brand"},{key:"model_name",label:"Model"},{key:"variant_name",label:"Variant"},{key:"sales_type",label:"Sales Type"},{key:"sales_year",label:"Year"},{key:"sales_month",label:"Month"},{key:"units",label:"Units"},{key:"source",label:"Source"}]};
+    }
     if (dataset === "Brand Monthly Bookings") {
       const result = await supabase.from("sales_cockpit_brand_monthly_bookings").select("brand,sales_year,sales_month,units,source").eq("brand", brand).in("sales_year", selectedYears).order("sales_year").order("sales_month");
       if (result.error) throw result.error;
