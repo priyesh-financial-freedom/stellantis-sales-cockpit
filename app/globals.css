@@ -6670,3 +6670,58 @@ html[data-theme="dark"] .variantRetailTable .variantMonthlyContribution span:las
     line-height:1.5 !important;
   }
 }
+
+
+/* Expanded variant contribution: compact, scannable month-by-month table. */
+.variantRetailPage .variantMonthlyContributionTableWrap {
+  width:100%;
+  overflow-x:auto;
+  border:1px solid var(--border,#aab8c6);
+  border-radius:10px;
+}
+.variantRetailPage .variantMonthlyContributionTable {
+  width:100%;
+  border-collapse:collapse;
+  table-layout:auto;
+  font-variant-numeric:tabular-nums;
+}
+.variantRetailPage .variantMonthlyContributionTable th,
+.variantRetailPage .variantMonthlyContributionTable td {
+  padding:10px 12px;
+  border-bottom:1px solid var(--border,#d6dee6);
+  text-align:left;
+  white-space:nowrap;
+  font-size:15px;
+  line-height:1.4;
+}
+.variantRetailPage .variantMonthlyContributionTable thead th {
+  background:rgba(115,139,160,.13);
+  color:var(--foreground,#243342);
+  font-weight:650;
+}
+.variantRetailPage .variantMonthlyContributionTable tbody th {
+  color:var(--foreground,#243342);
+  font-weight:600;
+}
+.variantRetailPage .variantMonthlyContributionTable tbody td {
+  color:var(--foreground,#34485b);
+}
+.variantRetailPage .variantMonthlyContributionTable tbody tr:last-child th,
+.variantRetailPage .variantMonthlyContributionTable tbody tr:last-child td {
+  border-bottom:0;
+}
+@media (max-width:650px) {
+  .variantRetailPage .variantMonthlyContributionTable th,
+  .variantRetailPage .variantMonthlyContributionTable td {
+    padding:12px 10px;
+    font-size:16px;
+  }
+  .variantRetailPage .variantMonthlyContributionTable thead th {
+    white-space:normal;
+    min-width:105px;
+  }
+  .variantRetailPage .variantMonthlyContributionTable thead th:first-child,
+  .variantRetailPage .variantMonthlyContributionTable tbody th {
+    min-width:62px;
+  }
+}
