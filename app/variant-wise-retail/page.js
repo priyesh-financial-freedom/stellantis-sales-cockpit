@@ -152,7 +152,6 @@ export default function VariantWiseRetailPage() {
       brandPct:brandDenominator>0 ? value/brandDenominator*100 : 0
     };
   };
-  const isCitroenFocusVariant = r => r.brand==="Citroën" && r.model==="C3" && ["Live","Live Option"].includes(r.variant);
   const grandTotal = rows.reduce((sum,r)=>sum+r.total,0);
   const brandMonthlyTotals = useMemo(()=>{
     const totals = new Map();
@@ -224,7 +223,7 @@ export default function VariantWiseRetailPage() {
                   {detailOpen&&<div className="variantExpandedDetail"><div className="variantExpandedPeriods">{comparisonPeriods.map((p,i)=><span key={p.label}><small>{p.label}</small><strong>{fmt(r.periodTotals[i])}</strong></span>)}</div>
                     {comparisonPeriods.length>1&&<div className="variantPeriodChanges">{comparisonPeriods.slice(1).map((p,i)=>{const previous=r.periodTotals[i],current=r.periodTotals[i+1],delta=current-previous;const pct=previous===0?null:delta/previous*100;return <span key={p.label}>{comparisonPeriods[i].label.replace(/ \([^)]*\)/g,"")} → {p.label.replace(/ \([^)]*\)/g,"")}: <strong className={delta>0?"trendUp":delta<0?"trendDown":""}>{delta>0?"+":""}{fmt(delta)}{pct==null?"":" ("+(pct>0?"+":"")+pct.toFixed(1)+"%)"}</strong></span>;})}</div>}
                     <div className="variantMixDetail">Rolling 3-month model mix: <strong className={"mix-"+contribution.tier}>{contribution.pct.toFixed(1)}%</strong></div>
-                    {isCitroenFocusVariant(r)&&<section className="variantMonthlyFocusDetail"><h4>Monthly contribution mix</h4><p>Each month's share of C3 retail and total Citroën retail</p><div className="variantMonthlyFocusGrid">{MONTHS.map((month,monthIndex)=>{if(monthIndex>activeMonth)return null;const share=monthlyContributionFor(r,monthIndex);const units=r.months[monthIndex];if(units==null)return <div className="variantMonthlyFocusCell" key={month}><strong>{month}</strong><span>Units unavailable</span></div>;return <div className="variantMonthlyFocusCell" key={month}><strong>{month}</strong><b>{fmt(units)} units</b><span>{share.modelPct.toFixed(1)}% of C3</span><span>{share.brandPct.toFixed(1)}% of Citroën</span></div>;})}</div></section>}</div>}
+                    <section className="variantMonthlyFocusDetail"><h4>Monthly contribution mix</h4><p>Each month's share of {r.model} retail and total {r.brand} retail</p><div className="variantMonthlyFocusGrid">{MONTHS.map((month,monthIndex)=>{if(monthIndex>activeMonth)return null;const share=monthlyContributionFor(r,monthIndex);const units=r.months[monthIndex];if(units==null)return <div className="variantMonthlyFocusCell" key={month}><strong>{month}</strong><span>Units unavailable</span></div>;return <div className="variantMonthlyFocusCell" key={month}><strong>{month}</strong><b>{fmt(units)} units</b><span>{share.modelPct.toFixed(1)}% of {r.model}</span><span>{share.brandPct.toFixed(1)}% of {r.brand}</span></div>;})}</div></section></div>}
                 </div>;
               })}
             </div>}
