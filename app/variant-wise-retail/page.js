@@ -138,6 +138,21 @@ export default function VariantWiseRetailPage() {
     const brandPct = brandDenominator>0 ? value/brandDenominator*100 : 0;
     return {pct,brandPct,tier:pct<10?"low":pct<=25?"mid":"high",months:indexes.map(i=>MONTHS[i])};
   };
+  const monthlyContributionFor = (r,monthIndex) => {
+    const value = r.months[monthIndex];
+    if (value == null) return null;
+    const modelDenominator = variantRows
+      .filter(item=>item.brand===r.brand&&item.model===r.model)
+      .reduce((sum,item)=>sum+(item.months[monthIndex]??0),0);
+    const brandDenominator = variantRows
+      .filter(item=>item.brand===r.brand)
+      .reduce((sum,item)=>sum+(item.months[monthIndex]??0),0);
+    return {
+      modelPct:modelDenominator>0 ? value/modelDenominator*100 : 0,
+      brandPct:brandDenominator>0 ? value/brandDenominator*100 : 0
+    };
+  };
+  const isCitroenFocusVariant = r => r.brand==="Citroën" && r.model==="C3" && ["Live","Live Option"].includes(r.variant);
   const grandTotal = rows.reduce((sum,r)=>sum+r.total,0);
   const brandMonthlyTotals = useMemo(()=>{
     const totals = new Map();
@@ -218,7 +233,7 @@ export default function VariantWiseRetailPage() {
       </div>
       <div className="pricesTableScroll variantCompareDesktopTable"><table className="pricesTable variantCompareTable"><thead><tr><th>Brand</th><th>Model</th><th>Variant</th>{comparisonPeriods.map(p=><th key={p.label}>{p.label}</th>)}</tr></thead><tbody>{comparisonRows.map(r=><tr className={"contribution-"+contributionFor(r).tier} key={"compare|"+r.brand+"|"+r.model+"|"+r.variant}><td>{r.brand}</td><td><strong>{r.model}</strong></td><td className="priceVariantCell">{r.variant}</td>{r.periodTotals.map((value,i)=><td key={comparisonPeriods[i].label}>{fmt(value)}</td>)}</tr>)}{!comparisonRows.length&&<tr><td colSpan={comparisonPeriods.length+3} className="pricesEmptyCell">No variants match these filters.</td></tr>}</tbody></table></div>
     </section>
-    <section className="pricesTableWrap"><div className="pricesSectionHeading"><h2>Variant retail matrix</h2><span>Units · {year}</span></div><div className="pricesTableScroll"><table className="pricesTable variantRetailTable"><thead><tr><th>Brand</th><th>Model</th><th>Variant</th>{monthIndexes.map(i=><th key={i}>{MONTHS[i]}</th>)}<th>Total</th></tr></thead><tbody>{rows.map((r,i)=><tr className={"contribution-"+contributionFor(r).tier} key={r.brand+"|"+r.model+"|"+r.variant}><td data-label="Brand">{r.brand}</td><td data-label="Model"><strong>{r.model}</strong></td><td data-label="Variant" className={"priceVariantCell contributionCell contribution-"+contributionFor(r,r.total).tier}>{r.variant}<small>{contributionFor(r,r.total).pct.toFixed(1)}% of model</small><small>{contributionFor(r,r.total).brandPct.toFixed(1)}% of brand</small></td>{monthIndexes.map(m=><td key={m} data-label={MONTHS[m]}>{fmt(r.months[m])}</td>)}<td data-label="Total"><strong>{fmt(r.total)}</strong></td></tr>)}{!rows.length&&<tr><td colSpan={monthIndexes.length+4} className="pricesEmptyCell">No variants match these filters.</td></tr>}</tbody><tfoot>{brandMonthlyTotals.map(entry=><tr className="variantRetailBrandTotal" key={"brand-total-"+entry.brand}><th colSpan={3}>{entry.brand} Total</th>{entry.months.map((value,i)=><th key={monthIndexes[i]}>{fmt(value)}</th>)}<th>{fmt(entry.total)}</th></tr>)}{brandMonthlyTotals.length>1&&<tr className="variantRetailGrandTotal"><th colSpan={3}>Grand Total</th>{monthIndexes.map((monthIndex,i)=><th key={monthIndex}>{fmt(brandMonthlyTotals.reduce((sum,entry)=>sum+entry.months[i],0))}</th>)}<th>{fmt(grandTotal)}</th></tr>}</tfoot></table></div></section>
+    <section className="pricesTableWrap"><div className="pricesSectionHeading"><h2>Variant retail matrix</h2><span>Units · {year}</span></div><div className="pricesTableScroll"><table className="pricesTable variantRetailTable"><thead><tr><th>Brand</th><th>Model</th><th>Variant</th>{monthIndexes.map(i=><th key={i}>{MONTHS[i]}</th>)}<th>Total</th></tr></thead><tbody>{rows.map((r,i)=><tr className={"contribution-"+contributionFor(r).tier} key={r.brand+"|"+r.model+"|"+r.variant}><td data-label="Brand">{r.brand}</td><td data-label="Model"><strong>{r.model}</strong></td><td data-label="Variant" className={"priceVariantCell contributionCell contribution-"+contributionFor(r,r.total).tier}>{r.variant}<small>{contributionFor(r,r.total).pct.toFixed(1)}% of model</small><small>{contributionFor(r,r.total).brandPct.toFixed(1)}% of brand</small></td>{monthIndexes.map(m=><td key={m} data-label={MONTHS[m]}>{fmt(r.months[m])}{isCitroenFocusVariant(r)&&monthlyContributionFor(r,m)&&<small className="variantMonthlyContribution"><span>{monthlyContributionFor(r,m).modelPct.toFixed(1)}% model</span><span>{monthlyContributionFor(r,m).brandPct.toFixed(1)}% brand</span></small>}</td>)}<td data-label="Total"><strong>{fmt(r.total)}</strong></td></tr>)}{!rows.length&&<tr><td colSpan={monthIndexes.length+4} className="pricesEmptyCell">No variants match these filters.</td></tr>}</tbody><tfoot>{brandMonthlyTotals.map(entry=><tr className="variantRetailBrandTotal" key={"brand-total-"+entry.brand}><th colSpan={3}>{entry.brand} Total</th>{entry.months.map((value,i)=><th key={monthIndexes[i]}>{fmt(value)}</th>)}<th>{fmt(entry.total)}</th></tr>)}{brandMonthlyTotals.length>1&&<tr className="variantRetailGrandTotal"><th colSpan={3}>Grand Total</th>{monthIndexes.map((monthIndex,i)=><th key={monthIndex}>{fmt(brandMonthlyTotals.reduce((sum,entry)=>sum+entry.months[i],0))}</th>)}<th>{fmt(grandTotal)}</th></tr>}</tfoot></table></div></section>
     <p className="pricesStorageNote">Source: uploaded 2026 variant-wise retail workbooks. Monthly figures are preserved as supplied. Period totals sum available numeric monthly values; blanks are excluded from the sum and displayed as —.</p>
   </main>;
 }
