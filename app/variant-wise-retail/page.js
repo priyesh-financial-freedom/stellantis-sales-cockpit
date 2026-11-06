@@ -125,7 +125,7 @@ export default function VariantWiseRetailPage() {
       totals.set(key,(totals.get(key)||0)+value);
     });
     return {indexes:activeMonths,totals};
-  },[]);
+  },[variantRows]);
   const contributionFor = r => {
     const key = r.brand+"|"+r.model;
     const indexes = rollingContribution.indexes;
