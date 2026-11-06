@@ -61,7 +61,7 @@ export default function VariantWiseRetailPage() {
       result.set(b,active.length?Math.max(...active):-1);
     }
     return result;
-  },[]);
+  },[variantRows]);
   const activeMonth = brand==="All"
     ? Math.max(activeMonthByBrand.get("Jeep")??-1,activeMonthByBrand.get("Citroën")??-1)
     : (activeMonthByBrand.get(brand)??-1);
