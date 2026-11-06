@@ -8,7 +8,7 @@ const fmt = value => value == null ? "—" : Number(value).toLocaleString("en-IN
 const periods = ["Monthly","Quarterly","Half-Yearly","Annual","Custom Range"];
 const monthOptions = MONTHS.map((name,index)=>({name,index}));
 export default function VariantWiseRetailPage() {
-  const [variantRows,setVariantRows] = useState(STATIC_variantRows);
+  const [variantRows,setVariantRows] = useState(STATIC_RETAIL_VARIANTS);
   const [dataLoading,setDataLoading] = useState(true);
   const [dataError,setDataError] = useState("");
   useEffect(() => {
@@ -28,7 +28,7 @@ export default function VariantWiseRetailPage() {
           grouped.get(key).months[Number(row.sales_month)-1] = Number(row.units);
         });
         if (active && grouped.size) {
-          const jeepRows = STATIC_variantRows.filter(row => row.brand === "Jeep");
+          const jeepRows = STATIC_RETAIL_VARIANTS.filter(row => row.brand === "Jeep");
           setVariantRows([...jeepRows,...grouped.values()]);
           setDataError("");
         }
