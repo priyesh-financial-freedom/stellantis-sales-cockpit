@@ -1,12 +1,46 @@
 "use client";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { supabase } from "../../lib/supabase";
 import CockpitNavigation from "../../components/CockpitNavigation";
-import { MONTHS, RETAIL_VARIANTS } from "../../lib/variantRetailData";
+import { MONTHS, RETAIL_VARIANTS as STATIC_RETAIL_VARIANTS } from "../../lib/variantRetailData";
 
 const fmt = value => value == null ? "—" : Number(value).toLocaleString("en-IN");
 const periods = ["Monthly","Quarterly","Half-Yearly","Annual","Custom Range"];
 const monthOptions = MONTHS.map((name,index)=>({name,index}));
 export default function VariantWiseRetailPage() {
+  const [variantRows,setVariantRows] = useState(STATIC_variantRows);
+  const [dataLoading,setDataLoading] = useState(true);
+  const [dataError,setDataError] = useState("");
+  useEffect(() => {
+    let active = true;
+    async function loadLiveVariants() {
+      try {
+        const { data, error } = await supabase
+          .from("sales_cockpit_variant_monthly")
+          .select("brand,model_name,variant_name,sales_year,sales_month,units")
+          .eq("brand","Citroën").eq("sales_type","Retail").eq("sales_year",2026)
+          .order("model_name").order("variant_name").order("sales_month");
+        if (error) throw error;
+        const grouped = new Map();
+        (data || []).forEach(row => {
+          const key = [row.brand,row.model_name,row.variant_name].join("|");
+          if (!grouped.has(key)) grouped.set(key,{brand:row.brand,model:row.model_name,variant:row.variant_name,months:Array(12).fill(null)});
+          grouped.get(key).months[Number(row.sales_month)-1] = Number(row.units);
+        });
+        if (active && grouped.size) {
+          const jeepRows = STATIC_variantRows.filter(row => row.brand === "Jeep");
+          setVariantRows([...jeepRows,...grouped.values()]);
+          setDataError("");
+        }
+      } catch (err) {
+        if (active) setDataError(err.message || "Live variant data could not be loaded; showing the saved baseline.");
+      } finally {
+        if (active) setDataLoading(false);
+      }
+    }
+    loadLiveVariants();
+    return () => { active = false; };
+  }, []);
   const [brand,setBrand] = useState("All");
   const [year,setYear] = useState("2026");
   const [model,setModel] = useState("All");
@@ -19,11 +53,11 @@ export default function VariantWiseRetailPage() {
   const [expandedVariants,setExpandedVariants] = useState({});
   const [showMobileFilters,setShowMobileFilters] = useState(false);
   const brands = ["All","Jeep","Citroën"];
-  const models = useMemo(()=>["All",...new Set(RETAIL_VARIANTS.filter(r=>brand==="All"||r.brand===brand).map(r=>r.model))],[brand]);
+  const models = useMemo(()=>["All",...new Set(variantRows.filter(r=>brand==="All"||r.brand===brand).map(r=>r.model))],[brand]);
   const activeMonthByBrand = useMemo(()=>{
     const result = new Map();
     for (const b of ["Jeep","Citroën"]) {
-      const active = MONTHS.map((_,i)=>RETAIL_VARIANTS.some(r=>r.brand===b&&(r.months[i]??0)>0)?i:-1).filter(i=>i>=0);
+      const active = MONTHS.map((_,i)=>variantRows.some(r=>r.brand===b&&(r.months[i]??0)>0)?i:-1).filter(i=>i>=0);
       result.set(b,active.length?Math.max(...active):-1);
     }
     return result;
@@ -41,17 +75,17 @@ export default function VariantWiseRetailPage() {
     else { const start=Math.min(Number(fromMonth),Number(toMonth)), end=Math.max(Number(fromMonth),Number(toMonth)); requested=MONTHS.map((_,i)=>i).filter(i=>i>=start&&i<=end); }
     return requested.filter(i=>i<=activeLimit);
   },[period,periodValue,fromMonth,toMonth,activeMonth]);
-  const rows = useMemo(()=>RETAIL_VARIANTS.filter(r=>(brand==="All"||r.brand===brand)&&(model==="All"||r.model===model)&&(`${r.variant} ${r.model}`).toLowerCase().includes(variantSearch.toLowerCase())).map(r=>({...r,total:monthIndexes.reduce((sum,i)=>sum+(r.months[i]??0),0)})).filter(r=>r.total>0).sort((a,b)=>a.brand.localeCompare(b.brand)||a.model.localeCompare(b.model)||a.variant.localeCompare(b.variant)),[brand,model,variantSearch,monthIndexes]);
+  const rows = useMemo(()=>variantRows.filter(r=>(brand==="All"||r.brand===brand)&&(model==="All"||r.model===model)&&(`${r.variant} ${r.model}`).toLowerCase().includes(variantSearch.toLowerCase())).map(r=>({...r,total:monthIndexes.reduce((sum,i)=>sum+(r.months[i]??0),0)})).filter(r=>r.total>0).sort((a,b)=>a.brand.localeCompare(b.brand)||a.model.localeCompare(b.model)||a.variant.localeCompare(b.variant)),[brand,model,variantSearch,monthIndexes]);
   const rollingContribution = useMemo(()=>{
     // A month is considered available for the rolling window when the source
     // contains positive retail activity across the dataset. Trailing zero-filled
     // months must not displace the latest genuinely populated months.
     const activeMonths = MONTHS.map((_,i)=>({
       index:i,
-      total:RETAIL_VARIANTS.reduce((sum,r)=>sum+(r.months[i]??0),0)
+      total:variantRows.reduce((sum,r)=>sum+(r.months[i]??0),0)
     })).filter(m=>m.total>0).map(m=>m.index).slice(-3);
     const totals = new Map();
-    RETAIL_VARIANTS.forEach(r=>{
+    variantRows.forEach(r=>{
       const key = r.brand+"|"+r.model;
       const value = activeMonths.reduce((sum,i)=>sum+(r.months[i]??0),0);
       totals.set(key,(totals.get(key)||0)+value);
@@ -74,7 +108,7 @@ export default function VariantWiseRetailPage() {
     if (period === "Annual") return [{label:"Year to date",indexes:MONTHS.map((_,i)=>i).filter(i=>i<=activeMonth)}];
     return monthIndexes.map(i=>({label:MONTHS[i],indexes:[i]}));
   },[period,monthIndexes,activeMonth]);
-  const comparisonRows = useMemo(()=>RETAIL_VARIANTS.filter(r=>(brand==="All"||r.brand===brand)&&(model==="All"||r.model===model)&&((r.variant+" "+r.model).toLowerCase().includes(variantSearch.toLowerCase()))).map(r=>({...r,periodTotals:comparisonPeriods.map(p=>p.indexes.reduce((sum,i)=>sum+(r.months[i]??0),0))})).filter(r=>r.periodTotals.some(value=>value>0)).sort((a,b)=>a.brand.localeCompare(b.brand)||a.model.localeCompare(b.model)||a.variant.localeCompare(b.variant)),[brand,model,variantSearch,comparisonPeriods]);
+  const comparisonRows = useMemo(()=>variantRows.filter(r=>(brand==="All"||r.brand===brand)&&(model==="All"||r.model===model)&&((r.variant+" "+r.model).toLowerCase().includes(variantSearch.toLowerCase()))).map(r=>({...r,periodTotals:comparisonPeriods.map(p=>p.indexes.reduce((sum,i)=>sum+(r.months[i]??0),0))})).filter(r=>r.periodTotals.some(value=>value>0)).sort((a,b)=>a.brand.localeCompare(b.brand)||a.model.localeCompare(b.model)||a.variant.localeCompare(b.variant)),[brand,model,variantSearch,comparisonPeriods]);
   const groupedComparisonRows = useMemo(()=>{
     const groups = new Map();
     comparisonRows.forEach(r=>{
@@ -86,7 +120,7 @@ export default function VariantWiseRetailPage() {
   },[comparisonRows]);
   const periodLabel = period==="Monthly"?(periodValue==="All"?"All months":MONTHS[Number(periodValue)]):period==="Quarterly"?["Q1 (Jan–Mar)","Q2 (Apr–Jun)","Q3 (Jul–Sep)","Q4 (Oct–Dec)"][Number(periodValue)]:period==="Half-Yearly"?["H1 (Jan–Jun)","H2 (Jul–Dec)"][Number(periodValue)]:period==="Annual"?"Full year":"Custom range";
   return <main className="pageShell pricesPage variantRetailPage">
-    <header className="pageHeader"><div><h1>Variant-wise Retail</h1><p className="subtitle">Monthly variant retail performance · Jeep and Citroën · 2026</p></div></header>
+    <header className="pageHeader"><div><h1>Variant-wise Retail</h1><p className="subtitle">Monthly variant retail performance · Jeep and Citroën · 2026</p>{dataLoading&&<p className="subtitle">Refreshing live Citroën variant data…</p>}{dataError&&<p className="subtitle">{dataError}</p>}</div></header>
     <CockpitNavigation active="Variant-wise Retail" />
     <section className="pricesNotice"><strong>Retail data only</strong><span>Monthly retail volumes by model and variant. Blank source cells are shown as unavailable (—); reported zeroes remain zero. Months after the latest month with positive retail activity for the selected brand are hidden.</span></section>
     <button type="button" className="variantFiltersToggle" aria-expanded={showMobileFilters} onClick={()=>setShowMobileFilters(v=>!v)}><span>Filters</span><span>{[period,brand,model].join(" · ")}</span><strong>{showMobileFilters?"Hide −":"Edit +"} </strong></button>
