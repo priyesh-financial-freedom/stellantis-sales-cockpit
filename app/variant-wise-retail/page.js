@@ -53,8 +53,9 @@ export default function VariantWiseRetailPage() {
               grouped.get(liveKey).months[monthIndex] = historicalLive[monthIndex];
               grouped.get(optionKey).months[monthIndex] = historicalLiveOption[monthIndex];
             } else if (monthIndex === 9) {
-              grouped.get(liveKey).months[monthIndex] = Number(row.units);
-              // October split to be supplied; keep the option value unavailable.
+              // October split confirmed by the user: 311 Live + 364 Live Option.
+              grouped.get(liveKey).months[monthIndex] = 311;
+              grouped.get(optionKey).months[monthIndex] = 364;
             }
             return;
           }
@@ -170,7 +171,7 @@ export default function VariantWiseRetailPage() {
     <header className="pageHeader"><div><h1>Variant-wise Retail</h1><p className="subtitle">Monthly variant retail performance · Jeep and Citroën · 2026</p>{dataLoading&&<p className="subtitle">Refreshing live Citroën variant data…</p>}{dataError&&<p className="subtitle">{dataError}</p>}</div></header>
     <CockpitNavigation active="Variant-wise Retail" />
     <section className="pricesNotice"><strong>Retail data only</strong><span>Monthly retail volumes by model and variant. Blank source cells are shown as unavailable (—); reported zeroes remain zero. Months after the latest month with positive retail activity for the selected brand are hidden.</span></section>
-    <p className="pricesStorageNote">C3 Live and Live Option are shown separately using the validated January–September split. October’s combined 675 units are temporarily carried under Live; the October split is pending.</p>
+    <p className="pricesStorageNote">C3 Live and Live Option are shown separately using the validated January–September split. October split is confirmed: 311 Live and 364 Live Option (675 combined).</p>
     <button type="button" className="variantFiltersToggle" aria-expanded={showMobileFilters} onClick={()=>setShowMobileFilters(v=>!v)}><span>Filters</span><span>{[period,brand,model].join(" · ")}</span><strong>{showMobileFilters?"Hide −":"Edit +"} </strong></button>
     <section className={"pricesFilters variantRetailFilters"+(showMobileFilters?" isOpen":"")}>
       <label>Period type<select value={period} onChange={e=>{setPeriod(e.target.value);setPeriodValue(e.target.value==="Monthly"?"All":"0");}}>{periods.map(p=><option key={p}>{p}</option>)}</select></label>
