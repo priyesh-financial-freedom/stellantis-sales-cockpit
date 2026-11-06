@@ -6344,3 +6344,11 @@ html[data-theme="dark"] .stellantisComparisonTable .stellantisComparisonTotal { 
     line-height: 1.5 !important;
   }
 }
+
+
+.variantRetailTable .variantMonthlyContribution { display:flex; flex-direction:column; gap:2px; margin-top:4px; color:var(--muted,#64748b); font-size:10px; line-height:1.25; white-space:nowrap; }
+.variantRetailTable .variantMonthlyContribution span:first-child { color:#167344; }
+.variantRetailTable .variantMonthlyContribution span:last-child { color:#2465a5; }
+html[data-theme="dark"] .variantRetailTable .variantMonthlyContribution { color:#b9c5d2; }
+html[data-theme="dark"] .variantRetailTable .variantMonthlyContribution span:first-child { color:#78d6a4; }
+html[data-theme="dark"] .variantRetailTable .variantMonthlyContribution span:last-child { color:#8dbdff; }
