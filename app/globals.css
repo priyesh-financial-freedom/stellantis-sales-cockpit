@@ -6480,3 +6480,72 @@ html[data-theme="dark"] .variantRetailTable .variantMonthlyContribution span:las
 @media (min-width:500px) and (max-width:760px) {
   .variantRetailPage .variantMonthlyFocusGrid { grid-template-columns:repeat(3,minmax(0,1fr)); }
 }
+
+
+/* C3 Live / Live Option monthly mix: stronger mobile contrast and hierarchy. */
+@media (max-width:760px) {
+  .variantRetailPage .variantMonthlyFocusDetail {
+    border-top:1px solid #718295;
+  }
+  .variantRetailPage .variantMonthlyFocusDetail h4 {
+    color:#f5f8fc;
+    font-size:16px;
+    line-height:1.4;
+    letter-spacing:.01em;
+  }
+  .variantRetailPage .variantMonthlyFocusDetail p {
+    color:#d0dae5 !important;
+    font-size:13px;
+    line-height:1.45;
+  }
+  .variantRetailPage .variantMonthlyFocusGrid {
+    gap:9px;
+  }
+  .variantRetailPage .variantMonthlyFocusCell {
+    padding:11px 12px;
+    gap:6px;
+    border:1.5px solid #718397;
+    border-radius:10px;
+    background:#293847 !important;
+    box-shadow:inset 0 0 0 1px rgba(255,255,255,.035);
+  }
+  .variantRetailPage .variantMonthlyFocusCell strong {
+    color:#83e0d5 !important;
+    font-size:14px;
+    line-height:1.35;
+  }
+  .variantRetailPage .variantMonthlyFocusCell b {
+    color:#ffffff;
+    font-size:19px;
+    line-height:1.3;
+    font-weight:600 !important;
+  }
+  .variantRetailPage .variantMonthlyFocusCell span {
+    color:#d5dfeb !important;
+    font-size:13px;
+    line-height:1.4;
+  }
+  html[data-theme="light"] .variantRetailPage .variantMonthlyFocusDetail h4 {
+    color:#17212b;
+  }
+  html[data-theme="light"] .variantRetailPage .variantMonthlyFocusDetail {
+    border-top-color:#aab8c6;
+  }
+  html[data-theme="light"] .variantRetailPage .variantMonthlyFocusDetail p {
+    color:#405164 !important;
+  }
+  html[data-theme="light"] .variantRetailPage .variantMonthlyFocusCell {
+    background:#f0f5f9 !important;
+    border-color:#9aabba;
+    box-shadow:none;
+  }
+  html[data-theme="light"] .variantRetailPage .variantMonthlyFocusCell strong {
+    color:#087f78 !important;
+  }
+  html[data-theme="light"] .variantRetailPage .variantMonthlyFocusCell b {
+    color:#142333;
+  }
+  html[data-theme="light"] .variantRetailPage .variantMonthlyFocusCell span {
+    color:#34485b !important;
+  }
+}
