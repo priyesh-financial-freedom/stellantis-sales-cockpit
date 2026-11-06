@@ -152,7 +152,6 @@ export default function VariantWiseRetailPage() {
       brandPct:brandDenominator>0 ? value/brandDenominator*100 : 0
     };
   };
-  const isCitroenFocusVariant = r => r.brand==="Citroën" && r.model==="C3" && ["Live","Live Option"].includes(r.variant);
   const grandTotal = rows.reduce((sum,r)=>sum+r.total,0);
   const brandMonthlyTotals = useMemo(()=>{
     const totals = new Map();
