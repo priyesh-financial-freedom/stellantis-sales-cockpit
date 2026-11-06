@@ -700,6 +700,16 @@ export default function DataEntryPage() {
           if (!/^\d{4}-\d{2}-\d{2}$/.test(row.sales_date || "") || Number.isNaN(Date.parse(row.sales_date))) rowErrors.push("Row " + line + ": sales_date must use YYYY-MM-DD.");
           ["test_drives", "bookings", "retail", "wholesale"].forEach((field) => { if (row[field] !== "" && !integer(row[field])) rowErrors.push("Row " + line + ": " + field + " must be a non-negative whole number or blank."); });
           key = [row.brand, row.sales_date].join("|");
+        } else if (dataset === "Variant Monthly") {
+          const monthNum = Number(row.sales_month);
+          if (!MODEL_BRANDS.includes(row.brand)) rowErrors.push("Row " + line + ": brand must be Jeep or Citroën.");
+          if (!(MODEL_NAMES[row.brand] || []).includes(row.model_name)) rowErrors.push("Row " + line + ": invalid model for brand.");
+          if (!row.variant_name?.trim()) rowErrors.push("Row " + line + ": variant_name is required.");
+          if (!["Bookings","Retail","Wholesale"].includes(row.sales_type)) rowErrors.push("Row " + line + ": invalid sales_type.");
+          if (!integer(row.sales_year) || Number(row.sales_year) < 2021 || Number(row.sales_year) > 2035) rowErrors.push("Row " + line + ": invalid sales_year.");
+          if (!integer(row.sales_month) || monthNum < 1 || monthNum > 12) rowErrors.push("Row " + line + ": sales_month must be 1–12.");
+          if (!integer(row.units)) rowErrors.push("Row " + line + ": units must be a non-negative whole number.");
+          key = [row.brand,row.model_name,row.variant_name,row.sales_type,row.sales_year,row.sales_month].join("|");
         } else if (dataset === "Model Monthly") {
           const monthNum = Number(row.sales_month);
           if (!MODEL_BRANDS.includes(row.brand)) rowErrors.push("Row " + line + ": brand must be Jeep or Citroën.");
@@ -756,6 +766,10 @@ export default function DataEntryPage() {
             const result = await supabase.from("sales_cockpit_daily").insert(payload);
             if (result.error) throw result.error;
           }
+        } else if (dataset === "Variant Monthly") {
+          const payload = {brand:row.brand,model_name:row.model_name,variant_name:row.variant_name.trim(),sales_type:row.sales_type,sales_year:Number(row.sales_year),sales_month:Number(row.sales_month),units:Number(row.units),source:"CSV import",updated_at:new Date().toISOString()};
+          const result = await supabase.from("sales_cockpit_variant_monthly").upsert(payload,{onConflict:"brand,model_name,variant_name,sales_type,sales_year,sales_month"});
+          if (result.error) throw result.error;
         } else if (dataset === "Model Monthly") {
           const salesMonth = Number(row.sales_month);
           if (!MODEL_BRANDS.includes(row.brand) || !["Bookings", "Retail", "Wholesale"].includes(row.sales_type) || !row.model_name || !row.sales_year || salesMonth < 1 || salesMonth > 12) {
