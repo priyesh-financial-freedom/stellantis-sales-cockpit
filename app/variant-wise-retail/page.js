@@ -18,22 +18,38 @@ export default function VariantWiseRetailPage() {
         const { data, error } = await supabase
           .from("sales_cockpit_variant_monthly")
           .select("brand,model_name,variant_name,sales_year,sales_month,units")
-          .eq("brand","Citroën").eq("sales_type","Retail").eq("sales_year",2026)
-          .order("model_name").order("variant_name").order("sales_month");
+          .ilike("brand","Citro%").eq("sales_type","Retail").eq("sales_year",2026)
+          .order("model_name").order("variant_name").order("sales_month")
+          .range(0,4999);
         if (error) throw error;
         const grouped = new Map();
         (data || []).forEach(row => {
-          const key = [row.brand,row.model_name,row.variant_name].join("|");
-          if (!grouped.has(key)) grouped.set(key,{brand:row.brand,model:row.model_name,variant:row.variant_name,months:Array(12).fill(null)});
-          grouped.get(key).months[Number(row.sales_month)-1] = Number(row.units);
+          const brandName = String(row.brand || "").normalize("NFC");
+          if (!brandName.toLocaleLowerCase().startsWith("citro")) return;
+          let modelName = String(row.model_name || "").trim();
+          let variantName = String(row.variant_name || "").trim();
+          // The live source stores Aircross seating configuration in the variant
+          // label; present it consistently as Aircross 5S / Aircross 7S.
+          if (modelName.toLowerCase() === "aircross") {
+            const seating = variantName.match(/^(5S|7S)\s*[-–]\s*/i);
+            if (seating) {
+              modelName = "Aircross " + seating[1].toUpperCase();
+              variantName = variantName.slice(seating[0].length);
+            }
+          }
+          if (modelName.toLowerCase() === "ec3") modelName = "EC3";
+          const key = [brandName,modelName,variantName].join("|");
+          if (!grouped.has(key)) grouped.set(key,{brand:brandName,model:modelName,variant:variantName,months:Array(12).fill(null)});
+          const monthIndex = Number(row.sales_month)-1;
+          if (monthIndex >= 0 && monthIndex < 12) grouped.get(key).months[monthIndex] = Number(row.units);
         });
-        if (active && grouped.size) {
+        if (active) {
           const jeepRows = STATIC_RETAIL_VARIANTS.filter(row => row.brand === "Jeep");
           setVariantRows([...jeepRows,...grouped.values()]);
-          setDataError("");
+          setDataError(grouped.size ? "" : "Live Citroën retail records were not returned. The page is not substituting the old zero-filled baseline.");
         }
       } catch (err) {
-        if (active) setDataError(err.message || "Live variant data could not be loaded; showing the saved baseline.");
+        if (active) { setVariantRows(STATIC_RETAIL_VARIANTS.filter(row => row.brand === "Jeep")); setDataError("Live Citroën retail data could not be loaded: " + (err.message || "unknown error")); }
       } finally {
         if (active) setDataLoading(false);
       }
