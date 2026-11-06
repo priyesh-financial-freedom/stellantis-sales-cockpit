@@ -6725,3 +6725,33 @@ html[data-theme="dark"] .variantRetailTable .variantMonthlyContribution span:las
     min-width:62px;
   }
 }
+
+
+/* Mobile readability: the expanded contribution table has ample width,
+   so use genuinely comfortable type sizes rather than compact defaults. */
+@media (max-width:650px) {
+  .variantRetailPage .variantExpandedDetail .variantMonthlyContributionTableWrap {
+    width:100%;
+    overflow-x:visible;
+  }
+  .variantRetailPage .variantExpandedDetail .variantMonthlyContributionTable {
+    width:100%;
+    table-layout:auto;
+  }
+  .variantRetailPage .variantExpandedDetail .variantMonthlyContributionTable th,
+  .variantRetailPage .variantExpandedDetail .variantMonthlyContributionTable td {
+    font-size:19px !important;
+    line-height:1.5 !important;
+    padding:16px 14px !important;
+    white-space:normal !important;
+  }
+  .variantRetailPage .variantExpandedDetail .variantMonthlyContributionTable thead th {
+    font-size:19px !important;
+    line-height:1.4 !important;
+    font-weight:700 !important;
+  }
+  .variantRetailPage .variantExpandedDetail .variantMonthlyContributionTable tbody th {
+    font-size:19px !important;
+    font-weight:650 !important;
+  }
+}
