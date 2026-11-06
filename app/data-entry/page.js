@@ -919,7 +919,7 @@ export default function DataEntryPage() {
           </div>
         ) : (
           <div className="entryGrid">
-            <div className="filter"><label>Brand</label><select value={dataset === "SAARC Monthly" ? "SAARC" : brand} onChange={(e) => { const selectedBrand = e.target.value; setBrand(selectedBrand); setDataset(selectedBrand === "SAARC" ? "SAARC Monthly" : "Model Monthly"); }}><option value="Jeep">Jeep</option><option value="Citroën">Citroën</option><option value="SAARC">SAARC</option></select></div>
+            <div className="filter"><label>Brand</label><select value={dataset === "SAARC Monthly" ? "SAARC" : brand} onChange={(e) => { const selectedBrand = e.target.value; setBrand(selectedBrand); setDataset(selectedBrand === "SAARC" ? "SAARC Monthly" : (dataset === "Variant Monthly" ? "Variant Monthly" : "Model Monthly")); }}><option value="Jeep">Jeep</option><option value="Citroën">Citroën</option><option value="SAARC">SAARC</option></select></div>
             <div className="filter"><label>Sales Type</label><select value={salesType} onChange={(e) => setSalesType(e.target.value)}>{SALES_TYPES.filter((item) => item !== "All").map((item) => <option key={item}>{item}</option>)}</select></div>
             <div className="filter"><label>Model</label><select value={model} onChange={(e) => setModel(e.target.value)}>{models.map((item) => <option key={item}>{item}</option>)}</select></div>
             {dataset === "Variant Monthly" && <div className="filter"><label>Variant</label><input value={variantName} onChange={e=>setVariantName(e.target.value)} placeholder="Enter exact variant name"/></div>}
