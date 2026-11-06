@@ -77,7 +77,7 @@ export default function VariantWiseRetailPage() {
     loadLiveVariants();
     return () => { active = false; };
   }, []);
-  const [brand,setBrand] = useState("All");
+  const [brand,setBrand] = useState("Jeep");
   const [year,setYear] = useState("2026");
   const [model,setModel] = useState("All");
   const [variantSearch,setVariantSearch] = useState("");
@@ -88,8 +88,8 @@ export default function VariantWiseRetailPage() {
   const [expandedModels,setExpandedModels] = useState({});
   const [expandedVariants,setExpandedVariants] = useState({});
   const [showMobileFilters,setShowMobileFilters] = useState(false);
-  const brands = ["All","Jeep","Citroën"];
-  const models = useMemo(()=>["All",...new Set(variantRows.filter(r=>brand==="All"||r.brand===brand).map(r=>r.model))],[brand]);
+  const brands = ["Jeep","Citroën"];
+  const models = useMemo(()=>["All",...new Set(variantRows.filter(r=>r.brand===brand).map(r=>r.model))],[brand,variantRows]);
   const activeMonthByBrand = useMemo(()=>{
     const result = new Map();
     for (const b of ["Jeep","Citroën"]) {
@@ -98,9 +98,7 @@ export default function VariantWiseRetailPage() {
     }
     return result;
   },[variantRows]);
-  const activeMonth = brand==="All"
-    ? Math.max(activeMonthByBrand.get("Jeep")??-1,activeMonthByBrand.get("Citroën")??-1)
-    : (activeMonthByBrand.get(brand)??-1);
+  const activeMonth = activeMonthByBrand.get(brand)??-1;
   const monthIndexes = useMemo(()=>{
     const activeLimit = activeMonth;
     let requested;
@@ -111,7 +109,7 @@ export default function VariantWiseRetailPage() {
     else { const start=Math.min(Number(fromMonth),Number(toMonth)), end=Math.max(Number(fromMonth),Number(toMonth)); requested=MONTHS.map((_,i)=>i).filter(i=>i>=start&&i<=end); }
     return requested.filter(i=>i<=activeLimit);
   },[period,periodValue,fromMonth,toMonth,activeMonth]);
-  const rows = useMemo(()=>variantRows.filter(r=>(brand==="All"||r.brand===brand)&&(model==="All"||r.model===model)&&(`${r.variant} ${r.model}`).toLowerCase().includes(variantSearch.toLowerCase())).map(r=>({...r,total:monthIndexes.reduce((sum,i)=>sum+(r.months[i]??0),0)})).filter(r=>r.total>0).sort((a,b)=>a.brand.localeCompare(b.brand)||a.model.localeCompare(b.model)||a.variant.localeCompare(b.variant)),[brand,model,variantSearch,monthIndexes]);
+  const rows = useMemo(()=>variantRows.filter(r=>(r.brand===brand)&&(model==="All"||r.model===model)&&(`${r.variant} ${r.model}`).toLowerCase().includes(variantSearch.toLowerCase())).map(r=>({...r,total:monthIndexes.reduce((sum,i)=>sum+(r.months[i]??0),0)})).filter(r=>r.total>0).sort((a,b)=>a.brand.localeCompare(b.brand)||a.model.localeCompare(b.model)||a.variant.localeCompare(b.variant)),[brand,model,variantSearch,monthIndexes]);
   const rollingContribution = useMemo(()=>{
     // A month is considered available for the rolling window when the source
     // contains positive retail activity across the dataset. Trailing zero-filled
@@ -156,7 +154,7 @@ export default function VariantWiseRetailPage() {
     if (period === "Annual") return [{label:"Year to date",indexes:MONTHS.map((_,i)=>i).filter(i=>i<=activeMonth)}];
     return monthIndexes.map(i=>({label:MONTHS[i],indexes:[i]}));
   },[period,monthIndexes,activeMonth]);
-  const comparisonRows = useMemo(()=>variantRows.filter(r=>(brand==="All"||r.brand===brand)&&(model==="All"||r.model===model)&&((r.variant+" "+r.model).toLowerCase().includes(variantSearch.toLowerCase()))).map(r=>({...r,periodTotals:comparisonPeriods.map(p=>p.indexes.reduce((sum,i)=>sum+(r.months[i]??0),0))})).filter(r=>r.periodTotals.some(value=>value>0)).sort((a,b)=>a.brand.localeCompare(b.brand)||a.model.localeCompare(b.model)||a.variant.localeCompare(b.variant)),[brand,model,variantSearch,comparisonPeriods]);
+  const comparisonRows = useMemo(()=>variantRows.filter(r=>(r.brand===brand)&&(model==="All"||r.model===model)&&((r.variant+" "+r.model).toLowerCase().includes(variantSearch.toLowerCase()))).map(r=>({...r,periodTotals:comparisonPeriods.map(p=>p.indexes.reduce((sum,i)=>sum+(r.months[i]??0),0))})).filter(r=>r.periodTotals.some(value=>value>0)).sort((a,b)=>a.brand.localeCompare(b.brand)||a.model.localeCompare(b.model)||a.variant.localeCompare(b.variant)),[brand,model,variantSearch,comparisonPeriods]);
   const groupedComparisonRows = useMemo(()=>{
     const groups = new Map();
     comparisonRows.forEach(r=>{
