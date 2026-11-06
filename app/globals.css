@@ -4003,6 +4003,13 @@ html[data-theme="light"] .pricesPage .pricesTable tbody tr {
 }
 
 
+
+.variantRetailTable tfoot th { position:sticky; bottom:0; z-index:3; padding:12px 10px; text-align:right; font-weight:750; font-variant-numeric:tabular-nums; background:var(--surface,#eaf0f6); border-top:2px solid var(--border,#b8c4d1); color:var(--text,#17212b); white-space:nowrap; }
+.variantRetailTable tfoot th:first-child { left:0; z-index:5; text-align:left; }
+.variantRetailTable tfoot .variantRetailGrandTotal th { background:var(--surface-strong,#dce6ef); border-top:2px solid var(--text,#526170); }
+html[data-theme="dark"] .variantRetailTable tfoot th { background:#263442; color:#f2f5f8; border-color:#526273; }
+html[data-theme="dark"] .variantRetailTable tfoot .variantRetailGrandTotal th { background:#344657; }
+
 /* Variant-wise Retail period comparison */
 .variantComparePanel { margin:0 0 20px; padding:18px; border:1px solid var(--border,#d9e0e8); border-radius:14px; background:var(--card,#fff); }
 .variantCompareHeading h2 { margin:0 0 5px; font-size:22px; }

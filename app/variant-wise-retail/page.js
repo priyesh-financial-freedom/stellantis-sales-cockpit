@@ -117,6 +117,18 @@ export default function VariantWiseRetailPage() {
     return {pct,tier:pct<10?"low":pct<=25?"mid":"high",months:indexes.map(i=>MONTHS[i])};
   };
   const grandTotal = rows.reduce((sum,r)=>sum+r.total,0);
+  const brandMonthlyTotals = useMemo(()=>{
+    const totals = new Map();
+    rows.forEach(r=>{
+      if(!totals.has(r.brand)) totals.set(r.brand,{brand:r.brand,months:monthIndexes.map(()=>0),total:0});
+      const entry=totals.get(r.brand);
+      monthIndexes.forEach((monthIndex,columnIndex)=>{
+        entry.months[columnIndex]+=(r.months[monthIndex]??0);
+      });
+      entry.total+=r.total;
+    });
+    return [...totals.values()].sort((a,b)=>a.brand.localeCompare(b.brand));
+  },[rows,monthIndexes]);
   const comparisonPeriods = useMemo(() => {
     if (period === "Monthly") return MONTHS.map((label,i)=>({label,indexes:[i]})).filter(p=>p.indexes[0]<=activeMonth);
     if (period === "Quarterly") return ["Q1 (Jan–Mar)","Q2 (Apr–Jun)","Q3 (Jul–Sep)","Q4 (Oct–Dec)"].map((label,q)=>({label,indexes:[q*3,q*3+1,q*3+2].filter(i=>i<=activeMonth)})).filter(p=>p.indexes.length>0);
@@ -183,7 +195,7 @@ export default function VariantWiseRetailPage() {
       </div>
       <div className="pricesTableScroll variantCompareDesktopTable"><table className="pricesTable variantCompareTable"><thead><tr><th>Brand</th><th>Model</th><th>Variant</th>{comparisonPeriods.map(p=><th key={p.label}>{p.label}</th>)}</tr></thead><tbody>{comparisonRows.map(r=><tr className={"contribution-"+contributionFor(r).tier} key={"compare|"+r.brand+"|"+r.model+"|"+r.variant}><td>{r.brand}</td><td><strong>{r.model}</strong></td><td className="priceVariantCell">{r.variant}</td>{r.periodTotals.map((value,i)=><td key={comparisonPeriods[i].label}>{fmt(value)}</td>)}</tr>)}{!comparisonRows.length&&<tr><td colSpan={comparisonPeriods.length+3} className="pricesEmptyCell">No variants match these filters.</td></tr>}</tbody></table></div>
     </section>
-    <section className="pricesTableWrap"><div className="pricesSectionHeading"><h2>Variant retail matrix</h2><span>Units · {year}</span></div><div className="pricesTableScroll"><table className="pricesTable variantRetailTable"><thead><tr><th>Brand</th><th>Model</th><th>Variant</th>{monthIndexes.map(i=><th key={i}>{MONTHS[i]}</th>)}<th>Total</th></tr></thead><tbody>{rows.map((r,i)=><tr className={"contribution-"+contributionFor(r).tier} key={r.brand+"|"+r.model+"|"+r.variant}><td data-label="Brand">{r.brand}</td><td data-label="Model"><strong>{r.model}</strong></td><td data-label="Variant" className={"priceVariantCell contributionCell contribution-"+contributionFor(r,r.total).tier}>{r.variant}<small>{contributionFor(r,r.total).pct.toFixed(1)}% of model</small></td>{monthIndexes.map(m=><td key={m} data-label={MONTHS[m]}>{fmt(r.months[m])}</td>)}<td data-label="Total"><strong>{fmt(r.total)}</strong></td></tr>)}{!rows.length&&<tr><td colSpan={monthIndexes.length+4} className="pricesEmptyCell">No variants match these filters.</td></tr>}</tbody></table></div></section>
+    <section className="pricesTableWrap"><div className="pricesSectionHeading"><h2>Variant retail matrix</h2><span>Units · {year}</span></div><div className="pricesTableScroll"><table className="pricesTable variantRetailTable"><thead><tr><th>Brand</th><th>Model</th><th>Variant</th>{monthIndexes.map(i=><th key={i}>{MONTHS[i]}</th>)}<th>Total</th></tr></thead><tbody>{rows.map((r,i)=><tr className={"contribution-"+contributionFor(r).tier} key={r.brand+"|"+r.model+"|"+r.variant}><td data-label="Brand">{r.brand}</td><td data-label="Model"><strong>{r.model}</strong></td><td data-label="Variant" className={"priceVariantCell contributionCell contribution-"+contributionFor(r,r.total).tier}>{r.variant}<small>{contributionFor(r,r.total).pct.toFixed(1)}% of model</small></td>{monthIndexes.map(m=><td key={m} data-label={MONTHS[m]}>{fmt(r.months[m])}</td>)}<td data-label="Total"><strong>{fmt(r.total)}</strong></td></tr>)}{!rows.length&&<tr><td colSpan={monthIndexes.length+4} className="pricesEmptyCell">No variants match these filters.</td></tr>}</tbody><tfoot>{brandMonthlyTotals.map(entry=><tr className="variantRetailBrandTotal" key={"brand-total-"+entry.brand}><th colSpan={3}>{entry.brand} Total</th>{entry.months.map((value,i)=><th key={monthIndexes[i]}>{fmt(value)}</th>)}<th>{fmt(entry.total)}</th></tr>)}{brandMonthlyTotals.length>1&&<tr className="variantRetailGrandTotal"><th colSpan={3}>Grand Total</th>{monthIndexes.map((monthIndex,i)=><th key={monthIndex}>{fmt(brandMonthlyTotals.reduce((sum,entry)=>sum+entry.months[i],0))}</th>)}<th>{fmt(grandTotal)}</th></tr>}</tfoot></table></div></section>
     <p className="pricesStorageNote">Source: uploaded 2026 variant-wise retail workbooks. Monthly figures are preserved as supplied. Period totals sum available numeric monthly values; blanks are excluded from the sum and displayed as —.</p>
   </main>;
 }
