@@ -6549,3 +6549,67 @@ html[data-theme="dark"] .variantRetailTable .variantMonthlyContribution span:las
     color:#34485b !important;
   }
 }
+
+
+/* Mobile Variant-wise Retail: enlarge expandable contribution detail and navigation. */
+@media (max-width:650px) {
+  .variantRetailPage .variantExpandedDetail {
+    padding:16px 14px 18px !important;
+    font-size:17px !important;
+    line-height:1.5 !important;
+  }
+  .variantRetailPage .variantMonthlyFocusDetail {
+    margin-top:8px !important;
+    padding-top:15px !important;
+  }
+  .variantRetailPage .variantMonthlyFocusDetail h4 {
+    font-size:20px !important;
+    line-height:1.35 !important;
+    margin-bottom:9px !important;
+  }
+  .variantRetailPage .variantMonthlyFocusGrid {
+    gap:11px !important;
+    grid-template-columns:repeat(2,minmax(0,1fr)) !important;
+  }
+  .variantRetailPage .variantMonthlyFocusCell {
+    min-height:112px;
+    padding:14px 14px !important;
+    gap:9px !important;
+    border-width:1.7px !important;
+  }
+  .variantRetailPage .variantMonthlyFocusCell strong {
+    font-size:18px !important;
+    line-height:1.35 !important;
+  }
+  .variantRetailPage .variantMonthlyFocusCell span {
+    font-size:16px !important;
+    line-height:1.45 !important;
+    color:#34485b !important;
+  }
+  html[data-theme="dark"] .variantRetailPage .variantMonthlyFocusCell span,
+  html[data-theme="system"] .variantRetailPage .variantMonthlyFocusCell span {
+    color:#e0e8f0 !important;
+  }
+  .variantRetailPage .cockpitMobileMenuButton {
+    min-height:66px !important;
+    padding:16px 18px !important;
+    font-size:23px !important;
+    line-height:1.3 !important;
+    font-weight:700 !important;
+  }
+  .variantRetailPage .cockpitMobileMenu .cockpitNavGroupHeader {
+    min-height:68px !important;
+    padding:18px 18px !important;
+    font-size:21px !important;
+    line-height:1.4 !important;
+    letter-spacing:.02em !important;
+    font-weight:700 !important;
+  }
+  .variantRetailPage .cockpitMobileMenu .cockpitNavGroupLinks a {
+    min-height:68px !important;
+    padding:17px 14px !important;
+    font-size:21px !important;
+    line-height:1.4 !important;
+    font-weight:600 !important;
+  }
+}
