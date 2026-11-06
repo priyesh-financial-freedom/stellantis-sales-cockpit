@@ -6755,3 +6755,59 @@ html[data-theme="dark"] .variantRetailTable .variantMonthlyContribution span:las
     font-weight:650 !important;
   }
 }
+
+
+/* Dark-mode contrast correction for the expanded monthly contribution table.
+   Explicit foreground/background colours override inherited muted table styles. */
+html[data-theme="dark"] .variantRetailPage .variantExpandedDetail .variantMonthlyContributionTableWrap,
+html[data-theme="system"] .variantRetailPage .variantExpandedDetail .variantMonthlyContributionTableWrap {
+  background:#17212c !important;
+  border-color:#8293a5 !important;
+}
+html[data-theme="dark"] .variantRetailPage .variantExpandedDetail .variantMonthlyContributionTable,
+html[data-theme="system"] .variantRetailPage .variantExpandedDetail .variantMonthlyContributionTable {
+  background:#17212c !important;
+  color:#f1f5f9 !important;
+}
+html[data-theme="dark"] .variantRetailPage .variantExpandedDetail .variantMonthlyContributionTable thead,
+html[data-theme="system"] .variantRetailPage .variantExpandedDetail .variantMonthlyContributionTable thead {
+  background:#2a3949 !important;
+}
+html[data-theme="dark"] .variantRetailPage .variantExpandedDetail .variantMonthlyContributionTable thead th,
+html[data-theme="system"] .variantRetailPage .variantExpandedDetail .variantMonthlyContributionTable thead th {
+  background:#2a3949 !important;
+  color:#ffffff !important;
+  opacity:1 !important;
+  text-shadow:none !important;
+  font-weight:750 !important;
+}
+html[data-theme="dark"] .variantRetailPage .variantExpandedDetail .variantMonthlyContributionTable tbody tr,
+html[data-theme="system"] .variantRetailPage .variantExpandedDetail .variantMonthlyContributionTable tbody tr {
+  background:#17212c !important;
+}
+html[data-theme="dark"] .variantRetailPage .variantExpandedDetail .variantMonthlyContributionTable tbody th,
+html[data-theme="dark"] .variantRetailPage .variantExpandedDetail .variantMonthlyContributionTable tbody td,
+html[data-theme="system"] .variantRetailPage .variantExpandedDetail .variantMonthlyContributionTable tbody th,
+html[data-theme="system"] .variantRetailPage .variantExpandedDetail .variantMonthlyContributionTable tbody td {
+  color:#e8eef6 !important;
+  opacity:1 !important;
+  text-shadow:none !important;
+  border-color:#465666 !important;
+}
+html[data-theme="dark"] .variantRetailPage .variantExpandedDetail .variantMonthlyContributionTable tbody th,
+html[data-theme="system"] .variantRetailPage .variantExpandedDetail .variantMonthlyContributionTable tbody th {
+  color:#ffffff !important;
+  font-weight:700 !important;
+}
+html[data-theme="dark"] .variantRetailPage .variantExpandedDetail .variantMonthlyContributionTable tbody tr:last-child th,
+html[data-theme="dark"] .variantRetailPage .variantExpandedDetail .variantMonthlyContributionTable tbody tr:last-child td,
+html[data-theme="system"] .variantRetailPage .variantExpandedDetail .variantMonthlyContributionTable tbody tr:last-child th,
+html[data-theme="system"] .variantRetailPage .variantExpandedDetail .variantMonthlyContributionTable tbody tr:last-child td {
+  border-bottom:0 !important;
+}
+@media (prefers-color-scheme:dark) {
+  html[data-theme="system"] .variantRetailPage .variantExpandedDetail .variantMonthlyContributionTableWrap,
+  html[data-theme="system"] .variantRetailPage .variantExpandedDetail .variantMonthlyContributionTable {
+    background:#17212c !important;
+  }
+}
