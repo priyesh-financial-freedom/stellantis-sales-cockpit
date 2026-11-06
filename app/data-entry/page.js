@@ -846,13 +846,13 @@ export default function DataEntryPage() {
           <div className="filter">
             <MultiSelect
               label="Brand"
-              options={dataset === "Model Monthly" ? MODEL_BRANDS : BRANDS}
+              options={(dataset === "Model Monthly" || dataset === "Variant Monthly") ? MODEL_BRANDS : BRANDS}
               value={filterBrands}
               onChange={setFilterBrands}
             />
           </div>
         )}
-        {dataset === "Model Monthly" && (
+        {(dataset === "Model Monthly" || dataset === "Variant Monthly") && (
           <>
             <div className="filter"><MultiSelect label="Sales Type" options={SALES_TYPES.filter(item => item !== "All")} value={filterSalesTypes} onChange={setFilterSalesTypes} /></div>
             <div className="filter"><MultiSelect label="Model" options={filterModelOptions} value={filterModels} onChange={setFilterModels} /></div>
@@ -922,12 +922,13 @@ export default function DataEntryPage() {
             <div className="filter"><label>Brand</label><select value={dataset === "SAARC Monthly" ? "SAARC" : brand} onChange={(e) => { const selectedBrand = e.target.value; setBrand(selectedBrand); setDataset(selectedBrand === "SAARC" ? "SAARC Monthly" : "Model Monthly"); }}><option value="Jeep">Jeep</option><option value="Citroën">Citroën</option><option value="SAARC">SAARC</option></select></div>
             <div className="filter"><label>Sales Type</label><select value={salesType} onChange={(e) => setSalesType(e.target.value)}>{SALES_TYPES.filter((item) => item !== "All").map((item) => <option key={item}>{item}</option>)}</select></div>
             <div className="filter"><label>Model</label><select value={model} onChange={(e) => setModel(e.target.value)}>{models.map((item) => <option key={item}>{item}</option>)}</select></div>
+            {dataset === "Variant Monthly" && <div className="filter"><label>Variant</label><input value={variantName} onChange={e=>setVariantName(e.target.value)} placeholder="Enter exact variant name"/></div>}
             <div className="filter"><label>Year</label><select value={year} onChange={(e) => setYear(e.target.value)}>{MODEL_YEARS.map((item) => <option key={item}>{item}</option>)}</select></div>
             <div className="filter"><label>Month</label><select value={month} onChange={(e) => setMonth(e.target.value)}>{MODEL_PERIODS.map((item) => <option key={item}>{item}</option>)}</select></div>
             <div className="filter"><label>Units</label><input type="number" min="0" value={units} onChange={(e) => setUnits(e.target.value)} /></div>
           </div>
         )}
-        <div className="entryFooter"><div className="messageArea">{message && <span className="successMessage">{message}</span>}{error && <span className="errorMessage">{error}</span>}</div><button type="button" className="primaryButton" disabled={saving || exportOnly || (dataset === "Model Monthly" && (brand === "All" || salesType === "All"))} onClick={save}>{saving ? "Saving..." : (dataset === "SAARC Monthly" || dataset === "Brand Monthly Bookings") ? "Save / Update Month" : "Save Record"}</button></div>
+        <div className="entryFooter"><div className="messageArea">{message && <span className="successMessage">{message}</span>}{error && <span className="errorMessage">{error}</span>}</div><button type="button" className="primaryButton" disabled={saving || exportOnly || ((dataset === "Model Monthly" || dataset === "Variant Monthly") && (brand === "All" || salesType === "All"))} onClick={save}>{saving ? "Saving..." : (dataset === "SAARC Monthly" || dataset === "Brand Monthly Bookings") ? "Save / Update Month" : "Save Record"}</button></div>
       </section>
 
       {!exportOnly && <section className="tableCard recentDataCard">
