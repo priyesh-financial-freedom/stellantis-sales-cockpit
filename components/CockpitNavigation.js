@@ -3,7 +3,7 @@ import { useState } from "react";
 import Link from "next/link";
 import ThemeToggle from "./ThemeToggle";
 const groups=[
-{title:"Stellantis India",items:[{label:"Jeep Model Wise",href:"/model-wise/jeep"},{label:"Citroën Model Wise",href:"/model-wise/citroen"},{label:"SAARC Sales Performance",href:"/saarc"},{label:"Budget Planning",href:"/budget-planning"},{label:"Stellantis Network",href:"/stellantis-network"},{label:"Prices",href:"/prices"},{label:"Variant-wise Retail",href:"/variant-wise-retail"}]},
+{title:"Stellantis India",items:[{label:"Jeep Model Wise",href:"/model-wise/jeep"},{label:"Citroën Model Wise",href:"/model-wise/citroen"},{label:"SAARC Sales Performance",href:"/saarc"},{label:"Budget Planning",href:"/budget-planning"},{label:"Stellantis Network",href:"/stellantis-network"},{label:"Prices",href:"/prices"},{label:"Variant-wise Retail",href:"/variant-wise-retail"},{label:"RTO vs Retail",href:"/rto-retail"}]},
 {title:"Industry",items:[{label:"Industry",href:"/industry"},{label:"Manufacturer History",href:"/industry/manufacturers"}]},
 {title:"Data Entry",items:[{label:"Data Entry",href:"/data-entry"}]}];
 export default function CockpitNavigation({active}){
