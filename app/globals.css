@@ -6888,3 +6888,62 @@ html[data-theme="system"] .variantRetailPage .variantExpandedDetail .variantMont
     background:#202b37 !important;
   }
 }
+
+
+/* Monthly RTO vs Retail */
+.rtoRetailPage .rtoIntro {
+  margin:16px 0;
+  padding:14px 16px;
+  border:1px solid var(--border,#d6dee6);
+  border-radius:12px;
+  background:var(--surface-soft,#f2f6f9);
+  color:var(--text,#1f2933);
+}
+.rtoRetailPage .rtoIntro strong { display:block; margin-bottom:5px; font-size:15px; }
+.rtoRetailPage .rtoIntro p { margin:0; color:var(--muted,#657181); line-height:1.5; }
+.rtoRetailPage .rtoYearFilter { display:flex; align-items:end; justify-content:space-between; gap:16px; }
+.rtoRetailPage .rtoYearFilter .filter { min-width:180px; max-width:260px; }
+.rtoRetailPage .rtoRefresh { display:flex; justify-content:flex-end; }
+.rtoRetailPage .rtoEntryCard { margin-top:16px; }
+.rtoRetailPage .rtoPerformanceCard { margin-top:18px; }
+.rtoRetailPage .rtoTableScroll { width:100%; overflow:auto; border:1px solid var(--border,#cbd5df); border-radius:10px; }
+.rtoRetailPage .rtoTable { border-collapse:separate; border-spacing:0; width:100%; min-width:1160px; color:var(--text,#1f2933); font-variant-numeric:tabular-nums; }
+.rtoRetailPage .rtoTable th,
+.rtoRetailPage .rtoTable td { padding:10px 11px; border-right:1px solid var(--border,#d9e0e7); border-bottom:1px solid var(--border,#d9e0e7); text-align:right; white-space:nowrap; }
+.rtoRetailPage .rtoTable thead th { position:sticky; top:0; z-index:2; background:var(--table-header,#edf2f6); color:var(--muted,#536273); font-size:12px; font-weight:700; }
+.rtoRetailPage .rtoTable thead th:first-child,
+.rtoRetailPage .rtoTable thead th:nth-child(2) { text-align:left; }
+.rtoRetailPage .rtoTable tbody th { text-align:left; font-weight:600; }
+.rtoRetailPage .rtoTable tbody tr:not(.rtoBrandHeading) th { min-width:88px; }
+.rtoRetailPage .rtoTable tbody td:last-child,
+.rtoRetailPage .rtoTable thead th:last-child { border-right:0; font-weight:700; }
+.rtoRetailPage .rtoTable .rtoBrandHeading th { padding:11px 12px; background:var(--surface-soft,#f1f5f8); color:var(--accent,#167b73); text-align:left; font-size:14px; letter-spacing:.02em; border-top:2px solid var(--border-strong,#aab7c4); }
+.rtoRetailPage .rtoTable .rtoAchievementRow td,
+.rtoRetailPage .rtoTable .rtoAchievementRow th { color:var(--accent,#167b73); }
+.rtoRetailPage .rtoTable .rtoGapRow td,
+.rtoRetailPage .rtoTable .rtoGapRow th { color:var(--muted,#657181); }
+.rtoRetailPage .rtoTable .rtoTotalCell { background:var(--surface-soft,#f3f6f8); }
+.rtoRetailPage .rtoTotalBlock .rtoBrandHeading th { background:var(--table-header,#e9eff4); color:var(--text,#1f2933); font-size:15px; }
+.rtoRetailPage .rtoTotalBlock tr:not(.rtoBrandHeading) th,
+.rtoRetailPage .rtoTotalBlock tr:not(.rtoBrandHeading) td { font-weight:750; }
+.rtoRetailPage .rtoTable tbody tr:last-child th,
+.rtoRetailPage .rtoTable tbody tr:last-child td { border-bottom:0; }
+.rtoRetailPage .rtoFootnote { margin:10px 2px 0; color:var(--muted,#657181); font-size:12px; line-height:1.45; }
+html[data-theme="dark"] .rtoRetailPage .rtoIntro { background:#202b37; border-color:#455466; color:#f1f5f9; }
+html[data-theme="dark"] .rtoRetailPage .rtoTableScroll { border-color:#536171; }
+html[data-theme="dark"] .rtoRetailPage .rtoTable { color:#e8eef6; }
+html[data-theme="dark"] .rtoRetailPage .rtoTable th,
+html[data-theme="dark"] .rtoRetailPage .rtoTable td { border-color:#465565; }
+html[data-theme="dark"] .rtoRetailPage .rtoTable thead th { background:#2a3949; color:#f1f5f9; }
+html[data-theme="dark"] .rtoRetailPage .rtoTable .rtoBrandHeading th { background:#202b37; color:#7dd3c7; border-top-color:#596777; }
+html[data-theme="dark"] .rtoRetailPage .rtoTable .rtoTotalCell,
+html[data-theme="dark"] .rtoRetailPage .rtoTotalBlock .rtoBrandHeading th { background:#2a3949; color:#ffffff; }
+@media (max-width:650px) {
+  .rtoRetailPage .rtoYearFilter { align-items:stretch; flex-direction:column; }
+  .rtoRetailPage .rtoYearFilter .filter { max-width:none; width:100%; }
+  .rtoRetailPage .rtoRefresh .secondaryButton { width:100%; }
+  .rtoRetailPage .rtoTable { min-width:1120px; }
+  .rtoRetailPage .rtoTable th,
+  .rtoRetailPage .rtoTable td { padding:11px 10px; font-size:14px; }
+  .rtoRetailPage .rtoIntro { font-size:14px; }
+}
