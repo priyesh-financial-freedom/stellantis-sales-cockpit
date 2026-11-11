@@ -6942,8 +6942,152 @@ html[data-theme="dark"] .rtoRetailPage .rtoTotalBlock .rtoBrandHeading th { back
   .rtoRetailPage .rtoYearFilter { align-items:stretch; flex-direction:column; }
   .rtoRetailPage .rtoYearFilter .filter { max-width:none; width:100%; }
   .rtoRetailPage .rtoRefresh .secondaryButton { width:100%; }
-  .rtoRetailPage .rtoTable { min-width:1120px; }
+
+  /* Keep the two row-identifying columns visible while month columns scroll. */
+  .rtoRetailPage .rtoTableScroll {
+    max-width:100%;
+    overflow-x:auto;
+    overflow-y:auto;
+    -webkit-overflow-scrolling:touch;
+    overscroll-behavior-x:contain;
+    scrollbar-gutter:stable;
+  }
+  .rtoRetailPage .rtoTable {
+    width:max-content;
+    min-width:1160px;
+    table-layout:fixed;
+  }
   .rtoRetailPage .rtoTable th,
-  .rtoRetailPage .rtoTable td { padding:11px 10px; font-size:14px; }
-  .rtoRetailPage .rtoIntro { font-size:14px; }
+  .rtoRetailPage .rtoTable td {
+    padding:12px 11px;
+    font-size:15px;
+    line-height:1.35;
+  }
+  .rtoRetailPage .rtoTable thead th {
+    position:sticky;
+    top:0;
+    z-index:4;
+    font-size:13px;
+    padding-top:13px;
+    padding-bottom:13px;
+  }
+  .rtoRetailPage .rtoTable thead th:first-child,
+  .rtoRetailPage .rtoTable tbody tr:not(.rtoBrandHeading) > td:first-child {
+    position:sticky;
+    left:0;
+    width:86px;
+    min-width:86px;
+    max-width:86px;
+    z-index:5;
+    text-align:left;
+    background:var(--table-header,#edf2f6);
+    box-sizing:border-box;
+  }
+  .rtoRetailPage .rtoTable thead th:nth-child(2),
+  .rtoRetailPage .rtoTable tbody tr:not(.rtoBrandHeading) > th[scope="row"] {
+    position:sticky;
+    left:86px;
+    width:98px;
+    min-width:98px;
+    max-width:98px;
+    z-index:5;
+    text-align:left;
+    background:var(--surface,#ffffff);
+    box-sizing:border-box;
+    box-shadow:3px 0 5px -4px rgba(0,0,0,.45);
+  }
+  .rtoRetailPage .rtoTable thead th:first-child,
+  .rtoRetailPage .rtoTable thead th:nth-child(2) {
+    z-index:7;
+    background:var(--table-header,#edf2f6);
+  }
+  .rtoRetailPage .rtoTable tbody tr:not(.rtoBrandHeading) > td:first-child {
+    background:var(--surface,#ffffff);
+  }
+  .rtoRetailPage .rtoTable tbody tr:not(.rtoBrandHeading) > th[scope="row"] {
+    background:var(--surface,#ffffff);
+  }
+  .rtoRetailPage .rtoTable .rtoTotalCell {
+    background:var(--surface-soft,#f3f6f8);
+  }
+  html[data-theme="dark"] .rtoRetailPage .rtoTable tbody tr:not(.rtoBrandHeading) > td:first-child,
+  html[data-theme="dark"] .rtoRetailPage .rtoTable tbody tr:not(.rtoBrandHeading) > th[scope="row"] {
+    background:#202b37;
+  }
+  html[data-theme="dark"] .rtoRetailPage .rtoTable thead th:first-child,
+  html[data-theme="dark"] .rtoRetailPage .rtoTable thead th:nth-child(2) {
+    background:#2a3949;
+  }
+  .rtoRetailPage .rtoIntro { font-size:15px; line-height:1.5; }
+  .rtoRetailPage .rtoFootnote { font-size:13px; }
+}
+
+/* Brand labels stay visible when the 15-column group heading scrolls. */
+.rtoRetailPage .rtoStickyBrandName { display:inline-block; }
+@media (max-width:650px) {
+  .rtoRetailPage .rtoTable .rtoBrandHeading th {
+    position:relative;
+    padding:0;
+    height:52px;
+    font-size:18px;
+    vertical-align:middle;
+  }
+  .rtoRetailPage .rtoTable .rtoStickyBrandName {
+    position:sticky;
+    left:0;
+    z-index:6;
+    display:flex;
+    align-items:center;
+    width:184px;
+    min-width:184px;
+    max-width:184px;
+    height:52px;
+    box-sizing:border-box;
+    padding:0 12px;
+    font-size:18px;
+    font-weight:600;
+    background:var(--surface-soft,#f1f5f8);
+    color:var(--accent,#167b73);
+  }
+  .rtoRetailPage .rtoTotalBlock .rtoStickyBrandName {
+    background:var(--table-header,#e9eff4);
+    color:var(--text,#1f2933);
+  }
+  .rtoRetailPage .rtoTable th,
+  .rtoRetailPage .rtoTable td {
+    font-size:18px;
+    line-height:1.4;
+    padding:13px 12px;
+  }
+  .rtoRetailPage .rtoTable thead th {
+    font-size:15px;
+  }
+  .rtoRetailPage .rtoTable thead th:nth-child(2),
+  .rtoRetailPage .rtoTable tbody tr:not(.rtoBrandHeading) > th[scope="row"] {
+    left:72px;
+    width:132px;
+    min-width:132px;
+    max-width:132px;
+    font-size:16px;
+    white-space:nowrap;
+  }
+  .rtoRetailPage .rtoTable thead th:first-child,
+  .rtoRetailPage .rtoTable tbody tr:not(.rtoBrandHeading) > td:first-child {
+    width:72px;
+    min-width:72px;
+    max-width:72px;
+  }
+  .rtoRetailPage .rtoTable .rtoStickyBrandName {
+    width:204px;
+    min-width:204px;
+    max-width:204px;
+  }
+  html[data-theme="dark"] .rtoRetailPage .rtoTable .rtoStickyBrandName {
+    background:#202b37;
+    color:#7dd3c7;
+  }
+  html[data-theme="dark"] .rtoRetailPage .rtoTotalBlock .rtoStickyBrandName {
+    background:#2a3949;
+    color:#ffffff;
+  }
 }
