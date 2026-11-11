@@ -107,7 +107,7 @@ export default function RtoRetailPage() {
     const totalRetailValue = sum(retail);
     return (
       <tbody key={item} className="rtoBrandBlock">
-        <tr className="rtoBrandHeading"><th colSpan={15}>{item}</th></tr>
+        <tr className="rtoBrandHeading"><th colSpan={15}><span className="rtoStickyBrandName">{item}</span></th></tr>
         <tr><td aria-hidden="true" /><th scope="row">RTO</th>{rto.map((value, index) => <td key={index}>{fmt(value)}</td>)}<td className="rtoTotalCell">{fmt(totalRtoValue)}</td></tr>
         <tr><td aria-hidden="true" /><th scope="row">Retail</th>{retail.map((value, index) => <td key={index}>{fmt(value)}</td>)}<td className="rtoTotalCell">{fmt(totalRetailValue)}</td></tr>
         <tr className="rtoAchievementRow"><td aria-hidden="true" /><th scope="row">Achievement</th>{MONTHS.map((_, index) => <td key={index}>{pct(retail[index], rto[index]) == null ? "—" : pct(retail[index], rto[index]).toFixed(0) + "%"}</td>)}<td className="rtoTotalCell">{pct(totalRetailValue, totalRtoValue) == null ? "—" : pct(totalRetailValue, totalRtoValue).toFixed(0) + "%"}</td></tr>
@@ -158,7 +158,7 @@ export default function RtoRetailPage() {
               <thead><tr><th>Brand</th><th>Measure</th>{MONTHS.map((item) => <th key={item}>{item} {year}</th>)}<th>Total</th></tr></thead>
               {BRANDS.map(renderBrandRows)}
               <tbody className="rtoTotalBlock">
-                <tr className="rtoBrandHeading"><th colSpan={15}>Stellantis Total</th></tr>
+                <tr className="rtoBrandHeading"><th colSpan={15}><span className="rtoStickyBrandName">Stellantis Total</span></th></tr>
                 <tr><td aria-hidden="true" /><th scope="row">RTO</th>{totalRto.map((value, index) => <td key={index}>{fmt(value)}</td>)}<td className="rtoTotalCell">{fmt(sum(totalRto))}</td></tr>
                 <tr><td aria-hidden="true" /><th scope="row">Retail</th>{totalRetail.map((value, index) => <td key={index}>{fmt(value)}</td>)}<td className="rtoTotalCell">{fmt(sum(totalRetail))}</td></tr>
                 <tr className="rtoAchievementRow"><td aria-hidden="true" /><th scope="row">Achievement</th>{MONTHS.map((_, index) => <td key={index}>{pct(totalRetail[index], totalRto[index]) == null ? "—" : pct(totalRetail[index], totalRto[index]).toFixed(0) + "%"}</td>)}<td className="rtoTotalCell">{pct(sum(totalRetail), sum(totalRto)) == null ? "—" : pct(sum(totalRetail), sum(totalRto)).toFixed(0) + "%"}</td></tr>
