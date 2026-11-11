@@ -107,10 +107,10 @@ export default function RtoRetailPage() {
     return (
       <tbody key={item} className="rtoBrandBlock">
         <tr className="rtoBrandHeading"><th colSpan={15}>{item}</th></tr>
-        <tr><th scope="row">RTO</th>{rto.map((value, index) => <td key={index}>{fmt(value)}</td>)}<td className="rtoTotalCell">{fmt(totalRtoValue)}</td></tr>
-        <tr><th scope="row">Retail</th>{retail.map((value, index) => <td key={index}>{fmt(value)}</td>)}<td className="rtoTotalCell">{fmt(totalRetailValue)}</td></tr>
-        <tr className="rtoAchievementRow"><th scope="row">Achievement</th>{MONTHS.map((_, index) => <td key={index}>{pct(retail[index], rto[index]) == null ? "—" : pct(retail[index], rto[index]).toFixed(0) + "%"}</td>)}<td className="rtoTotalCell">{pct(totalRetailValue, totalRtoValue) == null ? "—" : pct(totalRetailValue, totalRtoValue).toFixed(0) + "%"}</td></tr>
-        <tr className="rtoGapRow"><th scope="row">Gap</th>{MONTHS.map((_, index) => <td key={index}>{fmt(gap(rto[index], retail[index]))}</td>)}<td className="rtoTotalCell">{fmt(gap(totalRtoValue, totalRetailValue))}</td></tr>
+        <tr><td aria-hidden="true" /><th scope="row">RTO</th>{rto.map((value, index) => <td key={index}>{fmt(value)}</td>)}<td className="rtoTotalCell">{fmt(totalRtoValue)}</td></tr>
+        <tr><td aria-hidden="true" /><th scope="row">Retail</th>{retail.map((value, index) => <td key={index}>{fmt(value)}</td>)}<td className="rtoTotalCell">{fmt(totalRetailValue)}</td></tr>
+        <tr className="rtoAchievementRow"><td aria-hidden="true" /><th scope="row">Achievement</th>{MONTHS.map((_, index) => <td key={index}>{pct(retail[index], rto[index]) == null ? "—" : pct(retail[index], rto[index]).toFixed(0) + "%"}</td>)}<td className="rtoTotalCell">{pct(totalRetailValue, totalRtoValue) == null ? "—" : pct(totalRetailValue, totalRtoValue).toFixed(0) + "%"}</td></tr>
+        <tr className="rtoGapRow"><td aria-hidden="true" /><th scope="row">Gap</th>{MONTHS.map((_, index) => <td key={index}>{fmt(gap(rto[index], retail[index]))}</td>)}<td className="rtoTotalCell">{fmt(gap(totalRtoValue, totalRetailValue))}</td></tr>
       </tbody>
     );
   }
@@ -154,14 +154,14 @@ export default function RtoRetailPage() {
         {loading ? <p className="subtitle">Loading monthly figures…</p> : (
           <div className="rtoTableScroll" role="region" aria-label={year + " monthly RTO versus Retail"} tabIndex={0}>
             <table className="rtoTable">
-              <thead><tr><th>Brand</th><th>Measure</th>{MONTHS.map((item) => <th key={item}>{String(year).slice(-2)}-{item}</th>)}<th>Total</th></tr></thead>
+              <thead><tr><th>Brand</th><th>Measure</th>{MONTHS.map((item) => <th key={item}>{item} {year}</th>)}<th>Total</th></tr></thead>
               {BRANDS.map(renderBrandRows)}
               <tbody className="rtoTotalBlock">
                 <tr className="rtoBrandHeading"><th colSpan={15}>Stellantis Total</th></tr>
-                <tr><th scope="row">RTO</th>{totalRto.map((value, index) => <td key={index}>{fmt(value)}</td>)}<td className="rtoTotalCell">{fmt(sum(totalRto))}</td></tr>
-                <tr><th scope="row">Retail</th>{totalRetail.map((value, index) => <td key={index}>{fmt(value)}</td>)}<td className="rtoTotalCell">{fmt(sum(totalRetail))}</td></tr>
-                <tr className="rtoAchievementRow"><th scope="row">Achievement</th>{MONTHS.map((_, index) => <td key={index}>{pct(totalRetail[index], totalRto[index]) == null ? "—" : pct(totalRetail[index], totalRto[index]).toFixed(0) + "%"}</td>)}<td className="rtoTotalCell">{pct(sum(totalRetail), sum(totalRto)) == null ? "—" : pct(sum(totalRetail), sum(totalRto)).toFixed(0) + "%"}</td></tr>
-                <tr className="rtoGapRow"><th scope="row">Gap</th>{MONTHS.map((_, index) => <td key={index}>{fmt(gap(totalRto[index], totalRetail[index]))}</td>)}<td className="rtoTotalCell">{fmt(gap(sum(totalRto), sum(totalRetail)))}</td></tr>
+                <tr><td aria-hidden="true" /><th scope="row">RTO</th>{totalRto.map((value, index) => <td key={index}>{fmt(value)}</td>)}<td className="rtoTotalCell">{fmt(sum(totalRto))}</td></tr>
+                <tr><td aria-hidden="true" /><th scope="row">Retail</th>{totalRetail.map((value, index) => <td key={index}>{fmt(value)}</td>)}<td className="rtoTotalCell">{fmt(sum(totalRetail))}</td></tr>
+                <tr className="rtoAchievementRow"><td aria-hidden="true" /><th scope="row">Achievement</th>{MONTHS.map((_, index) => <td key={index}>{pct(totalRetail[index], totalRto[index]) == null ? "—" : pct(totalRetail[index], totalRto[index]).toFixed(0) + "%"}</td>)}<td className="rtoTotalCell">{pct(sum(totalRetail), sum(totalRto)) == null ? "—" : pct(sum(totalRetail), sum(totalRto)).toFixed(0) + "%"}</td></tr>
+                <tr className="rtoGapRow"><td aria-hidden="true" /><th scope="row">Gap</th>{MONTHS.map((_, index) => <td key={index}>{fmt(gap(totalRto[index], totalRetail[index]))}</td>)}<td className="rtoTotalCell">{fmt(gap(sum(totalRto), sum(totalRetail)))}</td></tr>
               </tbody>
             </table>
           </div>
