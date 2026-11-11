@@ -7021,3 +7021,73 @@ html[data-theme="dark"] .rtoRetailPage .rtoTotalBlock .rtoBrandHeading th { back
   .rtoRetailPage .rtoIntro { font-size:15px; line-height:1.5; }
   .rtoRetailPage .rtoFootnote { font-size:13px; }
 }
+
+/* Brand labels stay visible when the 15-column group heading scrolls. */
+.rtoRetailPage .rtoStickyBrandName { display:inline-block; }
+@media (max-width:650px) {
+  .rtoRetailPage .rtoTable .rtoBrandHeading th {
+    position:relative;
+    padding:0;
+    height:52px;
+    font-size:18px;
+    vertical-align:middle;
+  }
+  .rtoRetailPage .rtoTable .rtoStickyBrandName {
+    position:sticky;
+    left:0;
+    z-index:6;
+    display:flex;
+    align-items:center;
+    width:184px;
+    min-width:184px;
+    max-width:184px;
+    height:52px;
+    box-sizing:border-box;
+    padding:0 12px;
+    font-size:18px;
+    font-weight:600;
+    background:var(--surface-soft,#f1f5f8);
+    color:var(--accent,#167b73);
+  }
+  .rtoRetailPage .rtoTotalBlock .rtoStickyBrandName {
+    background:var(--table-header,#e9eff4);
+    color:var(--text,#1f2933);
+  }
+  .rtoRetailPage .rtoTable th,
+  .rtoRetailPage .rtoTable td {
+    font-size:18px;
+    line-height:1.4;
+    padding:13px 12px;
+  }
+  .rtoRetailPage .rtoTable thead th {
+    font-size:15px;
+  }
+  .rtoRetailPage .rtoTable thead th:nth-child(2),
+  .rtoRetailPage .rtoTable tbody tr:not(.rtoBrandHeading) > th[scope="row"] {
+    left:72px;
+    width:132px;
+    min-width:132px;
+    max-width:132px;
+    font-size:16px;
+    white-space:nowrap;
+  }
+  .rtoRetailPage .rtoTable thead th:first-child,
+  .rtoRetailPage .rtoTable tbody tr:not(.rtoBrandHeading) > td:first-child {
+    width:72px;
+    min-width:72px;
+    max-width:72px;
+  }
+  .rtoRetailPage .rtoTable .rtoStickyBrandName {
+    width:204px;
+    min-width:204px;
+    max-width:204px;
+  }
+  html[data-theme="dark"] .rtoRetailPage .rtoTable .rtoStickyBrandName {
+    background:#202b37;
+    color:#7dd3c7;
+  }
+  html[data-theme="dark"] .rtoRetailPage .rtoTotalBlock .rtoStickyBrandName {
+    background:#2a3949;
+    color:#ffffff;
+  }
+}
