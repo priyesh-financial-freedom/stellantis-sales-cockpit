@@ -74,7 +74,7 @@ export default function RtoRetailPage() {
   }, [rtoRows, retailRows]);
 
   const totalRto = useMemo(() => MONTHS.map((_, index) => sum(BRANDS.map((item) => data.rto[item][index]))), [data]);
-  const totalRetail = useMemo(() => MONTHS.map((_, index) => sum(BRANDS.map((item) => data.retail[item][index]))), [data]);
+  const totalRetail = useMemo(() => MONTHS.map((_, index) => sum(BRANDS.map((item) => data.rto[item][index] == null ? null : data.retail[item][index]))), [data]);
 
   async function saveRto() {
     const numericUnits = units === "" ? null : Number(units);
@@ -101,7 +101,8 @@ export default function RtoRetailPage() {
 
   function renderBrandRows(item) {
     const rto = data.rto[item];
-    const retail = data.retail[item];
+    // Compare Retail only for months where this brand has a manually entered RTO figure.
+    const retail = data.retail[item].map((value, index) => rto[index] == null ? null : value);
     const totalRtoValue = sum(rto);
     const totalRetailValue = sum(retail);
     return (
